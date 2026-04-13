@@ -1,0 +1,629 @@
+views['cotizar'] = {
+  render() {
+    document.getElementById('app').innerHTML = `
+<div class="content">
+  <div class="steps">
+    <div class="step active" id="s1"><div class="step-n">1</div><span class="step-label">Producto</span></div>
+    <div class="step-line"></div>
+    <div class="step" id="s2"><div class="step-n">2</div><span class="step-label">Especificaciones</span></div>
+    <div class="step-line"></div>
+    <div class="step" id="s3"><div class="step-n">3</div><span class="step-label">Resultado</span></div>
+  </div>
+
+  <!-- ── PASO 1: TIPO DE PRODUCTO ──────────────────────────────── -->
+  <div id="c1">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:18px;font-weight:500">¿Qué tipo de proyecto vas a cotizar?</p>
+    <div class="prod-grid">
+      <div class="prod-card active" id="pc-general">
+        <svg class="prod-card-icon" viewBox="0 0 44 44" fill="none">
+          <rect x="8" y="6" width="28" height="34" rx="2" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M14 15h16M14 21h16M14 27h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <div class="prod-card-title">General</div>
+        <div class="prod-card-sub">Posters, tarjetas, volantes, manteletas, etiquetas</div>
+      </div>
+      <div class="prod-card" id="pc-editorial">
+        <svg class="prod-card-icon" viewBox="0 0 44 44" fill="none">
+          <path d="M22 8L10 12v22l12 4 12-4V12L22 8z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M22 8v28M10 12l12 4 12-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="prod-card-title">Editorial</div>
+        <div class="prod-card-sub">Revistas, libros, folletos, catálogos, calendarios</div>
+      </div>
+      <div class="prod-card" id="pc-empaque">
+        <svg class="prod-card-icon" viewBox="0 0 44 44" fill="none">
+          <path d="M8 16l14-8 14 8v14l-14 8-14-8V16z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M8 16l14 8 14-8M22 24v16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="prod-card-title">Empaque</div>
+        <div class="prod-card-sub">Plegadizo, corrugado, microcorrugado</div>
+      </div>
+    </div>
+    <button class="btn-primary" id="btn-c1-next">Continuar →</button>
+  </div>
+
+  <!-- ── PASO 2: ESPECIFICACIONES ─────────────────────────────── -->
+  <div id="c2" style="display:none">
+    <div class="card">
+      <div class="card-title">Especificaciones del proyecto</div>
+      <div class="row2" style="margin-bottom:14px">
+        <div class="fg" style="position:relative">
+          <label>Cliente</label>
+          <input type="text" id="cot-cl-inp" placeholder="Buscar cliente…" autocomplete="off"/>
+          <div class="cot-cl-dd" id="cot-cl-dd" style="display:none"></div>
+          <div id="cot-cl-badge" style="display:none"></div>
+        </div>
+        <div></div>
+      </div>
+      <div class="row2">
+        <div class="fg"><label>Nombre del proyecto</label><input id="pnombre" type="text" value=""/></div>
+        <div class="fg"><label>Cantidad de ejemplares</label><input id="pcantidad" type="number" value="5000"/></div>
+      </div>
+      <div class="row2">
+        <div class="fg"><label>Tipo de papel</label>
+          <select id="ptipo">
+            <option value="bond">Papel Bond</option>
+            <option value="couche" selected>Papel Couché</option>
+            <option value="sulfatado">Sulfatado</option>
+          </select>
+        </div>
+        <div class="fg"><label>Gramaje</label>
+          <select id="pgramaje">
+            <option>100g</option><option selected>150g</option><option>200g</option><option>250g</option><option>300g</option><option>350g</option>
+          </select>
+        </div>
+      </div>
+      <div class="row3">
+        <div class="fg"><label>Ancho producto (cm)</label><input id="pancho" type="number" value="50"/></div>
+        <div class="fg"><label>Alto producto (cm)</label><input id="palto" type="number" value="70"/></div>
+        <div class="fg"><label>Tintas</label>
+          <select id="ptintas">
+            <option value="4/0">4/0 (CMYK un lado)</option>
+            <option value="4/4">4/4 (CMYK dos lados)</option>
+            <option value="1/0">1/0 (un color)</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:0">
+        <label>Terminados</label>
+        <div class="chips" id="chips-terminados">
+          <div class="chip">Plecado</div>
+          <div class="chip on">Doblado</div>
+          <div class="chip">Suajado</div>
+          <div class="chip">Foliado</div>
+          <div class="chip">Barniz UV</div>
+          <div class="chip">Laminado mate</div>
+          <div class="chip">Hot stamping</div>
+          <div class="chip">Redondeo esquinas</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="imp-section-label" style="margin-top:6px">Imposición y máquina óptima</div>
+    <div id="alert-maq" class="alert-box" style="display:none">⚠ El producto no cabe en ninguna máquina disponible. Revisa las dimensiones.</div>
+    <div class="maq-cards" id="maq-cards"></div>
+    <div id="imp-detail-card" class="card" style="padding:16px 20px"></div>
+
+    <div class="btn-row">
+      <button class="btn-ghost" id="btn-c2-back">← Atrás</button>
+      <button class="btn-primary" id="btn-c2-next">Calcular cotización →</button>
+    </div>
+  </div>
+
+  <!-- ── PASO 3: RESULTADO ─────────────────────────────────────── -->
+  <div id="c3" style="display:none">
+    <div class="result-block">
+      <div class="result-header">
+        <div>
+          <div class="result-nombre" id="r-nombre">Posters Cliente XYZ</div>
+          <div class="result-sub" id="r-sub">Papel Couché 150g · CD102 · 4/0</div>
+        </div>
+        <span class="badge badge-green">Lista ✓</span>
+      </div>
+      <div class="result-grid-4">
+        <div class="rmet">
+          <div class="rmet-label">Ejemplares finales</div>
+          <div class="rmet-val" id="r-ej">5,000</div>
+          <div class="rmet-sub" id="r-merma-sub">+ 400 merma</div>
+        </div>
+        <div class="rmet">
+          <div class="rmet-label">Pliegos a imprimir</div>
+          <div class="rmet-val" id="r-pliegos">1,080</div>
+          <div class="rmet-sub" id="r-maq-sub">en CD102</div>
+        </div>
+        <div class="rmet">
+          <div class="rmet-label">Pzas / pliego</div>
+          <div class="rmet-val" id="r-imp-count">5</div>
+          <div class="rmet-sub" id="r-imp-sub">imposición</div>
+        </div>
+        <div class="rmet">
+          <div class="rmet-label">Costo de producción</div>
+          <div class="rmet-val teal" id="r-costo">$4,320</div>
+          <div class="rmet-sub">sin IVA</div>
+        </div>
+      </div>
+      <div class="r-divider"></div>
+      <div class="r-section-label">Desglose de costos</div>
+      <div class="r-row"><span id="r-papel-label">Papel (1,080 × $1.20)</span><span id="r-papel">$1,296</span></div>
+      <div class="r-row"><span>Impresión 4/0 tintas</span><span id="r-imp">$130</span></div>
+      <div class="r-row"><span>Terminados (doblado)</span><span>$270</span></div>
+      <div class="r-divider"></div>
+      <div class="r-total">
+        <div class="r-total-label">Precio sugerido de venta</div>
+        <div class="r-total-val" id="r-precio">$2,544</div>
+      </div>
+      <div class="r-margin" id="r-margin">Margen estimado: 33%</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-ghost" id="btn-c3-back">← Editar</button>
+      <button class="btn-primary" id="btn-wa">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:middle;margin-right:6px"><path d="M8 0a8 8 0 0 0-6.9 12L0 16l4.1-1.1A8 8 0 1 0 8 0zm0 14.5a6.46 6.46 0 0 1-3.3-.9l-.24-.14-2.44.64.65-2.38-.15-.24A6.5 6.5 0 1 1 8 14.5zm3.57-4.87c-.2-.1-1.16-.57-1.34-.64-.18-.07-.3-.1-.43.1-.13.2-.5.64-.62.77-.11.13-.23.14-.42.05-.2-.1-.84-.31-1.6-.99-.6-.53-1-1.18-1.11-1.38-.11-.2-.01-.3.09-.4l.38-.44c.12-.14.15-.24.23-.4.08-.14.04-.27-.02-.38-.06-.1-.43-1.04-.6-1.43-.15-.37-.31-.32-.43-.33l-.37-.01c-.13 0-.33.05-.5.24s-.66.64-.66 1.56.68 1.82.77 1.94c.1.13 1.33 2.04 3.24 2.86.45.2.8.31 1.08.4.45.14.87.12 1.2.07.36-.06 1.12-.46 1.28-.9.16-.45.16-.83.11-.91-.05-.08-.18-.13-.37-.22z"/></svg>
+        Enviar PDF por WhatsApp
+      </button>
+    </div>
+    <div class="wa-confirm" id="wa-ok">✅ PDF generado — abriendo WhatsApp...</div>
+  </div>
+</div>
+`;
+  },
+
+  init() {
+    // ── Machines (from shared store) ──────────────────────────────
+    const MACHINES = getMachines().map(m => ({
+      ...m, util: { w: m.utilW, h: m.utilH }
+    }));
+
+    // ── Client autocomplete ───────────────────────────────────────
+    let _clientId = null;
+    const clInp  = document.getElementById('cot-cl-inp');
+    const clDd   = document.getElementById('cot-cl-dd');
+    const clBadge = document.getElementById('cot-cl-badge');
+
+    function clInitials(c) {
+      const p = (c.nombre || '?').trim().split(/\s+/);
+      return (p[0][0] + (p[1] ? p[1][0] : '')).toUpperCase();
+    }
+
+    function selectClient(c) {
+      _clientId = c.id;
+      clInp.style.display = 'none';
+      clDd.style.display = 'none';
+      clBadge.style.display = 'flex';
+      clBadge.innerHTML = `
+        <div class="cot-cl-selected">
+          <div class="cl-avatar" style="width:22px;height:22px;font-size:10px;flex-shrink:0">${clInitials(c)}</div>
+          <span style="font-weight:600;color:var(--navy)">${c.nombre}${c.empresa ? ` <span style="font-weight:400;color:var(--text3)">· ${c.empresa}</span>` : ''}</span>
+          <span class="cot-cl-clear" title="Cambiar cliente">✕</span>
+        </div>`;
+      clBadge.querySelector('.cot-cl-clear').addEventListener('click', clearClient);
+    }
+
+    function clearClient() {
+      _clientId = null;
+      clInp.style.display = '';
+      clInp.value = '';
+      clBadge.style.display = 'none';
+      clInp.focus();
+    }
+
+    function openQuickAdd(nombre) {
+      const bg = document.createElement('div');
+      bg.className = 'cl-modal-bg';
+      bg.style.display = 'flex';
+      bg.innerHTML = `
+        <div class="cl-modal">
+          <div class="cl-modal-head">Nuevo cliente</div>
+          <div class="cl-modal-body">
+            <div class="row2" style="margin-bottom:12px">
+              <div class="fg"><label>Nombre completo *</label><input id="qa-nombre" value="${nombre}"/></div>
+              <div class="fg"><label>Empresa</label><input id="qa-empresa"/></div>
+            </div>
+            <div class="row2">
+              <div class="fg"><label>Email</label><input id="qa-email" type="email"/></div>
+              <div class="fg"><label>Teléfono</label><input id="qa-tel"/></div>
+            </div>
+          </div>
+          <div class="cl-modal-foot">
+            <button class="btn-ghost" id="qa-cancel">Cancelar</button>
+            <button class="btn-primary" id="qa-save">Guardar y seleccionar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(bg);
+      setTimeout(() => document.getElementById('qa-nombre').focus(), 50);
+
+      bg.addEventListener('click', e => { if (e.target === bg) bg.remove(); });
+      document.getElementById('qa-cancel').addEventListener('click', () => bg.remove());
+      document.getElementById('qa-save').addEventListener('click', () => {
+        const n = document.getElementById('qa-nombre').value.trim();
+        if (!n) { document.getElementById('qa-nombre').focus(); return; }
+        const nc = {
+          id: 'cl_' + Date.now(),
+          nombre: n,
+          empresa:   document.getElementById('qa-empresa').value.trim(),
+          email:     document.getElementById('qa-email').value.trim(),
+          tel:       document.getElementById('qa-tel').value.trim(),
+          rfc: '', direccion: '', notas: '',
+          createdAt: Date.now(),
+        };
+        const arr = getClientes();
+        arr.unshift(nc);
+        saveClientes(arr);
+        bg.remove();
+        selectClient(nc);
+      });
+    }
+
+    clInp.addEventListener('input', () => {
+      const q = clInp.value.trim();
+      if (!q) { clDd.style.display = 'none'; return; }
+      const matches = getClientes()
+        .filter(c => (c.nombre + ' ' + (c.empresa || '')).toLowerCase().includes(q.toLowerCase()))
+        .slice(0, 5);
+      clDd.innerHTML = [
+        ...matches.map(c => `
+          <div class="cot-cl-item" data-id="${c.id}">
+            <div class="cl-avatar" style="width:26px;height:26px;font-size:10px;flex-shrink:0">${clInitials(c)}</div>
+            <div>
+              <div style="font-weight:600;color:var(--navy)">${c.nombre}</div>
+              ${c.empresa ? `<div style="font-size:11px;color:var(--text3)">${c.empresa}</div>` : ''}
+            </div>
+          </div>`),
+        `<div class="cot-cl-item cot-cl-add">
+          <span style="font-size:16px;line-height:1;color:var(--teal)">+</span>
+          <span>Agregar "<strong>${q}</strong>" como nuevo cliente</span>
+        </div>`
+      ].join('');
+      clDd.style.display = '';
+      clDd.querySelectorAll('.cot-cl-item[data-id]').forEach(el => {
+        el.addEventListener('click', () => {
+          const c = getClientes().find(x => x.id === el.dataset.id);
+          if (c) selectClient(c);
+        });
+      });
+      clDd.querySelector('.cot-cl-add').addEventListener('click', () => {
+        clDd.style.display = 'none';
+        openQuickAdd(q);
+      });
+    });
+
+    clInp.addEventListener('blur', () => {
+      setTimeout(() => { clDd.style.display = 'none'; }, 200);
+    });
+    clInp.addEventListener('focus', () => {
+      if (clInp.value.trim()) clInp.dispatchEvent(new Event('input'));
+    });
+
+    // ── Module state ──────────────────────────────────────────────
+    let _imps = {};
+    let _selectedMaq = 'CD102';
+    let _bestMaq = 'CD102';
+
+    // ── Step helpers ──────────────────────────────────────────────
+    function setStep(n) {
+      [1,2,3].forEach(i => {
+        const el = document.getElementById('s'+i);
+        el.className = 'step' + (i===n?' active': i<n?' done':'');
+      });
+    }
+    function showPanel(p) {
+      ['c1','c2','c3'].forEach(id => {
+        document.getElementById(id).style.display = id===p ? '' : 'none';
+      });
+    }
+
+    // ── Count-up animation ────────────────────────────────────────
+    function countUp(el, target, prefix, duration) {
+      if (!el) return;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now-start)/duration, 1);
+        const ease = 1 - Math.pow(1-p, 3);
+        el.textContent = prefix + Math.round(target*ease).toLocaleString('es-MX');
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    // ── Imposition calculator ─────────────────────────────────────
+    const SANGRIA = 0.3; // cm bleed on each side
+
+    function calcImp(pW, pH, util) {
+      if (pW <= 0 || pH <= 0) return {nx:0,ny:0,count:0,rotated:false,cw:pW,ch:pH,pw:pW,ph:pH};
+      const cw1=pW+SANGRIA*2, ch1=pH+SANGRIA*2;
+      const nx1=Math.floor(util.w/cw1)||0, ny1=Math.floor(util.h/ch1)||0;
+      const cw2=pH+SANGRIA*2, ch2=pW+SANGRIA*2;
+      const nx2=Math.floor(util.w/cw2)||0, ny2=Math.floor(util.h/ch2)||0;
+      if (nx2*ny2 > nx1*ny1)
+        return {nx:nx2,ny:ny2,count:nx2*ny2,rotated:true, cw:cw2,ch:ch2,pw:pH,ph:pW};
+      return   {nx:nx1,ny:ny1,count:nx1*ny1,rotated:false,cw:cw1,ch:ch1,pw:pW,ph:pH};
+    }
+
+    // ── SVG builder ───────────────────────────────────────────────
+    let _svgUid = 0;
+    function buildSVG(util, imp, maxPx) {
+      const uid = 'h' + (++_svgUid);
+      if (!imp || imp.count === 0) {
+        return `<svg width="${maxPx}" height="${Math.round(maxPx*0.72)}" viewBox="0 0 ${maxPx} ${Math.round(maxPx*0.72)}">
+          <rect width="${maxPx}" height="${Math.round(maxPx*0.72)}" fill="#F1F1ED" rx="3"/>
+          <text x="${maxPx/2}" y="${Math.round(maxPx*0.38)}" text-anchor="middle" fill="#8892A4" font-size="11" font-family="Inter,sans-serif" font-weight="600">No apta</text>
+        </svg>`;
+      }
+      // scale so longest side = maxPx
+      const aspect = util.h / util.w;
+      let svgW, svgH;
+      if (aspect >= 1) { svgH = maxPx; svgW = Math.round(maxPx / aspect); }
+      else             { svgW = maxPx; svgH = Math.round(maxPx * aspect); }
+      const scaleX = svgW / util.w;
+      const scaleY = svgH / util.h;
+
+      // Piece rects (actual print area = cw-sangria*2 × ch-sangria*2)
+      const s = SANGRIA;
+      let pieces = '';
+      const showNums = imp.count <= 16 && maxPx >= 180;
+      for (let row=0; row<imp.ny; row++) {
+        for (let col=0; col<imp.nx; col++) {
+          const x = (col*imp.cw + s) * scaleX;
+          const y = (row*imp.ch + s) * scaleY;
+          const pw = (imp.cw - s*2) * scaleX;
+          const ph = (imp.ch - s*2) * scaleY;
+          pieces += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${Math.max(1,pw).toFixed(1)}" height="${Math.max(1,ph).toFixed(1)}" fill="#00A878" fill-opacity=".88" rx="1.5"/>`;
+          if (showNums) {
+            const idx = row*imp.nx + col + 1;
+            const fs = Math.min(9, Math.floor(pw*0.38));
+            pieces += `<text x="${(x+pw/2).toFixed(1)}" y="${(y+ph/2+fs*0.35).toFixed(1)}" text-anchor="middle" fill="#fff" font-size="${fs}" font-family="Inter,sans-serif" font-weight="700">${idx}</text>`;
+          }
+        }
+      }
+
+      return `<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" style="display:block;margin:auto">
+        <defs>
+          <pattern id="${uid}" patternUnits="userSpaceOnUse" width="5" height="5" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="5" stroke="#CCCCC8" stroke-width="1.2"/>
+          </pattern>
+        </defs>
+        <rect width="${svgW}" height="${svgH}" fill="url(#${uid})" rx="2"/>
+        <rect width="${svgW}" height="${svgH}" fill="none" stroke="#1A2035" stroke-width="1.5" rx="2"/>
+        ${pieces}
+      </svg>`;
+    }
+
+    // ── Efficiency helper ─────────────────────────────────────────
+    function efficiency(m, imp) {
+      if (!imp || imp.count === 0) return 0;
+      const used = (imp.cw - SANGRIA*2) * (imp.ch - SANGRIA*2) * imp.count;
+      return Math.round(used / (m.util.w * m.util.h) * 100);
+    }
+
+    // ── Tintas count ──────────────────────────────────────────────
+    function getTintas() {
+      const v = document.getElementById('ptintas').value;
+      return v === '4/4' ? 8 : v === '1/0' ? 1 : 4;
+    }
+
+    // ── Render machine cards ──────────────────────────────────────
+    function renderCards() {
+      const cardsEl = document.getElementById('maq-cards');
+      const detailEl = document.getElementById('imp-detail-card');
+      if (!cardsEl || !detailEl) return;
+
+      const cant  = +document.getElementById('pcantidad').value || 0;
+      const merma = getMerma(cant);
+
+      // Build card HTML
+      let html = '';
+      for (const m of MACHINES) {
+        const imp   = _imps[m.id];
+        const nofit = !imp || imp.count === 0;
+        const isOpt = m.id === _bestMaq;
+        const isSel = m.id === _selectedMaq;
+        const eff   = efficiency(m, imp);
+        let cls = 'maq-card';
+        if (isSel) cls += ' selected';
+        if (nofit) cls += ' no-fit';
+        const svgStr = buildSVG(m.util, imp, 84);
+        html += `<div class="${cls}" data-maq="${m.id}">
+          ${isOpt && !nofit ? `<div class="maq-opt-badge">⭐ Óptima</div>` : ''}
+          <div class="maq-card-name">${m.name}</div>
+          <div class="maq-card-tag">${m.tag} · ${m.util.w}×${m.util.h} cm</div>
+          <div class="maq-imp-preview">${svgStr}</div>
+          <div class="maq-card-stats">
+            <div class="maq-stat">
+              <span class="maq-stat-val${nofit?' zero':''}">${nofit?'—':imp.count}</span>
+              <div class="maq-stat-lbl">pzas/pliego</div>
+            </div>
+            <div class="maq-stat">
+              <span class="maq-stat-val${nofit?' zero':''}">${nofit?'—':eff+'%'}</span>
+              <div class="maq-stat-lbl">eficiencia</div>
+            </div>
+          </div>
+        </div>`;
+      }
+      cardsEl.innerHTML = html;
+
+      // Card click handlers
+      cardsEl.querySelectorAll('.maq-card:not(.no-fit)').forEach(card => {
+        card.addEventListener('click', () => {
+          _selectedMaq = card.dataset.maq;
+          renderCards();
+        });
+      });
+
+      // Detail panel
+      const sel = MACHINES.find(m => m.id === _selectedMaq);
+      if (!sel) { detailEl.innerHTML = ''; return; }
+      const imp = _imps[sel.id];
+      const nofit = !imp || imp.count === 0;
+
+      if (nofit) {
+        detailEl.innerHTML = `
+          <div class="imp-nofit-msg">
+            <strong>No apta para este producto</strong>
+            Las dimensiones superan el área útil de la ${sel.name}.
+          </div>`;
+        return;
+      }
+
+      const pliegos  = Math.ceil((cant + merma) / imp.count);
+      const tintas   = getTintas();
+      const eff      = efficiency(sel, imp);
+      const bigSVG   = buildSVG(sel.util, imp, 240);
+
+      detailEl.innerHTML = `
+        <div class="card-title" style="margin-bottom:14px">Detalle imposición · ${sel.name}</div>
+        <div class="imp-detail">
+          <div class="imp-big-preview">${bigSVG}</div>
+          <div class="imp-stats">
+            <div class="imp-stat-item">
+              <span class="imp-stat-n">${imp.count}</span>
+              <span class="imp-stat-l">Pzas / pliego</span>
+            </div>
+            <div class="imp-stat-item">
+              <span class="imp-stat-n">${pliegos.toLocaleString('es-MX')}</span>
+              <span class="imp-stat-l">Pliegos a imprimir</span>
+            </div>
+            <div class="imp-stat-item">
+              <span class="imp-stat-n">${tintas}</span>
+              <span class="imp-stat-l">Planchas (${sel.name})</span>
+            </div>
+            <div class="imp-stat-item">
+              <span class="imp-stat-n">${eff}%</span>
+              <span class="imp-stat-l">Eficiencia de pliego</span>
+            </div>
+            ${imp.rotated ? `<div class="imp-rotation-note">↻ Girado 90° — optimiza la imposición de ${imp.nx}×${imp.ny}</div>` : ''}
+          </div>
+        </div>`;
+    }
+
+    // ── Recalc ────────────────────────────────────────────────────
+    function recalc() {
+      const pW = +document.getElementById('pancho').value || 0;
+      const pH = +document.getElementById('palto').value || 0;
+
+      _imps = {};
+      let bestCount = -1;
+      _bestMaq = null;
+      for (const m of MACHINES) {
+        const imp = calcImp(pW, pH, m.util);
+        _imps[m.id] = imp;
+        if (imp.count > bestCount) { bestCount = imp.count; _bestMaq = m.id; }
+      }
+
+      const alrt = document.getElementById('alert-maq');
+      if (bestCount === 0) {
+        alrt.style.display = 'block';
+      } else {
+        alrt.style.display = 'none';
+        // keep selection only if it still fits; otherwise snap to best
+        if (!_selectedMaq || !_imps[_selectedMaq] || _imps[_selectedMaq].count === 0) {
+          _selectedMaq = _bestMaq;
+        }
+      }
+
+      renderCards();
+    }
+
+    // ── updateGramajes ────────────────────────────────────────────
+    function updateGramajes() {
+      const t = document.getElementById('ptipo').value;
+      const s = document.getElementById('pgramaje');
+      s.innerHTML = '';
+      const opts = {
+        bond:      ['75g','90g','105g','120g'],
+        couche:    ['100g','150g','200g','250g','300g','350g'],
+        sulfatado: ['12 pts','14 pts','16 pts','18 pts','20 pts','24 pts'],
+      };
+      (opts[t]||[]).forEach(o => { const op=document.createElement('option'); op.textContent=o; s.appendChild(op); });
+      if (t==='couche') s.value='150g';
+    }
+
+    // ── goC3 ──────────────────────────────────────────────────────
+    function goC3() {
+      const nom   = document.getElementById('pnombre').value || 'Sin nombre';
+      const cant  = +document.getElementById('pcantidad').value || 5000;
+      const merma = getMerma(cant);
+      const sel   = MACHINES.find(m => m.id === _selectedMaq) || MACHINES[2];
+      const imp   = _imps[sel.id] || {count:1};
+      const pliegos = Math.ceil((cant + merma) / Math.max(1, imp.count));
+      const tintas  = getTintas();
+      const cp = pliegos * sel.pliegoPrice;
+      const ci = pliegos * 0.12;
+      const ct = cp + ci + 270;
+      const pv = ct * 1.5;
+      const margin = Math.round((pv - ct) / pv * 100);
+
+      document.getElementById('r-nombre').textContent    = nom;
+      document.getElementById('r-sub').textContent       =
+        `${document.getElementById('ptipo').options[document.getElementById('ptipo').selectedIndex].text} ${document.getElementById('pgramaje').value} · ${sel.name} · ${document.getElementById('ptintas').value}`;
+      document.getElementById('r-merma-sub').textContent = '+ ' + merma.toLocaleString('es-MX') + ' merma';
+      document.getElementById('r-maq-sub').textContent   = 'en ' + sel.name;
+      document.getElementById('r-imp-sub').textContent   = imp.count + ' pzas/pliego';
+      document.getElementById('r-papel-label').textContent = `Papel (${pliegos.toLocaleString('es-MX')} × $${sel.pliegoPrice.toFixed(2)})`;
+      document.getElementById('r-margin').textContent   = 'Margen estimado: ' + margin + '%';
+
+      showPanel('c3');
+      clearInterval(timerInt);
+      timerOn = false;
+      setStep(3);
+
+      requestAnimationFrame(() => {
+        countUp(document.getElementById('r-ej'),        cant,       '',  500);
+        countUp(document.getElementById('r-pliegos'),   pliegos,    '',  520);
+        countUp(document.getElementById('r-imp-count'), imp.count,  '',  350);
+        countUp(document.getElementById('r-costo'),     ct,         '$', 700);
+        countUp(document.getElementById('r-papel'),     cp,         '$', 600);
+        countUp(document.getElementById('r-imp'),       ci,         '$', 600);
+        countUp(document.getElementById('r-precio'),    pv,         '$', 900);
+      });
+    }
+
+    // ── pickProd ──────────────────────────────────────────────────
+    function pickProd(card) {
+      document.querySelectorAll('.prod-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+    }
+
+    // ── toggleChip ────────────────────────────────────────────────
+    function toggleChip(chip) {
+      chip.classList.toggle('on');
+      chip.classList.remove('popping');
+      void chip.offsetWidth;
+      chip.classList.add('popping');
+    }
+
+    // ── sendWA ────────────────────────────────────────────────────
+    function sendWA() {
+      const btn = document.getElementById('btn-wa');
+      const ok  = document.getElementById('wa-ok');
+      btn.textContent = '✓ ¡Enviando!';
+      btn.style.background = 'var(--teal-dark)';
+      setTimeout(() => {
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:middle;margin-right:6px"><path d="M8 0a8 8 0 0 0-6.9 12L0 16l4.1-1.1A8 8 0 1 0 8 0zm0 14.5a6.46 6.46 0 0 1-3.3-.9l-.24-.14-2.44.64.65-2.38-.15-.24A6.5 6.5 0 1 1 8 14.5zm3.57-4.87c-.2-.1-1.16-.57-1.34-.64-.18-.07-.3-.1-.43.1-.13.2-.5.64-.62.77-.11.13-.23.14-.42.05-.2-.1-.84-.31-1.6-.99-.6-.53-1-1.18-1.11-1.38-.11-.2-.01-.3.09-.4l.38-.44c.12-.14.15-.24.23-.4.08-.14.04-.27-.02-.38-.06-.1-.43-1.04-.6-1.43-.15-.37-.31-.32-.43-.33l-.37-.01c-.13 0-.33.05-.5.24s-.66.64-.66 1.56.68 1.82.77 1.94c.1.13 1.33 2.04 3.24 2.86.45.2.8.31 1.08.4.45.14.87.12 1.2.07.36-.06 1.12-.46 1.28-.9.16-.45.16-.83.11-.91-.05-.08-.18-.13-.37-.22z"/></svg>Enviar PDF por WhatsApp`;
+        btn.style.background = '';
+      }, 1500);
+      ok.classList.remove('visible');
+      void ok.offsetWidth;
+      ok.classList.add('visible');
+      setTimeout(() => { ok.classList.remove('visible'); ok.style.display='none'; }, 3500);
+    }
+
+    // ── Attach listeners ──────────────────────────────────────────
+    document.getElementById('btn-c1-next').addEventListener('click', () => { showPanel('c2'); recalc(); setStep(2); });
+    document.getElementById('btn-c2-back').addEventListener('click', () => { showPanel('c1'); setStep(1); });
+    document.getElementById('btn-c2-next').addEventListener('click', goC3);
+    document.getElementById('btn-c3-back').addEventListener('click', () => { showPanel('c2'); recalc(); setStep(2); });
+    document.getElementById('btn-wa').addEventListener('click', sendWA);
+
+    document.getElementById('pcantidad').addEventListener('input', () => { if (document.getElementById('c2').style.display !== 'none') renderCards(); });
+    document.getElementById('pancho').addEventListener('input', recalc);
+    document.getElementById('palto').addEventListener('input',  recalc);
+    document.getElementById('ptintas').addEventListener('change', renderCards);
+    document.getElementById('ptipo').addEventListener('change', updateGramajes);
+
+    document.querySelectorAll('#pc-general,#pc-editorial,#pc-empaque').forEach(card => {
+      card.addEventListener('click', () => pickProd(card));
+    });
+    document.querySelectorAll('#chips-terminados .chip').forEach(chip => {
+      chip.addEventListener('click', () => toggleChip(chip));
+    });
+  }
+};
