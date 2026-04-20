@@ -175,9 +175,13 @@ views['cotizar'] = {
     </div>
     <div class="btn-row">
       <button class="btn-ghost" id="btn-c3-back">← Editar</button>
+      <button class="btn-ghost" id="btn-pdf">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="vertical-align:middle;margin-right:6px"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6L9 2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 2v4h4M8 9v4M6 11l2 2 2-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Descargar PDF
+      </button>
       <button class="btn-primary" id="btn-wa">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:middle;margin-right:6px"><path d="M8 0a8 8 0 0 0-6.9 12L0 16l4.1-1.1A8 8 0 1 0 8 0zm0 14.5a6.46 6.46 0 0 1-3.3-.9l-.24-.14-2.44.64.65-2.38-.15-.24A6.5 6.5 0 1 1 8 14.5zm3.57-4.87c-.2-.1-1.16-.57-1.34-.64-.18-.07-.3-.1-.43.1-.13.2-.5.64-.62.77-.11.13-.23.14-.42.05-.2-.1-.84-.31-1.6-.99-.6-.53-1-1.18-1.11-1.38-.11-.2-.01-.3.09-.4l.38-.44c.12-.14.15-.24.23-.4.08-.14.04-.27-.02-.38-.06-.1-.43-1.04-.6-1.43-.15-.37-.31-.32-.43-.33l-.37-.01c-.13 0-.33.05-.5.24s-.66.64-.66 1.56.68 1.82.77 1.94c.1.13 1.33 2.04 3.24 2.86.45.2.8.31 1.08.4.45.14.87.12 1.2.07.36-.06 1.12-.46 1.28-.9.16-.45.16-.83.11-.91-.05-.08-.18-.13-.37-.22z"/></svg>
-        Enviar PDF por WhatsApp
+        Enviar por WhatsApp
       </button>
     </div>
     <div class="wa-confirm" id="wa-ok">✅ PDF generado — abriendo WhatsApp...</div>
@@ -316,6 +320,7 @@ views['cotizar'] = {
     let _imps = {};
     let _selectedMaq = 'CD102';
     let _bestMaq = 'CD102';
+    let _quoteData = null;
 
     // ── Step helpers ──────────────────────────────────────────────
     function setStep(n) {
@@ -646,6 +651,23 @@ views['cotizar'] = {
       document.getElementById('r-maq-sub').textContent   = 'en ' + sel.name;
       document.getElementById('r-imp-sub').textContent   = imp.count + ' pzas/pliego';
 
+      // ── Capturar datos para PDF ───────────────────────────────────
+      const tintasLabel = document.getElementById('ptintas').value;
+      const tipoPapelLabel = document.getElementById('ptipo').options[document.getElementById('ptipo').selectedIndex].text;
+      _quoteData = {
+        nom, cant, merma, pliegos, millares, tintas, tintasLabel,
+        tipoPapelLabel, gramaje,
+        maqName: sel.name,
+        impCount: imp.count,
+        papelPx, costoPapel, cortePrensa,
+        lamPrecio: parseFloat(lamEntry?.precio) || 0,
+        impPrecio: parseFloat(impEntry?.precio) || 0,
+        costoLam, costoImp,
+        termLines,
+        costoTotal,
+        fecha: new Date(),
+      };
+
       showPanel('c3');
       clearInterval(timerInt);
       timerOn = false;
@@ -684,6 +706,122 @@ views['cotizar'] = {
       setTimeout(() => { ok.classList.remove('visible'); ok.style.display='none'; }, 3500);
     }
 
+    // ── generarPDF ────────────────────────────────────────────────
+    function generarPDF() {
+      if (!_quoteData) return;
+      if (!window.jspdf) { alert('La librería PDF aún está cargando, intenta en un momento.'); return; }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const profile = getProfile();
+      const qd = _quoteData;
+      const margenPct = +(document.getElementById('r-margen-input')?.value || 30);
+      const precioVenta = margenPct >= 100 ? qd.costoTotal : qd.costoTotal / (1 - margenPct / 100);
+      const utilidad = precioVenta - qd.costoTotal;
+
+      const TEAL   = [0, 168, 120];
+      const NAVY   = [28, 32, 21];
+      const GRAY   = [90, 100, 86];
+      const LTGRAY = [240, 243, 238];
+      const pageW  = 210;
+      const margin = 14;
+      const fmtN   = n => '$' + Math.round(n).toLocaleString('es-MX');
+      let y = 16;
+
+      // ── Logo ──────────────────────────────────────────────────────
+      if (profile.logo) {
+        try {
+          const ext = profile.logo.startsWith('data:image/png') ? 'PNG' : 'JPEG';
+          doc.addImage(profile.logo, ext, margin, y, 36, 16, '', 'FAST');
+        } catch(e) {}
+      }
+
+      // ── Folio y fecha (derecha) ───────────────────────────────────
+      const dia  = qd.fecha.toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      const folio = `#${qd.fecha.getFullYear()}${String(qd.fecha.getMonth()+1).padStart(2,'0')}${String(qd.fecha.getDate()).padStart(2,'0')}`;
+      doc.setFont('helvetica','bold').setFontSize(20).setTextColor(...NAVY);
+      doc.text('COTIZACIÓN', pageW - margin, y + 5, { align:'right' });
+      doc.setFont('helvetica','normal').setFontSize(8).setTextColor(...GRAY);
+      doc.text(folio, pageW - margin, y + 11, { align:'right' });
+      doc.text(dia,   pageW - margin, y + 16, { align:'right' });
+
+      // ── Datos de la imprenta (izquierda, bajo logo) ───────────────
+      y += 22;
+      doc.setFont('helvetica','bold').setFontSize(10).setTextColor(...NAVY);
+      doc.text(profile.imprenta || 'Mi Imprenta', margin, y);
+      const infoLine = [profile.direccion, profile.ciudad, profile.tel ? 'Tel: ' + profile.tel : '', profile.email, profile.rfc ? 'RFC: ' + profile.rfc : ''].filter(Boolean).join('  ·  ');
+      if (infoLine) {
+        doc.setFont('helvetica','normal').setFontSize(7.5).setTextColor(...GRAY);
+        doc.text(infoLine, margin, y + 5, { maxWidth: pageW - margin * 2 });
+      }
+
+      // ── Separador teal ────────────────────────────────────────────
+      y += 14;
+      doc.setDrawColor(...TEAL).setLineWidth(0.6).line(margin, y, pageW - margin, y);
+      y += 7;
+
+      // ── Datos del proyecto ────────────────────────────────────────
+      doc.setFont('helvetica','bold').setFontSize(7.5).setTextColor(...TEAL);
+      doc.text('PROYECTO', margin, y);
+      y += 5;
+      doc.setFont('helvetica','bold').setFontSize(13).setTextColor(...NAVY);
+      doc.text(qd.nom, margin, y);
+      y += 6;
+      doc.setFont('helvetica','normal').setFontSize(8).setTextColor(...GRAY);
+      doc.text(`${qd.cant.toLocaleString('es-MX')} piezas  ·  +${qd.merma.toLocaleString('es-MX')} merma`, margin, y);
+      y += 4.5;
+      doc.text(`${qd.tipoPapelLabel} ${qd.gramaje}  ·  ${qd.maqName}  ·  ${qd.tintasLabel}  ·  ${qd.impCount} pzas/pliego  ·  ${qd.pliegos.toLocaleString('es-MX')} pliegos`, margin, y);
+      y += 9;
+
+      // ── Tabla de costos ───────────────────────────────────────────
+      const bodyRows = [
+        [`Papel (${qd.pliegos.toLocaleString('es-MX')} pliegos × $${qd.papelPx.toFixed(2)})`, fmtN(qd.costoPapel)],
+        ['  Corte a prensa (5%)',                                                                 fmtN(qd.cortePrensa)],
+        [`Láminas (${qd.tintas} × $${qd.lamPrecio})`,                                           fmtN(qd.costoLam)],
+        [`Impresión ${qd.tintasLabel} · ${qd.millares} ${qd.millares===1?'millar':'millares'}`,  fmtN(qd.costoImp)],
+        ...qd.termLines.map(t => [t.nombre, fmtN(t.costo)]),
+      ];
+
+      doc.autoTable({
+        startY: y,
+        head: [['Concepto', 'Importe']],
+        body: bodyRows,
+        foot: [
+          [{ content:'Costo de producción', styles:{fontStyle:'bold', textColor:NAVY} }, { content:fmtN(qd.costoTotal), styles:{fontStyle:'bold', textColor:NAVY} }],
+          [`Margen (${margenPct}%)`, fmtN(utilidad)],
+          [{ content:'PRECIO SUGERIDO DE VENTA', styles:{fontStyle:'bold', fontSize:10, textColor:NAVY, fillColor:LTGRAY} },
+           { content:fmtN(precioVenta),           styles:{fontStyle:'bold', fontSize:10, textColor:NAVY, fillColor:LTGRAY} }],
+        ],
+        headStyles: { fillColor:TEAL, textColor:[255,255,255], fontSize:8, fontStyle:'bold', cellPadding:3 },
+        bodyStyles: { fontSize:8, textColor:GRAY, cellPadding:2.5 },
+        footStyles: { fontSize:8, textColor:GRAY, fillColor:[255,255,255], cellPadding:2.5 },
+        columnStyles: { 0:{cellWidth:'auto'}, 1:{halign:'right', cellWidth:38} },
+        margin: { left:margin, right:margin },
+        theme: 'plain',
+        styles: { lineColor:[218,224,216], lineWidth:0.2 },
+      });
+
+      y = doc.lastAutoTable.finalY + 5;
+
+      // ── Precio unitario ───────────────────────────────────────────
+      const pu = precioVenta / Math.max(1, qd.cant);
+      doc.setFont('helvetica','normal').setFontSize(7.5).setTextColor(...GRAY);
+      doc.text(`Precio unitario: $${pu.toFixed(4)}`, pageW - margin, y, { align:'right' });
+      y += 10;
+
+      // ── Footer ────────────────────────────────────────────────────
+      doc.setDrawColor(...TEAL).setLineWidth(0.4).line(margin, y, pageW - margin, y);
+      y += 5;
+      doc.setFontSize(7).setTextColor(...GRAY);
+      doc.text('Precios sin IVA  ·  Cotización válida por 30 días  ·  Generada con Sustrato', margin, y);
+      const footContact = [profile.nombre, profile.tel, profile.email].filter(Boolean).join('  ·  ');
+      if (footContact) doc.text(footContact, pageW - margin, y, { align:'right' });
+
+      // ── Descarga ──────────────────────────────────────────────────
+      const filename = `Cotizacion-${(qd.nom||'proyecto').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s-]/g,'').trim().replace(/\s+/g,'-')}.pdf`;
+      doc.save(filename);
+    }
+
     // ── initPresets / selectPreset ────────────────────────────────
     function selectPreset(idx) {
       const ps = PRESET_SIZES[idx];
@@ -719,6 +857,7 @@ views['cotizar'] = {
     document.getElementById('btn-c2-next').addEventListener('click', goC3);
     document.getElementById('btn-c3-back').addEventListener('click', () => { showPanel('c2'); recalc(); setStep(2); });
     document.getElementById('btn-wa').addEventListener('click', sendWA);
+    document.getElementById('btn-pdf').addEventListener('click', generarPDF);
 
     document.getElementById('pcantidad').addEventListener('input', () => { if (document.getElementById('c2').style.display !== 'none') renderCards(); });
     ['pancho','palto'].forEach(id => {
