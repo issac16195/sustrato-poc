@@ -156,6 +156,7 @@ const titles = {
   plan:     'Plan y facturación',
   clientes: 'Clientes',
   tarifario:'Tarifario de servicios',
+  perfil:   'Mi imprenta',
 };
 const subs = {
   cotizar:  'Proyecto general · 3 pasos',
@@ -166,7 +167,20 @@ const subs = {
   plan:     'Suscripción mensual',
   clientes: 'Directorio de clientes · CRM básico',
   tarifario:'Precios de procesos y acabados · sin IVA',
+  perfil:   'Datos de tu taller · aparecerán en PDFs y cotizaciones',
 };
+
+// ─── Profile helpers ──────────────────────────────────────────────
+function getProfile() {
+  try {
+    const raw = localStorage.getItem('sustrato_profile');
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return {};
+}
+function saveProfile(obj) {
+  localStorage.setItem('sustrato_profile', JSON.stringify(obj));
+}
 
 // ─── Router ───────────────────────────────────────────────────────
 function showView(id, el) {
