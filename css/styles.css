@@ -424,3 +424,11 @@ input:hover,select:hover{border-color:var(--slate)}
 .cot-cl-selected{display:inline-flex;align-items:center;gap:8px;background:var(--teal-bg);border:1px solid var(--teal-border);border-radius:20px;padding:5px 12px;font-size:12px;margin-top:6px}
 .cot-cl-clear{cursor:pointer;opacity:.5;font-size:13px;margin-left:2px;transition:opacity .13s}
 .cot-cl-clear:hover{opacity:1}
+
+/* ─── COTIZAR — SIZE PRESET PICKER ──────────────────────────────── */
+.size-full{grid-column:1/-1}
+.size-presets{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.size-chip{padding:7px 16px;border-radius:20px;border:1.5px solid var(--border2);background:var(--white);color:var(--text);font-size:13px;cursor:pointer;transition:border-color .15s,background .15s,color .15s;line-height:1}
+.size-chip:hover{border-color:var(--teal)}
+.size-chip.active{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
+.size-manual{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}

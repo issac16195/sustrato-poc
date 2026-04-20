@@ -1,3 +1,11 @@
+const PRESET_SIZES = [
+  { label:'Carta',         w:21.6,  h:27.9  },
+  { label:'Media carta',   w:13.97, h:21.59 },
+  { label:'1/4 carta',     w:10.79, h:13.97 },
+  { label:'1/8 carta',     w:6.99,  h:10.79 },
+  { label:'Personalizado', w:null,  h:null  },
+];
+
 views['cotizar'] = {
   render() {
     document.getElementById('app').innerHTML = `
@@ -74,8 +82,14 @@ views['cotizar'] = {
         </div>
       </div>
       <div class="row3">
-        <div class="fg"><label>Ancho producto (cm)</label><input id="pancho" type="number" value="50"/></div>
-        <div class="fg"><label>Alto producto (cm)</label><input id="palto" type="number" value="70"/></div>
+        <div class="fg size-full">
+          <label>Medida del producto</label>
+          <div id="size-presets" class="size-presets"></div>
+          <div id="size-manual" class="size-manual" style="display:none">
+            <div class="fg"><label>Ancho (cm)</label><input id="pancho" type="number" step="0.1"/></div>
+            <div class="fg"><label>Alto (cm)</label><input id="palto" type="number" step="0.1"/></div>
+          </div>
+        </div>
         <div class="fg"><label>Tintas</label>
           <select id="ptintas">
             <option value="4/0">4/0 (CMYK un lado)</option>
@@ -670,6 +684,35 @@ views['cotizar'] = {
       setTimeout(() => { ok.classList.remove('visible'); ok.style.display='none'; }, 3500);
     }
 
+    // ── initPresets / selectPreset ────────────────────────────────
+    function selectPreset(idx) {
+      const ps = PRESET_SIZES[idx];
+      document.querySelectorAll('#size-presets .size-chip')
+        .forEach((b, i) => b.classList.toggle('active', i === idx));
+      const manual = document.getElementById('size-manual');
+      if (ps.w === null) {
+        manual.style.display = 'grid';
+      } else {
+        manual.style.display = 'none';
+        document.getElementById('pancho').value = ps.w;
+        document.getElementById('palto').value  = ps.h;
+        recalc();
+      }
+    }
+
+    function initPresets() {
+      const container = document.getElementById('size-presets');
+      PRESET_SIZES.forEach((ps, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'size-chip';
+        btn.textContent = ps.label;
+        btn.addEventListener('click', () => selectPreset(i));
+        container.appendChild(btn);
+      });
+      selectPreset(0);
+    }
+
     // ── Attach listeners ──────────────────────────────────────────
     document.getElementById('btn-c1-next').addEventListener('click', () => { showPanel('c2'); recalc(); setStep(2); });
     document.getElementById('btn-c2-back').addEventListener('click', () => { showPanel('c1'); setStep(1); });
@@ -678,8 +721,13 @@ views['cotizar'] = {
     document.getElementById('btn-wa').addEventListener('click', sendWA);
 
     document.getElementById('pcantidad').addEventListener('input', () => { if (document.getElementById('c2').style.display !== 'none') renderCards(); });
-    document.getElementById('pancho').addEventListener('input', recalc);
-    document.getElementById('palto').addEventListener('input',  recalc);
+    ['pancho','palto'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        const chips = document.querySelectorAll('#size-presets .size-chip');
+        chips.forEach((b, i) => b.classList.toggle('active', i === chips.length - 1));
+        recalc();
+      });
+    });
     document.getElementById('ptintas').addEventListener('change', renderCards);
     document.getElementById('ptipo').addEventListener('change', updateGramajes);
 
@@ -689,5 +737,7 @@ views['cotizar'] = {
     document.querySelectorAll('#chips-terminados .chip').forEach(chip => {
       chip.addEventListener('click', () => toggleChip(chip));
     });
+
+    initPresets();
   }
 };
