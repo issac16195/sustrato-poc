@@ -175,6 +175,14 @@ input:hover,select:hover{border-color:var(--slate)}
 .r-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0}
 .r-row span:first-child{color:rgba(143,168,192,.8)}
 .r-row span:last-child{color:rgba(255,255,255,.9);font-weight:600}
+.r-row-sub span:first-child{color:rgba(143,168,192,.5);padding-left:12px;font-size:12px}
+.r-row-sub span:last-child{color:rgba(255,255,255,.55);font-weight:500;font-size:12px}
+.r-margen-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0 6px;gap:12px}
+.r-margen-label{font-size:11px;font-weight:600;color:rgba(143,168,192,.7);text-transform:uppercase;letter-spacing:.4px;flex-shrink:0}
+.r-margen-ctrl{display:flex;align-items:center;gap:10px;flex:1;justify-content:flex-end}
+.r-margen-ctrl input[type=range]{-webkit-appearance:none;appearance:none;width:120px;height:4px;background:rgba(255,255,255,.12);border-radius:2px;outline:none;cursor:pointer}
+.r-margen-ctrl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--teal);cursor:pointer}
+.r-margen-pct{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--teal);min-width:36px;text-align:right}
 .r-total{display:flex;justify-content:space-between;align-items:baseline;margin-top:4px}
 .r-total-label{font-size:13px;font-weight:600;color:rgba(255,255,255,.7)}
 .r-total-val{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:800;color:var(--teal);letter-spacing:-.5px}

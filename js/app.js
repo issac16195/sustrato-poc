@@ -64,6 +64,17 @@ const DEFAULT_ACABADOS = [
   { id:'ac19', nombre:'Pegado fondo automático',  nota:'',                                tamano:'CH', precio:0.90, unidad:'por pieza' },
   { id:'ac20', nombre:'Pegado fondo automático',  nota:'',                                tamano:'MD', precio:1.80, unidad:'por pieza' },
   { id:'ac21', nombre:'Pegado fondo automático',  nota:'',                                tamano:'GD', precio:3.60, unidad:'por pieza' },
+  { id:'ac22', nombre:'Doblado',                  nota:'',                                tamano:'CH', precio:60,   unidad:'por millar' },
+  { id:'ac23', nombre:'Doblado',                  nota:'',                                tamano:'MD', precio:120,  unidad:'por millar' },
+  { id:'ac24', nombre:'Doblado',                  nota:'',                                tamano:'GD', precio:220,  unidad:'por millar' },
+  { id:'ac25', nombre:'Plecado',                  nota:'',                                tamano:'CH', precio:50,   unidad:'por millar' },
+  { id:'ac26', nombre:'Plecado',                  nota:'',                                tamano:'MD', precio:100,  unidad:'por millar' },
+  { id:'ac27', nombre:'Plecado',                  nota:'',                                tamano:'GD', precio:180,  unidad:'por millar' },
+  { id:'ac28', nombre:'Foliado',                  nota:'Numeración consecutiva',          tamano:'—',  precio:0.05, unidad:'por pieza'  },
+  { id:'ac29', nombre:'Hot stamping',             nota:'',                                tamano:'CH', precio:0.80, unidad:'por pieza'  },
+  { id:'ac30', nombre:'Hot stamping',             nota:'',                                tamano:'MD', precio:1.50, unidad:'por pieza'  },
+  { id:'ac31', nombre:'Hot stamping',             nota:'',                                tamano:'GD', precio:2.50, unidad:'por pieza'  },
+  { id:'ac32', nombre:'Redondeo esquinas',        nota:'',                                tamano:'—',  precio:0.10, unidad:'por pieza'  },
 ];
 function getAcabados() {
   try {
@@ -191,6 +202,101 @@ function startTimer() {
 // ─── Shared util ─────────────────────────────────────────────────
 function getMerma(n) {
   return n <= 500 ? 200 : n <= 1000 ? 300 : n <= 5000 ? 400 : n <= 10000 ? 700 : 750;
+}
+
+// ─── Pricing engine helpers ───────────────────────────────────────
+
+// Lee precios de papel del localStorage (guardados en onboarding/sustratos)
+function getPapelPrices() {
+  try {
+    const raw = localStorage.getItem('sustrato_papel');
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return null;
+}
+
+// Devuelve $/pliego para un tipo+gramaje. Fallback: pliegoPrice de la máquina.
+function getPapelPriceFor(tipoPapel, gramaje, fallback) {
+  const prices = getPapelPrices();
+  if (prices && prices[tipoPapel] && prices[tipoPapel][gramaje] != null) {
+    return +prices[tipoPapel][gramaje];
+  }
+  // Defaults integrados si no hay sustrato_papel configurado
+  const defaults = {
+    bond:      { '75g':0.38,'90g':0.45,'105g':0.54,'120g':0.62 },
+    couche:    { '100g':0.55,'150g':0.65,'200g':0.80,'250g':0.98,'300g':1.15,'350g':1.30 },
+    sulfatado: { '12 pts':1.10,'14 pts':1.28,'16 pts':1.48,'18 pts':1.72,'20 pts':1.95,'24 pts':2.30 },
+  };
+  if (defaults[tipoPapel] && defaults[tipoPapel][gramaje] != null) {
+    return +defaults[tipoPapel][gramaje];
+  }
+  return fallback || 0.65;
+}
+
+// Mapea id de máquina → 'CH'|'MD'|'GD'
+function getMaqSize(maqId) {
+  const m = getMachines().find(x => x.id === maqId);
+  if (!m) return 'GD';
+  return m.tag === 'Chica' ? 'CH' : m.tag === 'Mediana' ? 'MD' : 'GD';
+}
+
+// Busca entrada en un array de tarifario por nombre y prefijo de tamaño
+function lookupTarifa(arr, nombre, size) {
+  return arr.find(x => x.nombre === nombre &&
+    (x.tamano === size || x.tamano === '—' || x.tamano.startsWith(size)));
+}
+
+// Extrae mínimo de nota tipo "Mín. $500" → 500
+function parseMinimo(nota) {
+  const m = (nota || '').match(/[Mm]ín\.?\s*\$?([\d,]+)/);
+  return m ? parseFloat(m[1].replace(',', '')) : 0;
+}
+
+// Aplica la fórmula correcta según unidad de un entry de tarifario
+function applyUnidad(entry, { cant, pliegos, utilW_m, utilH_m }) {
+  const precio = parseFloat(entry.precio) || 0;
+  let costo = 0;
+  switch (entry.unidad) {
+    case 'por pieza':    costo = precio * cant; break;
+    case 'por millar':   costo = precio * Math.ceil(cant / 1000); break;
+    case 'por proyecto': costo = precio; break;
+    case 'por pliego':   costo = precio * pliegos; break;
+    case 'por m²':       costo = utilH_m * utilW_m * pliegos * precio; break;
+    case 'por lado':     costo = precio * Math.ceil(cant / 1000); break;
+    default:             costo = precio;
+  }
+  const min = parseMinimo(entry.nota);
+  return min > 0 ? Math.max(costo, min) : costo;
+}
+
+// Calcula costo de un terminado seleccionado. Retorna {costo, label}.
+function calcTerminadoCosto(nombre, size, cant, pliegos, utilW_m, utilH_m) {
+  const ctx = { cant, pliegos, utilW_m, utilH_m };
+  const ac  = getAcabados();
+  const rc  = getRecubrimientos();
+
+  // Mapa chip → nombre(s) en tarifario
+  const map = {
+    'Doblado':           { src:'ac', nombres:['Doblado'] },
+    'Plecado':           { src:'ac', nombres:['Plecado'] },
+    'Foliado':           { src:'ac', nombres:['Foliado'] },
+    'Hot stamping':      { src:'ac', nombres:['Hot stamping'] },
+    'Redondeo esquinas': { src:'ac', nombres:['Redondeo esquinas'] },
+    'Suajado':           { src:'ac', nombres:['Suaje (matriz)', 'Arreglo de suajado', 'Suajado'] },
+    'Barniz UV':         { src:'rc', nombres:['Barniz UV Brillante'] },
+    'Laminado mate':     { src:'rc', nombres:['Plástico Mate'] },
+  };
+
+  const def = map[nombre];
+  if (!def) return 0;
+
+  const arr = def.src === 'ac' ? ac : rc;
+  let total = 0;
+  for (const nom of def.nombres) {
+    const entry = lookupTarifa(arr, nom, size);
+    if (entry) total += applyUnidad(entry, ctx);
+  }
+  return total;
 }
 
 // ─── Boot ────────────────────────────────────────────────────────

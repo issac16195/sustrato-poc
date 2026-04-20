@@ -144,15 +144,20 @@ views['cotizar'] = {
       </div>
       <div class="r-divider"></div>
       <div class="r-section-label">Desglose de costos</div>
-      <div class="r-row"><span id="r-papel-label">Papel (1,080 × $1.20)</span><span id="r-papel">$1,296</span></div>
-      <div class="r-row"><span>Impresión 4/0 tintas</span><span id="r-imp">$130</span></div>
-      <div class="r-row"><span>Terminados (doblado)</span><span>$270</span></div>
+      <div id="r-desglose"></div>
       <div class="r-divider"></div>
+      <div class="r-margen-row">
+        <span class="r-margen-label">Margen deseado</span>
+        <div class="r-margen-ctrl">
+          <input type="range" id="r-margen-input" min="10" max="60" value="30" step="1"/>
+          <span class="r-margen-pct" id="r-margen-pct">30%</span>
+        </div>
+      </div>
       <div class="r-total">
         <div class="r-total-label">Precio sugerido de venta</div>
         <div class="r-total-val" id="r-precio">$2,544</div>
       </div>
-      <div class="r-margin" id="r-margin">Margen estimado: 33%</div>
+      <div class="r-margin" id="r-margin">Utilidad estimada: $XXX</div>
     </div>
     <div class="btn-row">
       <button class="btn-ghost" id="btn-c3-back">← Editar</button>
@@ -545,35 +550,94 @@ views['cotizar'] = {
       const imp   = _imps[sel.id] || {count:1};
       const pliegos = Math.ceil((cant + merma) / Math.max(1, imp.count));
       const tintas  = getTintas();
-      const cp = pliegos * sel.pliegoPrice;
-      const ci = pliegos * 0.12;
-      const ct = cp + ci + 270;
-      const pv = ct * 1.5;
-      const margin = Math.round((pv - ct) / pv * 100);
+      const size    = getMaqSize(sel.id);   // 'CH' | 'MD' | 'GD'
 
-      document.getElementById('r-nombre').textContent    = nom;
-      document.getElementById('r-sub').textContent       =
-        `${document.getElementById('ptipo').options[document.getElementById('ptipo').selectedIndex].text} ${document.getElementById('pgramaje').value} · ${sel.name} · ${document.getElementById('ptintas').value}`;
+      const produccion = getProduccion();
+      const tipoPapel  = document.getElementById('ptipo').value;         // bond|couche|sulfatado
+      const gramaje    = document.getElementById('pgramaje').value;      // '150g', '12 pts', etc.
+      const utilW_m    = (sel.utilW || sel.util?.w || 50) / 100;
+      const utilH_m    = (sel.utilH || sel.util?.h || 70) / 100;
+
+      // ── 1. Papel ──────────────────────────────────────────────────
+      const papelPx      = getPapelPriceFor(tipoPapel, gramaje, sel.pliegoPrice);
+      const costoPapel   = pliegos * papelPx;
+      const cortePrensa  = costoPapel * 0.05;
+
+      // ── 2. Láminas ────────────────────────────────────────────────
+      const lamEntry  = lookupTarifa(produccion, 'Láminas para impresión', size);
+      const costoLam  = tintas * (parseFloat(lamEntry?.precio) || 0);
+
+      // ── 3. Impresión (por color × millar de pliegos) ──────────────
+      const impEntry  = lookupTarifa(produccion, 'Impresión', size);
+      const millares  = Math.ceil(pliegos / 1000);
+      const costoImp  = tintas * millares * (parseFloat(impEntry?.precio) || 0);
+
+      // ── 4. Terminados seleccionados ───────────────────────────────
+      const chips = [...document.querySelectorAll('#chips-terminados .chip.on')];
+      const termLines = chips.map(ch => {
+        const nombre = ch.textContent.trim();
+        const costo  = calcTerminadoCosto(nombre, size, cant, pliegos, utilW_m, utilH_m);
+        return { nombre, costo };
+      });
+      const costoTerm = termLines.reduce((s, l) => s + l.costo, 0);
+
+      // ── 5. Total ──────────────────────────────────────────────────
+      const costoTotal = costoPapel + cortePrensa + costoLam + costoImp + costoTerm;
+
+      // Helper: renders cost + re-calculates price when margen changes
+      function renderResult(margenPct) {
+        const precioVenta = margenPct >= 100 ? costoTotal : costoTotal / (1 - margenPct / 100);
+        const utilidad    = precioVenta - costoTotal;
+
+        // Métricas superiores
+        document.getElementById('r-ej').textContent        = cant.toLocaleString('es-MX');
+        document.getElementById('r-pliegos').textContent   = pliegos.toLocaleString('es-MX');
+        document.getElementById('r-imp-count').textContent = imp.count.toLocaleString('es-MX');
+        document.getElementById('r-costo').textContent     = '$' + Math.round(costoTotal).toLocaleString('es-MX');
+
+        // Desglose
+        const fmt = n => '$' + Math.round(n).toLocaleString('es-MX');
+        const tintasLabel = document.getElementById('ptintas').value;
+        const lines = [
+          { label: `Papel (${pliegos.toLocaleString('es-MX')} pliegos × $${papelPx.toFixed(2)})`, val: costoPapel },
+          { label: 'Corte a prensa (5%)',                                                            val: cortePrensa, sub: true },
+          { label: `Láminas (${tintas} tintas × $${parseFloat(lamEntry?.precio)||0})`,               val: costoLam },
+          { label: `Impresión ${tintasLabel} · ${millares} ${millares===1?'millar':'millares'}`,     val: costoImp },
+          ...termLines.map(l => ({ label: l.nombre, val: l.costo })),
+        ];
+
+        document.getElementById('r-desglose').innerHTML = lines.map(l =>
+          `<div class="r-row${l.sub?' r-row-sub':''}"><span>${l.label}</span><span>${fmt(l.val)}</span></div>`
+        ).join('');
+
+        // Precio y utilidad
+        document.getElementById('r-precio').textContent = fmt(precioVenta);
+        document.getElementById('r-margin').textContent =
+          `Utilidad estimada: ${fmt(utilidad)} · P/U: $${(precioVenta / Math.max(1,cant)).toFixed(4)}`;
+      }
+
+      // Bind margen slider
+      const slider = document.getElementById('r-margen-input');
+      const pctLbl = document.getElementById('r-margen-pct');
+      slider.oninput = () => {
+        pctLbl.textContent = slider.value + '%';
+        renderResult(+slider.value);
+      };
+
+      // Meta
+      document.getElementById('r-nombre').textContent = nom;
+      document.getElementById('r-sub').textContent =
+        `${document.getElementById('ptipo').options[document.getElementById('ptipo').selectedIndex].text} ${gramaje} · ${sel.name} · ${document.getElementById('ptintas').value}`;
       document.getElementById('r-merma-sub').textContent = '+ ' + merma.toLocaleString('es-MX') + ' merma';
       document.getElementById('r-maq-sub').textContent   = 'en ' + sel.name;
       document.getElementById('r-imp-sub').textContent   = imp.count + ' pzas/pliego';
-      document.getElementById('r-papel-label').textContent = `Papel (${pliegos.toLocaleString('es-MX')} × $${sel.pliegoPrice.toFixed(2)})`;
-      document.getElementById('r-margin').textContent   = 'Margen estimado: ' + margin + '%';
 
       showPanel('c3');
       clearInterval(timerInt);
       timerOn = false;
       setStep(3);
 
-      requestAnimationFrame(() => {
-        countUp(document.getElementById('r-ej'),        cant,       '',  500);
-        countUp(document.getElementById('r-pliegos'),   pliegos,    '',  520);
-        countUp(document.getElementById('r-imp-count'), imp.count,  '',  350);
-        countUp(document.getElementById('r-costo'),     ct,         '$', 700);
-        countUp(document.getElementById('r-papel'),     cp,         '$', 600);
-        countUp(document.getElementById('r-imp'),       ci,         '$', 600);
-        countUp(document.getElementById('r-precio'),    pv,         '$', 900);
-      });
+      renderResult(+(slider?.value || 30));
     }
 
     // ── pickProd ──────────────────────────────────────────────────
