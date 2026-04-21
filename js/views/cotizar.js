@@ -651,12 +651,17 @@ views['cotizar'] = {
       document.getElementById('r-maq-sub').textContent   = 'en ' + sel.name;
       document.getElementById('r-imp-sub').textContent   = imp.count + ' pzas/pliego';
 
-      // ── Capturar datos para PDF ───────────────────────────────────
+      // ── Capturar datos para PDF y persistencia ────────────────────
       const tintasLabel = document.getElementById('ptintas').value;
       const tipoPapelLabel = document.getElementById('ptipo').options[document.getElementById('ptipo').selectedIndex].text;
+      const tipoMap = { 'pc-general':'General', 'pc-editorial':'Editorial', 'pc-empaque':'Empaque' };
+      const tipoActivo = tipoMap[document.querySelector('.prod-card.active')?.id] || 'General';
+      const clienteObj = _clientId ? getClientes().find(c => c.id === _clientId) : null;
       _quoteData = {
+        id: 'cot-' + Date.now(),
         nom, cant, merma, pliegos, millares, tintas, tintasLabel,
         tipoPapelLabel, gramaje,
+        tipo: tipoActivo,
         maqName: sel.name,
         impCount: imp.count,
         papelPx, costoPapel, cortePrensa,
@@ -665,6 +670,8 @@ views['cotizar'] = {
         costoLam, costoImp,
         termLines,
         costoTotal,
+        clientId: _clientId || null,
+        clientNombre: clienteObj ? (clienteObj.empresa || clienteObj.nombre) : '',
         fecha: new Date(),
       };
 
@@ -692,12 +699,24 @@ views['cotizar'] = {
 
     // ── sendWA ────────────────────────────────────────────────────
     function sendWA() {
+      if (_quoteData) {
+        const margenPct = +(document.getElementById('r-margen-input')?.value || 30);
+        const precioVenta = margenPct >= 100 ? _quoteData.costoTotal : _quoteData.costoTotal / (1 - margenPct / 100);
+        registrarCotizacion({
+          id: _quoteData.id, fecha: _quoteData.fecha instanceof Date ? _quoteData.fecha.toISOString() : _quoteData.fecha,
+          nom: _quoteData.nom, tipo: _quoteData.tipo, cant: _quoteData.cant, maqName: _quoteData.maqName,
+          tintasLabel: _quoteData.tintasLabel, tipoPapelLabel: _quoteData.tipoPapelLabel, gramaje: _quoteData.gramaje,
+          clientId: _quoteData.clientId, clientNombre: _quoteData.clientNombre,
+          costoTotal: _quoteData.costoTotal, margenPct, precioVenta,
+          estado: 'cotizacion',
+        });
+      }
       const btn = document.getElementById('btn-wa');
       const ok  = document.getElementById('wa-ok');
       btn.textContent = '✓ ¡Enviando!';
       btn.style.background = 'var(--teal-dark)';
       setTimeout(() => {
-        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:middle;margin-right:6px"><path d="M8 0a8 8 0 0 0-6.9 12L0 16l4.1-1.1A8 8 0 1 0 8 0zm0 14.5a6.46 6.46 0 0 1-3.3-.9l-.24-.14-2.44.64.65-2.38-.15-.24A6.5 6.5 0 1 1 8 14.5zm3.57-4.87c-.2-.1-1.16-.57-1.34-.64-.18-.07-.3-.1-.43.1-.13.2-.5.64-.62.77-.11.13-.23.14-.42.05-.2-.1-.84-.31-1.6-.99-.6-.53-1-1.18-1.11-1.38-.11-.2-.01-.3.09-.4l.38-.44c.12-.14.15-.24.23-.4.08-.14.04-.27-.02-.38-.06-.1-.43-1.04-.6-1.43-.15-.37-.31-.32-.43-.33l-.37-.01c-.13 0-.33.05-.5.24s-.66.64-.66 1.56.68 1.82.77 1.94c.1.13 1.33 2.04 3.24 2.86.45.2.8.31 1.08.4.45.14.87.12 1.2.07.36-.06 1.12-.46 1.28-.9.16-.45.16-.83.11-.91-.05-.08-.18-.13-.37-.22z"/></svg>Enviar PDF por WhatsApp`;
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:middle;margin-right:6px"><path d="M8 0a8 8 0 0 0-6.9 12L0 16l4.1-1.1A8 8 0 1 0 8 0zm0 14.5a6.46 6.46 0 0 1-3.3-.9l-.24-.14-2.44.64.65-2.38-.15-.24A6.5 6.5 0 1 1 8 14.5zm3.57-4.87c-.2-.1-1.16-.57-1.34-.64-.18-.07-.3-.1-.43.1-.13.2-.5.64-.62.77-.11.13-.23.14-.42.05-.2-.1-.84-.31-1.6-.99-.6-.53-1-1.18-1.11-1.38-.11-.2-.01-.3.09-.4l.38-.44c.12-.14.15-.24.23-.4.08-.14.04-.27-.02-.38-.06-.1-.43-1.04-.6-1.43-.15-.37-.31-.32-.43-.33l-.37-.01c-.13 0-.33.05-.5.24s-.66.64-.66 1.56.68 1.82.77 1.94c.1.13 1.33 2.04 3.24 2.86.45.2.8.31 1.08.4.45.14.87.12 1.2.07.36-.06 1.12-.46 1.28-.9.16-.45.16-.83.11-.91-.05-.08-.18-.13-.37-.22z"/></svg>Enviar por WhatsApp`;
         btn.style.background = '';
       }, 1500);
       ok.classList.remove('visible');
@@ -820,6 +839,16 @@ views['cotizar'] = {
       // ── Descarga ──────────────────────────────────────────────────
       const filename = `Cotizacion-${(qd.nom||'proyecto').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s-]/g,'').trim().replace(/\s+/g,'-')}.pdf`;
       doc.save(filename);
+
+      // ── Persistir en dashboard ────────────────────────────────────
+      registrarCotizacion({
+        id: qd.id, fecha: qd.fecha instanceof Date ? qd.fecha.toISOString() : qd.fecha,
+        nom: qd.nom, tipo: qd.tipo, cant: qd.cant, maqName: qd.maqName,
+        tintasLabel: qd.tintasLabel, tipoPapelLabel: qd.tipoPapelLabel, gramaje: qd.gramaje,
+        clientId: qd.clientId, clientNombre: qd.clientNombre,
+        costoTotal: qd.costoTotal, margenPct, precioVenta,
+        estado: 'cotizacion',
+      });
     }
 
     // ── initPresets / selectPreset ────────────────────────────────

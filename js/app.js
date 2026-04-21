@@ -182,6 +182,31 @@ function saveProfile(obj) {
   localStorage.setItem('sustrato_profile', JSON.stringify(obj));
 }
 
+// ─── Cotizaciones helpers ─────────────────────────────────────────
+function getCotizaciones() {
+  try {
+    const raw = localStorage.getItem('sustrato_cotizaciones');
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return [];
+}
+function saveCotizaciones(arr) {
+  localStorage.setItem('sustrato_cotizaciones', JSON.stringify(arr));
+}
+function registrarCotizacion(record) {
+  const arr = getCotizaciones();
+  // Evitar duplicado si se descarga dos veces la misma cotización
+  const exists = arr.find(c => c.id === record.id);
+  if (!exists) arr.unshift(record);
+  saveCotizaciones(arr);
+}
+function convertirANotaVenta(cotId) {
+  const arr = getCotizaciones();
+  const cot = arr.find(c => c.id === cotId);
+  if (cot) { cot.estado = 'nota_venta'; cot.fechaNota = new Date().toISOString(); }
+  saveCotizaciones(arr);
+}
+
 // ─── Router ───────────────────────────────────────────────────────
 function showView(id, el) {
   // render HTML into #app
