@@ -194,16 +194,20 @@ function hideError() {
 
 function mapFirebaseError(code) {
   const map = {
-    'auth/user-not-found':       'No encontramos una cuenta con ese correo.',
-    'auth/wrong-password':       'Contraseña incorrecta. Inténtalo de nuevo.',
-    'auth/invalid-credential':   'Correo o contraseña incorrectos.',
-    'auth/email-already-in-use': 'Ese correo ya está registrado. Inicia sesión.',
-    'auth/weak-password':        'La contraseña debe tener al menos 6 caracteres.',
-    'auth/invalid-email':        'El formato del correo no es válido.',
-    'auth/too-many-requests':    'Demasiados intentos. Espera un momento e inténtalo de nuevo.',
-    'auth/popup-closed-by-user': 'Cerraste la ventana de Google antes de terminar.',
+    'auth/user-not-found':          'No encontramos una cuenta con ese correo.',
+    'auth/wrong-password':          'Contraseña incorrecta. Inténtalo de nuevo.',
+    'auth/invalid-credential':      'Correo o contraseña incorrectos.',
+    'auth/email-already-in-use':    'Ese correo ya está registrado. Inicia sesión.',
+    'auth/weak-password':           'La contraseña debe tener al menos 6 caracteres.',
+    'auth/invalid-email':           'El formato del correo no es válido.',
+    'auth/too-many-requests':       'Demasiados intentos. Espera un momento e inténtalo de nuevo.',
+    'auth/popup-closed-by-user':    'Cerraste la ventana de Google antes de terminar.',
+    'auth/operation-not-allowed':   'Este método de acceso no está habilitado. Actívalo en Firebase Console → Authentication.',
+    'auth/configuration-not-found': 'Configuración de auth no encontrada. Verifica Firebase Console.',
+    'auth/network-request-failed':  'Error de red. Verifica tu conexión a internet.',
+    'auth/internal-error':          'Error interno de Firebase. Intenta de nuevo.',
   };
-  return map[code] || 'Ocurrió un error. Inténtalo de nuevo.';
+  return map[code] || `Error: ${code || 'desconocido'}. Inténtalo de nuevo.`;
 }
 
 function setLoading(btnId, loading) {
