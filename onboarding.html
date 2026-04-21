@@ -418,11 +418,29 @@ function goDemo() {
 }
 
 // ── Dashboard ──────────────────────────────────────────────────────
-function goDashboard() {
+async function goDashboard() {
   localStorage.setItem('sustrato_onboarded', '1');
   if (_profile.nombre) {
     localStorage.setItem('sustrato_profile', JSON.stringify(_profile));
   }
+
+  // Persist onboarding data to Firestore if user is authenticated
+  try {
+    const user = typeof auth !== 'undefined' && auth.currentUser;
+    if (user) {
+      const base = db.collection('users').doc(user.uid).collection('config');
+      const writes = [];
+      if (_profile.nombre) writes.push(base.doc('profile').set(_profile));
+      const machinesRaw = localStorage.getItem('sustrato_machines');
+      if (machinesRaw) writes.push(base.doc('machines').set({ data: JSON.parse(machinesRaw) }));
+      const papelRaw = localStorage.getItem('sustrato_papel');
+      if (papelRaw) writes.push(base.doc('papel').set({ data: JSON.parse(papelRaw) }));
+      await Promise.all(writes);
+    }
+  } catch (e) {
+    console.warn('[Firestore onboarding]', e);
+  }
+
   window.location.href = 'index.html';
 }
 
@@ -569,5 +587,10 @@ function renderDone() {
   setInterval(resetAndPlay, TOTAL);
 })();
 </script>
+<!-- Firebase (needed for goDashboard Firestore writes) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
 </body>
 </html>

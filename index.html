@@ -11,6 +11,17 @@
 </head>
 <body>
 
+<!-- ── Auth loading overlay ─────────────────────────────────────── -->
+<div class="auth-overlay" id="auth-loading">
+  <svg width="38" height="38" viewBox="0 0 30 30" fill="none">
+    <path d="M3 22 L15 28 L27 22 L15 16 Z" fill="#00BDA5" opacity="0.3"/>
+    <path d="M3 18 L15 24 L27 18 L15 12 Z" fill="#00BDA5" opacity="0.55"/>
+    <path d="M3 14 L15 20 L27 14 L15 8 Z" fill="#00BDA5" opacity="0.8"/>
+    <path d="M3 10 L15 16 L27 10 L15 4 Z" fill="#00BDA5"/>
+  </svg>
+  <div style="color:rgba(255,255,255,.38);font-size:12px;font-family:'Inter',sans-serif;letter-spacing:.3px">Verificando sesión…</div>
+</div>
+
 <nav class="sidebar">
   <div class="logo">
     <div class="logo-wrap">
@@ -63,10 +74,17 @@
     <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M2 12L5 5l3 5 3-4 3 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     Sustratos &amp; Mermas
   </div>
-  <div style="padding:0 20px 4px">
-    <div onclick="localStorage.removeItem('sustrato_onboarded');window.location.href='onboarding.html'" style="font-size:10px;color:rgba(255,255,255,.2);cursor:pointer;text-align:center;padding:6px;border-radius:4px;transition:color .15s" onmouseover="this.style.color='rgba(255,255,255,.5)'" onmouseout="this.style.color='rgba(255,255,255,.2)'">↩ Ver onboarding (demo)</div>
-  </div>
-  <div class="sidebar-foot">
+  <!-- Bottom section: user info + trial card -->
+  <div class="sidebar-bottom">
+    <div class="sidebar-user" id="sidebar-user">
+      <div class="sidebar-avatar" id="sidebar-avatar">—</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sidebar-user-name">Mi imprenta</div>
+        <div class="sidebar-user-email" id="sidebar-user-email"></div>
+      </div>
+      <button class="sidebar-logout" title="Cerrar sesión" onclick="signOutUser().then(()=>location.href='login.html')">⏏</button>
+    </div>
+    <div class="sidebar-foot">
     <div class="trial-card">
       <div class="trial-label">Periodo de prueba</div>
       <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:2px">
@@ -75,6 +93,7 @@
       </div>
       <button class="trial-cta" onclick="showView('plan',null)">Activar plan — $499/mes →</button>
     </div>
+  </div>
   </div>
 </nav>
 
@@ -89,13 +108,14 @@
   <div id="app"></div>
 </main>
 
-<script>
-  // Redirect to onboarding if not registered
-  if (!localStorage.getItem('sustrato_onboarded')) {
-    window.location.href = 'onboarding.html';
-  }
-</script>
-<script src="js/app.js?v=7"></script>
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<!-- App -->
+<script src="js/app.js?v=8"></script>
 <script src="js/views/dashboard.js?v=3"></script>
 <script src="js/views/cotizar.js?v=4"></script>
 <script src="js/views/procesos.js?v=2"></script>
@@ -107,5 +127,29 @@
 <script src="js/views/plan.js?v=2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<!-- Auth guard — runs after all scripts are loaded -->
+<script>
+  auth.onAuthStateChanged(async user => {
+    if (!user) {
+      window.location.href = 'login.html';
+      return;
+    }
+    const onboarded = await isOnboarded(user.uid);
+    if (!onboarded) {
+      window.location.href = 'onboarding.html';
+      return;
+    }
+    // Populate sidebar user info
+    const profile = getProfile();
+    const nameStr = profile.nombre || user.displayName || user.email || '?';
+    const initials = nameStr.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    document.getElementById('sidebar-avatar').textContent = initials;
+    document.getElementById('sidebar-user-name').textContent = profile.imprenta || 'Mi imprenta';
+    document.getElementById('sidebar-user-email').textContent = user.email || '';
+    document.getElementById('sidebar-user').style.display = 'flex';
+    // Show app
+    document.getElementById('auth-loading').style.display = 'none';
+  });
+</script>
 </body>
 </html>

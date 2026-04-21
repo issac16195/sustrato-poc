@@ -16,6 +16,7 @@ function getMachines() {
 }
 function saveMachines(arr) {
   localStorage.setItem('sustrato_machines', JSON.stringify(arr));
+  if (typeof fsWrite === 'function') fsWrite('machines', arr);
 }
 
 // ─── Tarifario stores ─────────────────────────────────────────────
@@ -40,6 +41,7 @@ function getPreprensa() {
 }
 function savePreprensa(arr) {
   localStorage.setItem('sustrato_preprensa', JSON.stringify(arr));
+  if (typeof fsWrite === 'function') fsWrite('preprensa', arr);
 }
 
 const DEFAULT_ACABADOS = [
@@ -85,6 +87,7 @@ function getAcabados() {
 }
 function saveAcabados(arr) {
   localStorage.setItem('sustrato_acabados', JSON.stringify(arr));
+  if (typeof fsWrite === 'function') fsWrite('acabados', arr);
 }
 
 const DEFAULT_PRODUCCION = [
@@ -105,6 +108,7 @@ function getProduccion() {
 }
 function saveProduccion(arr) {
   localStorage.setItem('sustrato_produccion', JSON.stringify(arr));
+  if (typeof fsWrite === 'function') fsWrite('produccion', arr);
 }
 
 const DEFAULT_RECUBRIMIENTOS = [
@@ -129,6 +133,7 @@ function getRecubrimientos() {
 }
 function saveRecubrimientos(arr) {
   localStorage.setItem('sustrato_recubrimientos', JSON.stringify(arr));
+  if (typeof fsWrite === 'function') fsWrite('recubrimientos', arr);
 }
 
 // ─── Clientes store ──────────────────────────────────────────────
@@ -141,6 +146,7 @@ function getClientes() {
 }
 function saveClientes(arr) {
   localStorage.setItem('sustrato_clientes', JSON.stringify(arr));
+  if (typeof fsWrite === 'function') fsWrite('clientes', arr);
 }
 
 // ─── Views registry (populated by each view file) ────────────────
@@ -180,6 +186,7 @@ function getProfile() {
 }
 function saveProfile(obj) {
   localStorage.setItem('sustrato_profile', JSON.stringify(obj));
+  if (typeof fsWrite === 'function') fsWrite('profile', obj);
 }
 
 // ─── Cotizaciones helpers ─────────────────────────────────────────
@@ -192,6 +199,7 @@ function getCotizaciones() {
 }
 function saveCotizaciones(arr) {
   localStorage.setItem('sustrato_cotizaciones', JSON.stringify(arr));
+  if (typeof fsWrite === 'function') fsWrite('cotizaciones', arr);
 }
 function registrarCotizacion(record) {
   const arr = getCotizaciones();

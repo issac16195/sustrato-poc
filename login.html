@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sustrato — Acceso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#00A878; --teal-dark:#008F66;
+  --navy:#1C2015; --navy-mid:#262B1C;
+  --white:#fff; --text:#2D3527; --text2:#5A6350; --text3:#94A08A;
+  --bg:#F4F6F0; --border:#DDE3D6; --border2:#CBD4C2;
+  --radius:12px; --radius-sm:8px;
+}
+body{font-family:'Inter',sans-serif;background:var(--navy);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+
+/* ─── Card ─── */
+.login-wrap{width:100%;max-width:420px}
+.login-logo{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:36px}
+.login-logo-icon svg path{fill:var(--teal)}
+.login-logo-name{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;color:#fff;letter-spacing:.04em}
+.login-logo-tag{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.08em;text-transform:uppercase;margin-top:1px}
+
+.login-card{background:var(--white);border-radius:var(--radius);padding:32px 32px 28px;box-shadow:0 32px 80px rgba(0,0,0,.35)}
+
+/* ─── Tabs ─── */
+.login-tabs{display:flex;border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:3px;gap:3px;margin-bottom:28px}
+.login-tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:600;border-radius:6px;cursor:pointer;transition:background .15s,color .15s;color:var(--text2)}
+.login-tab.active{background:var(--navy);color:#fff}
+
+/* ─── Form ─── */
+.login-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--navy);margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--text2);margin-bottom:22px}
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.fg input{width:100%;padding:10px 13px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:var(--white);transition:border .15s,box-shadow .15s;outline:none}
+.fg input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,168,120,.12)}
+.fg input.err{border-color:#E05555;box-shadow:0 0 0 3px rgba(224,85,85,.12)}
+
+.btn-primary{width:100%;padding:11px;background:var(--teal);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:background .15s;margin-top:4px}
+.btn-primary:hover{background:var(--teal-dark)}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed}
+
+.divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--text3);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.btn-google{width:100%;padding:10px;background:var(--white);border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:border-color .15s,box-shadow .15s;color:var(--text)}
+.btn-google:hover{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,168,120,.1)}
+
+.login-error{background:#FEF0F0;border:1px solid #F5BEBE;border-radius:var(--radius-sm);padding:10px 13px;font-size:13px;color:#C0392B;margin-bottom:14px;display:none}
+.login-error.show{display:block}
+
+.forgot{text-align:right;margin-top:-8px;margin-bottom:16px}
+.forgot a{font-size:12px;color:var(--teal-dark);text-decoration:none;cursor:pointer}
+.forgot a:hover{text-decoration:underline}
+
+.login-foot{text-align:center;margin-top:20px;font-size:12px;color:rgba(255,255,255,.35)}
+
+/* ─── Loading overlay ─── */
+.auth-loading{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:999}
+.auth-spin{width:32px;height:32px;border:3px solid rgba(0,168,120,.3);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="auth-loading" id="auth-loading">
+  <div class="auth-spin"></div>
+</div>
+
+<div class="login-wrap" id="login-wrap" style="display:none">
+  <!-- Logo -->
+  <div class="login-logo">
+    <div class="login-logo-icon">
+      <svg width="28" height="28" viewBox="0 0 30 30" fill="none">
+        <path d="M3 22 L15 28 L27 22 L15 16 Z" fill="#00A878" opacity="0.3"/>
+        <path d="M3 18 L15 24 L27 18 L15 12 Z" fill="#00A878" opacity="0.55"/>
+        <path d="M3 14 L15 20 L27 14 L15 8 Z" fill="#00A878" opacity="0.8"/>
+        <path d="M3 10 L15 16 L27 10 L15 4 Z" fill="#00A878"/>
+      </svg>
+    </div>
+    <div>
+      <div class="login-logo-name">SUSTRATO</div>
+      <div class="login-logo-tag">Software de Prensa</div>
+    </div>
+  </div>
+
+  <div class="login-card">
+    <!-- Tabs -->
+    <div class="login-tabs">
+      <div class="login-tab active" id="tab-signin" onclick="switchTab('signin')">Iniciar sesión</div>
+      <div class="login-tab" id="tab-signup" onclick="switchTab('signup')">Crear cuenta</div>
+    </div>
+
+    <!-- Error banner -->
+    <div class="login-error" id="login-error"></div>
+
+    <!-- Sign in form -->
+    <div id="form-signin">
+      <div class="login-title">Bienvenido de vuelta</div>
+      <div class="login-sub">Ingresa con tu cuenta de imprenta</div>
+
+      <div class="fg">
+        <label>Correo electrónico</label>
+        <input type="email" id="si-email" placeholder="correo@imprenta.com" autocomplete="email"/>
+      </div>
+      <div class="fg">
+        <label>Contraseña</label>
+        <input type="password" id="si-pass" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <div class="forgot"><a onclick="forgotPassword()">¿Olvidaste tu contraseña?</a></div>
+
+      <button class="btn-primary" id="btn-signin" onclick="doSignIn()">Iniciar sesión →</button>
+
+      <div class="divider">o continúa con</div>
+      <button class="btn-google" onclick="doGoogle()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H24v8h11.3C33.7 33.3 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34 6.5 29.3 4.5 24 4.5 13.2 4.5 4.5 13.2 4.5 24S13.2 43.5 24 43.5c11 0 19.5-8 19.5-19.5 0-1.3-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34 6.5 29.3 4.5 24 4.5c-7.6 0-14.1 4.4-17.7 10.2z"/><path fill="#4CAF50" d="M24 43.5c5.2 0 9.8-1.9 13.4-5l-6.2-5.2C29.3 34.9 26.8 36 24 36c-5.2 0-9.6-3.6-11.2-8.5l-6.6 5C9.9 39.1 16.4 43.5 24 43.5z"/><path fill="#1565C0" d="M43.6 20H24v8h11.3c-.7 2-2 3.8-3.7 5l6.2 5.2C41 34.7 43.5 29.7 43.5 24c0-1.3-.1-2.7-.4-4z"/></svg>
+        Continuar con Google
+      </button>
+    </div>
+
+    <!-- Sign up form -->
+    <div id="form-signup" style="display:none">
+      <div class="login-title">Registra tu imprenta</div>
+      <div class="login-sub">Crea tu cuenta gratuita · 30 días de prueba</div>
+
+      <div class="fg">
+        <label>Correo electrónico</label>
+        <input type="email" id="su-email" placeholder="correo@imprenta.com" autocomplete="email"/>
+      </div>
+      <div class="fg">
+        <label>Contraseña</label>
+        <input type="password" id="su-pass" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
+      </div>
+      <div class="fg">
+        <label>Confirmar contraseña</label>
+        <input type="password" id="su-pass2" placeholder="Repite la contraseña" autocomplete="new-password"/>
+      </div>
+
+      <button class="btn-primary" id="btn-signup" onclick="doSignUp()">Crear cuenta y configurar →</button>
+
+      <div class="divider">o regístrate con</div>
+      <button class="btn-google" onclick="doGoogle()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H24v8h11.3C33.7 33.3 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34 6.5 29.3 4.5 24 4.5 13.2 4.5 4.5 13.2 4.5 24S13.2 43.5 24 43.5c11 0 19.5-8 19.5-19.5 0-1.3-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34 6.5 29.3 4.5 24 4.5c-7.6 0-14.1 4.4-17.7 10.2z"/><path fill="#4CAF50" d="M24 43.5c5.2 0 9.8-1.9 13.4-5l-6.2-5.2C29.3 34.9 26.8 36 24 36c-5.2 0-9.6-3.6-11.2-8.5l-6.6 5C9.9 39.1 16.4 43.5 24 43.5z"/><path fill="#1565C0" d="M43.6 20H24v8h11.3c-.7 2-2 3.8-3.7 5l6.2 5.2C41 34.7 43.5 29.7 43.5 24c0-1.3-.1-2.7-.4-4z"/></svg>
+        Continuar con Google
+      </button>
+    </div>
+  </div>
+
+  <div class="login-foot">Precios sin IVA · Tus datos son privados y seguros</div>
+</div>
+
+<!-- Firebase CDN -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+
+<script>
+// ── Auth state — if already logged in, go straight to app ─────────────────
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    const onboarded = await isOnboarded(user.uid);
+    window.location.href = onboarded ? 'index.html' : 'onboarding.html';
+    return;
+  }
+  document.getElementById('auth-loading').style.display = 'none';
+  document.getElementById('login-wrap').style.display = 'block';
+});
+
+// ── Tab switch ────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('form-signin').style.display = tab === 'signin' ? 'block' : 'none';
+  document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('tab-signin').className = 'login-tab' + (tab === 'signin' ? ' active' : '');
+  document.getElementById('tab-signup').className = 'login-tab' + (tab === 'signup' ? ' active' : '');
+  hideError();
+}
+
+// ── Error display ─────────────────────────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideError() {
+  document.getElementById('login-error').classList.remove('show');
+}
+
+function mapFirebaseError(code) {
+  const map = {
+    'auth/user-not-found':       'No encontramos una cuenta con ese correo.',
+    'auth/wrong-password':       'Contraseña incorrecta. Inténtalo de nuevo.',
+    'auth/invalid-credential':   'Correo o contraseña incorrectos.',
+    'auth/email-already-in-use': 'Ese correo ya está registrado. Inicia sesión.',
+    'auth/weak-password':        'La contraseña debe tener al menos 6 caracteres.',
+    'auth/invalid-email':        'El formato del correo no es válido.',
+    'auth/too-many-requests':    'Demasiados intentos. Espera un momento e inténtalo de nuevo.',
+    'auth/popup-closed-by-user': 'Cerraste la ventana de Google antes de terminar.',
+  };
+  return map[code] || 'Ocurrió un error. Inténtalo de nuevo.';
+}
+
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  btn.textContent = loading ? 'Un momento…' : btn.dataset.label;
+}
+
+// ── Sign in ───────────────────────────────────────────────────────────────
+document.getElementById('btn-signin').dataset.label = 'Iniciar sesión →';
+async function doSignIn() {
+  const email = document.getElementById('si-email').value.trim();
+  const pass  = document.getElementById('si-pass').value;
+  if (!email || !pass) { showError('Ingresa tu correo y contraseña.'); return; }
+  hideError();
+  setLoading('btn-signin', true);
+  try {
+    await signInUser(email, pass);
+    window.location.href = 'index.html';
+  } catch(e) {
+    setLoading('btn-signin', false);
+    showError(mapFirebaseError(e.code));
+  }
+}
+
+// ── Sign up ───────────────────────────────────────────────────────────────
+document.getElementById('btn-signup').dataset.label = 'Crear cuenta y configurar →';
+async function doSignUp() {
+  const email = document.getElementById('su-email').value.trim();
+  const pass  = document.getElementById('su-pass').value;
+  const pass2 = document.getElementById('su-pass2').value;
+  if (!email || !pass) { showError('Ingresa tu correo y contraseña.'); return; }
+  if (pass !== pass2)  { showError('Las contraseñas no coinciden.'); return; }
+  if (pass.length < 6) { showError('La contraseña debe tener al menos 6 caracteres.'); return; }
+  hideError();
+  setLoading('btn-signup', true);
+  try {
+    await signUpUser(email, pass);
+    window.location.href = 'onboarding.html';
+  } catch(e) {
+    setLoading('btn-signup', false);
+    showError(mapFirebaseError(e.code));
+  }
+}
+
+// ── Google ────────────────────────────────────────────────────────────────
+async function doGoogle() {
+  hideError();
+  try {
+    const { isNew } = await signInGoogle();
+    window.location.href = isNew ? 'onboarding.html' : 'index.html';
+  } catch(e) {
+    showError(mapFirebaseError(e.code));
+  }
+}
+
+// ── Forgot password ───────────────────────────────────────────────────────
+async function forgotPassword() {
+  const email = document.getElementById('si-email').value.trim();
+  if (!email) { showError('Ingresa tu correo para restablecer la contraseña.'); return; }
+  try {
+    await auth.sendPasswordResetEmail(email);
+    showError(''); // reuse banner as success
+    const el = document.getElementById('login-error');
+    el.style.background = '#F0FEF8';
+    el.style.borderColor = '#A8DFC8';
+    el.style.color = '#1A7A52';
+    el.textContent = 'Te enviamos un correo para restablecer tu contraseña.';
+    el.classList.add('show');
+  } catch(e) {
+    showError(mapFirebaseError(e.code));
+  }
+}
+
+// ── Enter key support ─────────────────────────────────────────────────────
+document.getElementById('si-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doSignIn(); });
+document.getElementById('su-pass2').addEventListener('keydown', e => { if (e.key === 'Enter') doSignUp(); });
+</script>
+</body>
+</html>
