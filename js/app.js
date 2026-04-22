@@ -317,7 +317,9 @@ function parseMinimo(nota) {
 }
 
 // Aplica la fórmula correcta según unidad de un entry de tarifario
-function applyUnidad(entry, { cant, pliegos, utilW_m, utilH_m }) {
+// ctx puede incluir: cant, pliegos, utilW_m, utilH_m, tintas, millares
+function applyUnidad(entry, ctx) {
+  const { cant = 0, pliegos = 0, utilW_m = 0, utilH_m = 0, tintas = 1, millares = 1 } = ctx;
   const precio = parseFloat(entry.precio) || 0;
   let costo = 0;
   switch (entry.unidad) {
@@ -327,6 +329,9 @@ function applyUnidad(entry, { cant, pliegos, utilW_m, utilH_m }) {
     case 'por pliego':   costo = precio * pliegos; break;
     case 'por m²':       costo = utilH_m * utilW_m * pliegos * precio; break;
     case 'por lado':     costo = precio * Math.ceil(cant / 1000); break;
+    case 'por lámina':   costo = precio * tintas; break;
+    case 'por color':    costo = precio * tintas * millares; break;
+    case 'sobre papel':  costo = precio; break; // porcentaje — el caller maneja esto
     default:             costo = precio;
   }
   const min = parseMinimo(entry.nota);
@@ -334,8 +339,8 @@ function applyUnidad(entry, { cant, pliegos, utilW_m, utilH_m }) {
 }
 
 // Calcula costo de un terminado seleccionado usando maqId de la máquina seleccionada.
-function calcTerminadoCosto(nombre, maqId, cant, pliegos, utilW_m, utilH_m) {
-  const ctx = { cant, pliegos, utilW_m, utilH_m };
+function calcTerminadoCosto(nombre, maqId, cant, pliegos, utilW_m, utilH_m, tintas = 1, millares = 1) {
+  const ctx = { cant, pliegos, utilW_m, utilH_m, tintas, millares };
   const ac  = getAcabados();
   const rc  = getRecubrimientos();
 

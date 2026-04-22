@@ -584,18 +584,23 @@ views['cotizar'] = {
 
       // ── 2. Láminas ────────────────────────────────────────────────
       const lamEntry  = lookupTarifa(produccion, 'Láminas para impresión', maqId);
-      const costoLam  = tintas * (parseFloat(lamEntry?.precio) || 0);
+      const millares  = Math.ceil(pliegos / 1000);
+      const lamCtx    = { cant, pliegos, utilW_m, utilH_m, tintas, millares };
+      const costoLam  = lamEntry
+        ? applyUnidad(lamEntry, lamCtx)
+        : tintas * 0;
 
       // ── 3. Impresión (por color × millar de pliegos) ──────────────
       const impEntry  = lookupTarifa(produccion, 'Impresión', maqId);
-      const millares  = Math.ceil(pliegos / 1000);
-      const costoImp  = tintas * millares * (parseFloat(impEntry?.precio) || 0);
+      const costoImp  = impEntry
+        ? applyUnidad(impEntry, lamCtx)
+        : 0;
 
       // ── 4. Terminados seleccionados ───────────────────────────────
       const chips = [...document.querySelectorAll('#chips-terminados .chip.on')];
       const termLines = chips.map(ch => {
         const nombre = ch.textContent.trim();
-        const costo  = calcTerminadoCosto(nombre, maqId, cant, pliegos, utilW_m, utilH_m);
+        const costo  = calcTerminadoCosto(nombre, maqId, cant, pliegos, utilW_m, utilH_m, tintas, millares);
         return { nombre, costo };
       });
       const costoTerm = termLines.reduce((s, l) => s + l.costo, 0);
@@ -620,8 +625,8 @@ views['cotizar'] = {
         const lines = [
           { label: `Papel (${pliegos.toLocaleString('es-MX')} pliegos × $${papelPx.toFixed(2)})`, val: costoPapel },
           { label: 'Corte a prensa (5%)',                                                            val: cortePrensa, sub: true },
-          { label: `Láminas (${tintas} tintas × $${parseFloat(lamEntry?.precio)||0})`,               val: costoLam },
-          { label: `Impresión ${tintasLabel} · ${millares} ${millares===1?'millar':'millares'}`,     val: costoImp },
+          { label: `Láminas (${tintas} ${tintas===1?'tinta':'tintas'} × $${parseFloat(lamEntry?.precio)||0})`, val: costoLam },
+          { label: `Impresión ${tintasLabel} · ${millares} ${millares===1?'millar':'millares'}`,                 val: costoImp },
           ...termLines.map(l => ({ label: l.nombre, val: l.costo })),
         ];
 

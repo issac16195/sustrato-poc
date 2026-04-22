@@ -128,6 +128,32 @@ views['tarifario'] = {
       return `<select${id ? ` id="${id}"` : ''} class="tf-f ${cls}" style="width:100%">${opts}</select>`;
     }
 
+    // ── Unidades estándar ─────────────────────────────────────────
+    // Valores deben coincidir exactamente con los casos de applyUnidad() en app.js
+    const UNIDADES = [
+      { value: 'por pieza',    label: 'Por pieza',    hint: 'precio × cantidad total' },
+      { value: 'por millar',   label: 'Por millar',   hint: 'precio × ⌈cant / 1,000⌉' },
+      { value: 'por proyecto', label: 'Por proyecto', hint: 'precio fijo, una vez' },
+      { value: 'por pliego',   label: 'Por pliego',   hint: 'precio × total de pliegos' },
+      { value: 'por m²',       label: 'Por m²',       hint: 'precio × área útil × pliegos' },
+      { value: 'por lado',     label: 'Por lado',     hint: 'precio × millares (barniz)' },
+      { value: 'sobre papel',  label: 'Sobre papel',  hint: '% del costo de papel' },
+      { value: 'por lámina',   label: 'Por lámina',   hint: 'precio × tintas' },
+      { value: 'por color',    label: 'Por color',    hint: 'precio × tintas × millares' },
+    ];
+
+    function unidadSelectHTML(selected, cls, id) {
+      const opts = UNIDADES.map(u =>
+        `<option value="${u.value}"${selected === u.value ? ' selected' : ''}>${u.label} — ${u.hint}</option>`
+      ).join('');
+      return `<select${id ? ` id="${id}"` : ''} class="tf-f ${cls}" style="width:100%">${opts}</select>`;
+    }
+
+    function unidadLabel(val) {
+      const u = UNIDADES.find(x => x.value === val);
+      return u ? `<span title="${u.hint}" style="cursor:help">${u.label}</span>` : (val || '—');
+    }
+
     // ── CRUD section factory ──────────────────────────────────────
     // cfg: { tbodyId, addFormId, addBtnId, cardId, prefix, addTitle, getItems, saveItems, hasMaq }
     function makeCrud(cfg) {
@@ -145,7 +171,7 @@ views['tarifario'] = {
           <td><div class="svc-note" style="color:var(--text2);font-size:12px">${item.nota || '—'}</div></td>
           <td>${tamCell}</td>
           <td class="price-col"><span class="price-chip navy">${fmtPrecio(item.precio)}</span></td>
-          <td style="font-size:12px;color:var(--text3)">${item.unidad}</td>
+          <td style="font-size:12px;color:var(--text3)">${unidadLabel(item.unidad)}</td>
           <td style="white-space:nowrap">
             <span class="save-link ${pfx}edit">Editar</span>
             &nbsp;·&nbsp;
@@ -163,7 +189,7 @@ views['tarifario'] = {
           <td><input class="tf-f ${pfx}nota" value="${item.nota}" placeholder="Nota (opcional)" style="width:100%"/></td>
           <td>${tamField}</td>
           <td><input class="tf-f ${pfx}precio" type="text" value="${item.precio}" placeholder="80 ó 5%" style="width:78px"/></td>
-          <td><input class="tf-f ${pfx}unidad" value="${item.unidad}" placeholder="por pieza" style="width:88px"/></td>
+          <td>${unidadSelectHTML(item.unidad, `${pfx}unidad`, '')}</td>
           <td style="white-space:nowrap">
             <span class="save-link ${pfx}save">Guardar</span>
             &nbsp;·&nbsp;
@@ -281,7 +307,7 @@ views['tarifario'] = {
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px">
               <div class="fg"><label>${hasMaq ? 'Máquina' : 'Tamaño / Nivel'}</label>${hasMaq ? maqSelectHTML('—', `${prefix}-np-tam-cls`, `${prefix}-np-tam`) : `<input id="${prefix}-np-tam" placeholder="— o nivel"/>`}</div>
               <div class="fg"><label>Precio (MXN)</label><input id="${prefix}-np-precio" type="text" placeholder="80 ó 5%"/></div>
-              <div class="fg"><label>Unidad</label><input id="${prefix}-np-unidad" placeholder="por proyecto, por pieza…"/></div>
+              <div class="fg"><label>Unidad de cobro</label>${unidadSelectHTML('por pieza', `${prefix}-np-unidad-cls`, `${prefix}-np-unidad`)}</div>
             </div>
             <div class="btn-row">
               <button class="btn-primary" id="${prefix}-np-submit">Agregar servicio</button>
