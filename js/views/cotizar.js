@@ -100,16 +100,7 @@ views['cotizar'] = {
       </div>
       <div style="margin-bottom:0">
         <label>Terminados</label>
-        <div class="chips" id="chips-terminados">
-          <div class="chip">Plecado</div>
-          <div class="chip on">Doblado</div>
-          <div class="chip">Suajado</div>
-          <div class="chip">Foliado</div>
-          <div class="chip">Barniz UV</div>
-          <div class="chip">Laminado mate</div>
-          <div class="chip">Hot stamping</div>
-          <div class="chip">Redondeo esquinas</div>
-        </div>
+        <div class="chips" id="chips-terminados"></div>
       </div>
     </div>
 
@@ -599,8 +590,9 @@ views['cotizar'] = {
       // ── 4. Terminados seleccionados ───────────────────────────────
       const chips = [...document.querySelectorAll('#chips-terminados .chip.on')];
       const termLines = chips.map(ch => {
+        const procId = ch.dataset.procId;
         const nombre = ch.textContent.trim();
-        const costo  = calcTerminadoCosto(nombre, maqId, cant, pliegos, utilW_m, utilH_m, tintas, millares);
+        const costo  = calcTerminadoCosto(procId, maqId, cant, pliegos, utilW_m, utilH_m, tintas, millares);
         return { nombre, costo };
       });
       const costoTerm = termLines.reduce((s, l) => s + l.costo, 0);
@@ -617,15 +609,15 @@ views['cotizar'] = {
         document.getElementById('r-ej').textContent        = cant.toLocaleString('es-MX');
         document.getElementById('r-pliegos').textContent   = pliegos.toLocaleString('es-MX');
         document.getElementById('r-imp-count').textContent = imp.count.toLocaleString('es-MX');
-        document.getElementById('r-costo').textContent     = '$' + Math.round(costoTotal).toLocaleString('es-MX');
+        document.getElementById('r-costo').textContent     = fmtMXN(costoTotal);
 
         // Desglose
-        const fmt = n => '$' + Math.round(n).toLocaleString('es-MX');
+        const fmt = n => fmtMXN(n);
         const tintasLabel = document.getElementById('ptintas').value;
         const lines = [
-          { label: `Papel (${pliegos.toLocaleString('es-MX')} pliegos × $${papelPx.toFixed(2)})`, val: costoPapel },
+          { label: `Papel (${pliegos.toLocaleString('es-MX')} pliegos × ${fmtMXN(papelPx)})`, val: costoPapel },
           { label: 'Corte a prensa (5%)',                                                            val: cortePrensa, sub: true },
-          { label: `Láminas (${tintas} ${tintas===1?'tinta':'tintas'} × $${parseFloat(lamEntry?.precio)||0})`, val: costoLam },
+          { label: `Láminas (${tintas} ${tintas===1?'tinta':'tintas'} × ${fmtMXN(parseFloat(lamEntry?.precio)||0)})`, val: costoLam },
           { label: `Impresión ${tintasLabel} · ${millares} ${millares===1?'millar':'millares'}`,                 val: costoImp },
           ...termLines.map(l => ({ label: l.nombre, val: l.costo })),
         ];
@@ -707,13 +699,21 @@ views['cotizar'] = {
       if (_quoteData) {
         const margenPct = +(document.getElementById('r-margen-input')?.value || 30);
         const precioVenta = margenPct >= 100 ? _quoteData.costoTotal : _quoteData.costoTotal / (1 - margenPct / 100);
+        const qd2 = _quoteData;
         registrarCotizacion({
-          id: _quoteData.id, fecha: _quoteData.fecha instanceof Date ? _quoteData.fecha.toISOString() : _quoteData.fecha,
-          nom: _quoteData.nom, tipo: _quoteData.tipo, cant: _quoteData.cant, maqName: _quoteData.maqName,
-          tintasLabel: _quoteData.tintasLabel, tipoPapelLabel: _quoteData.tipoPapelLabel, gramaje: _quoteData.gramaje,
-          clientId: _quoteData.clientId, clientNombre: _quoteData.clientNombre,
-          costoTotal: _quoteData.costoTotal, margenPct, precioVenta,
+          id: qd2.id, fecha: qd2.fecha instanceof Date ? qd2.fecha.toISOString() : qd2.fecha,
+          nom: qd2.nom, tipo: qd2.tipo, cant: qd2.cant, maqName: qd2.maqName,
+          tintasLabel: qd2.tintasLabel, tipoPapelLabel: qd2.tipoPapelLabel, gramaje: qd2.gramaje,
+          clientId: qd2.clientId, clientNombre: qd2.clientNombre,
+          costoTotal: qd2.costoTotal, margenPct, precioVenta,
           estado: 'cotizacion',
+          snap: {
+            merma: qd2.merma, pliegos: qd2.pliegos, millares: qd2.millares,
+            tintas: qd2.tintas, impCount: qd2.impCount,
+            papelPx: qd2.papelPx, costoPapel: qd2.costoPapel, cortePrensa: qd2.cortePrensa,
+            lamPrecio: qd2.lamPrecio, costoLam: qd2.costoLam, costoImp: qd2.costoImp,
+            termLines: qd2.termLines,
+          },
         });
       }
       const btn = document.getElementById('btn-wa');
@@ -749,7 +749,7 @@ views['cotizar'] = {
       const LTGRAY = [240, 243, 238];
       const pageW  = 210;
       const margin = 14;
-      const fmtN   = n => '$' + Math.round(n).toLocaleString('es-MX');
+      const fmtN   = n => fmtMXN(n);
       let y = 16;
 
       // ── Logo ──────────────────────────────────────────────────────
@@ -853,6 +853,13 @@ views['cotizar'] = {
         clientId: qd.clientId, clientNombre: qd.clientNombre,
         costoTotal: qd.costoTotal, margenPct, precioVenta,
         estado: 'cotizacion',
+        snap: {
+          merma: qd.merma, pliegos: qd.pliegos, millares: qd.millares,
+          tintas: qd.tintas, impCount: qd.impCount,
+          papelPx: qd.papelPx, costoPapel: qd.costoPapel, cortePrensa: qd.cortePrensa,
+          lamPrecio: qd.lamPrecio, costoLam: qd.costoLam, costoImp: qd.costoImp,
+          termLines: qd.termLines,
+        },
       });
     }
 
@@ -907,10 +914,122 @@ views['cotizar'] = {
     document.querySelectorAll('#pc-general,#pc-editorial,#pc-empaque').forEach(card => {
       card.addEventListener('click', () => pickProd(card));
     });
-    document.querySelectorAll('#chips-terminados .chip').forEach(chip => {
-      chip.addEventListener('click', () => toggleChip(chip));
-    });
+    // Generar chips desde procesos activos con tarifaSrc
+    const chipsEl = document.getElementById('chips-terminados');
+    if (chipsEl) {
+      chipsEl.innerHTML = getProcesos()
+        .filter(p => p.active && p.tarifaSrc)
+        .map(p => `<div class="chip" data-proc-id="${p.id}">${p.name}</div>`)
+        .join('');
+      chipsEl.querySelectorAll('.chip').forEach(chip => {
+        chip.addEventListener('click', () => toggleChip(chip));
+      });
+    }
 
     initPresets();
   }
 };
+
+// ── Genera PDF desde un registro del dashboard ───────────────────
+function generarPDFCotizacion(rec) {
+  if (!rec.snap) {
+    alert('Este registro fue guardado con una versión anterior y no tiene los datos necesarios para regenerar el PDF. Abre la cotización nuevamente desde "Nueva cotización" para descargarla.');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc     = new jsPDF({ unit:'mm', format:'a4' });
+  const profile = getProfile();
+  const s       = rec.snap;
+  const margenPct   = rec.margenPct || 30;
+  const precioVenta = rec.precioVenta || rec.costoTotal;
+  const utilidad    = precioVenta - rec.costoTotal;
+
+  const TEAL   = [0,168,120];
+  const NAVY   = [28,32,21];
+  const GRAY   = [90,100,86];
+  const LTGRAY = [240,243,238];
+  const pageW  = 210;
+  const margin = 14;
+  const fmtN   = n => fmtMXN(n);
+  let y = 16;
+
+  if (profile.logo) {
+    try {
+      const ext = profile.logo.startsWith('data:image/png') ? 'PNG' : 'JPEG';
+      doc.addImage(profile.logo, ext, margin, y, 36, 16, '', 'FAST');
+    } catch(e) {}
+  }
+
+  const fecha = new Date(rec.fecha);
+  const dia   = fecha.toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+  const folio = `#${fecha.getFullYear()}${String(fecha.getMonth()+1).padStart(2,'0')}${String(fecha.getDate()).padStart(2,'0')}`;
+  doc.setFont('helvetica','bold').setFontSize(20).setTextColor(...NAVY);
+  doc.text('COTIZACIÓN', pageW - margin, y + 5, { align:'right' });
+  doc.setFont('helvetica','normal').setFontSize(8).setTextColor(...GRAY);
+  doc.text(folio, pageW - margin, y + 11, { align:'right' });
+  doc.text(dia,   pageW - margin, y + 16, { align:'right' });
+
+  y += 22;
+  doc.setFont('helvetica','bold').setFontSize(10).setTextColor(...NAVY);
+  doc.text(profile.imprenta || 'Mi Imprenta', margin, y);
+  const infoLine = [profile.direccion, profile.ciudad, profile.tel ? 'Tel: '+profile.tel : '', profile.email, profile.rfc ? 'RFC: '+profile.rfc : ''].filter(Boolean).join('  ·  ');
+  if (infoLine) { doc.setFont('helvetica','normal').setFontSize(7.5).setTextColor(...GRAY); doc.text(infoLine, margin, y+5, { maxWidth: pageW - margin*2 }); }
+
+  y += 14;
+  doc.setDrawColor(...TEAL).setLineWidth(0.6).line(margin, y, pageW - margin, y);
+  y += 7;
+
+  doc.setFont('helvetica','bold').setFontSize(7.5).setTextColor(...TEAL);
+  doc.text('PROYECTO', margin, y);
+  y += 5;
+  doc.setFont('helvetica','bold').setFontSize(13).setTextColor(...NAVY);
+  doc.text(rec.nom, margin, y);
+  y += 6;
+  doc.setFont('helvetica','normal').setFontSize(8).setTextColor(...GRAY);
+  doc.text(`${(rec.cant||0).toLocaleString('es-MX')} piezas  ·  +${(s.merma||0).toLocaleString('es-MX')} merma`, margin, y);
+  y += 4.5;
+  doc.text(`${rec.tipoPapelLabel||''} ${rec.gramaje||''}  ·  ${rec.maqName||''}  ·  ${rec.tintasLabel||''}  ·  ${s.impCount||0} pzas/pliego  ·  ${(s.pliegos||0).toLocaleString('es-MX')} pliegos`, margin, y);
+  y += 9;
+
+  const bodyRows = [
+    [`Papel (${(s.pliegos||0).toLocaleString('es-MX')} pliegos × ${fmtN(s.papelPx||0)})`, fmtN(s.costoPapel||0)],
+    ['  Corte a prensa (5%)', fmtN(s.cortePrensa||0)],
+    [`Láminas (${s.tintas||0} × ${fmtN(s.lamPrecio||0)})`, fmtN(s.costoLam||0)],
+    [`Impresión ${rec.tintasLabel||''} · ${s.millares||0} ${(s.millares||0)===1?'millar':'millares'}`, fmtN(s.costoImp||0)],
+    ...(s.termLines||[]).map(t => [t.nombre, fmtN(t.costo)]),
+  ];
+
+  doc.autoTable({
+    startY: y,
+    head: [['Concepto','Importe']],
+    body: bodyRows,
+    foot: [
+      [{ content:'Costo de producción', styles:{fontStyle:'bold',textColor:NAVY} }, { content:fmtN(rec.costoTotal), styles:{fontStyle:'bold',textColor:NAVY} }],
+      [`Margen (${margenPct}%)`, fmtN(utilidad)],
+      [{ content:'PRECIO SUGERIDO DE VENTA', styles:{fontStyle:'bold',fontSize:10,textColor:NAVY,fillColor:LTGRAY} },
+       { content:fmtN(precioVenta),            styles:{fontStyle:'bold',fontSize:10,textColor:NAVY,fillColor:LTGRAY} }],
+    ],
+    headStyles: { fillColor:TEAL, textColor:[255,255,255], fontSize:8, fontStyle:'bold', cellPadding:3 },
+    bodyStyles: { fontSize:8, textColor:GRAY, cellPadding:2.5 },
+    footStyles: { fontSize:8, textColor:GRAY, fillColor:[255,255,255], cellPadding:2.5 },
+    columnStyles: { 0:{cellWidth:'auto'}, 1:{halign:'right',cellWidth:38} },
+    margin: { left:margin, right:margin },
+    theme: 'plain',
+    styles: { lineColor:[218,224,216], lineWidth:0.2 },
+  });
+
+  y = doc.lastAutoTable.finalY + 5;
+  const pu = precioVenta / Math.max(1, rec.cant||1);
+  doc.setFont('helvetica','normal').setFontSize(7.5).setTextColor(...GRAY);
+  doc.text(`Precio unitario: ${fmtN(pu)}`, pageW - margin, y, { align:'right' });
+  y += 10;
+  doc.setDrawColor(...TEAL).setLineWidth(0.4).line(margin, y, pageW - margin, y);
+  y += 5;
+  doc.setFontSize(7).setTextColor(...GRAY);
+  doc.text('Precios sin IVA  ·  Cotización válida por 30 días  ·  Generada con Sustrato', margin, y);
+  const footContact = [profile.nombre, profile.tel, profile.email].filter(Boolean).join('  ·  ');
+  if (footContact) doc.text(footContact, pageW - margin, y, { align:'right' });
+
+  const filename = `Cotizacion-${(rec.nom||'proyecto').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s-]/g,'').trim().replace(/\s+/g,'-')}.pdf`;
+  doc.save(filename);
+}

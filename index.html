@@ -42,7 +42,7 @@
   <div class="nav-group">Principal</div>
   <div class="nav-item" onclick="showView('dashboard',this)">
     <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
-    Dashboard
+    Resumen
   </div>
   <div class="nav-item active" onclick="showView('cotizar',this)">
     <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -99,7 +99,10 @@
 
 <main class="main">
   <div class="topbar">
-    <div>
+    <button class="ham-btn" id="ham-btn" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+    <div style="flex:1;min-width:0">
       <div class="page-title" id="top-title">Nueva cotización</div>
       <div class="page-sub" id="top-sub">Proyecto general · 3 pasos</div>
     </div>
@@ -115,18 +118,21 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/auth.js"></script>
 <!-- App -->
-<script src="js/app.js?v=10"></script>
-<script src="js/views/dashboard.js?v=3"></script>
-<script src="js/views/cotizar.js?v=6"></script>
-<script src="js/views/procesos.js?v=2"></script>
-<script src="js/views/maquinas.js?v=3"></script>
+<script src="js/app.js?v=13"></script>
+<script src="js/views/dashboard.js?v=6"></script>
+<script src="js/views/cotizar.js?v=9"></script>
+<script src="js/views/procesos.js?v=3"></script>
+<script src="js/views/maquinas.js?v=4"></script>
 <script src="js/views/sustratos.js?v=3"></script>
-<script src="js/views/tarifario.js?v=8"></script>
+<script src="js/views/tarifario.js?v=9"></script>
 <script src="js/views/clientes.js?v=1"></script>
 <script src="js/views/perfil.js?v=1"></script>
 <script src="js/views/plan.js?v=2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<!-- Sidebar overlay (mobile drawer) -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
 <!-- Auth guard — runs after all scripts are loaded -->
 <script>
   auth.onAuthStateChanged(async user => {
@@ -150,6 +156,39 @@
     // Show app
     document.getElementById('auth-loading').style.display = 'none';
   });
+</script>
+<!-- Hamburger / sidebar drawer (mobile) -->
+<script>
+  (function() {
+    const hamBtn  = document.getElementById('ham-btn');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      hamBtn.classList.add('open');
+      overlay.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      hamBtn.classList.remove('open');
+      overlay.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    hamBtn.addEventListener('click', () =>
+      sidebar.classList.contains('open') ? closeSidebar() : openSidebar()
+    );
+    overlay.addEventListener('click', closeSidebar);
+
+    // Auto-close al navegar en mobile
+    document.querySelectorAll('.nav-item').forEach(item =>
+      item.addEventListener('click', () => { if (window.innerWidth < 768) closeSidebar(); })
+    );
+    // Cerrar con Escape
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+  })();
 </script>
 </body>
 </html>

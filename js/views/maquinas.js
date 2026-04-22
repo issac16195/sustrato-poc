@@ -56,8 +56,8 @@ views['maquinas'] = {
         <td>${m.tamW}×${m.tamH}</td>
         <td>${m.utilW}×${m.utilH}</td>
         <td>${m.gramaje}</td>
-        <td>$${Number(m.pliegoPrice).toFixed(2)}</td>
-        <td>${Number(m.cph).toLocaleString('es-MX')}</td>
+        <td>${fmtMXN(m.pliegoPrice)}</td>
+        <td>${fmtMXN(m.cph)}</td>
         <td style="white-space:nowrap">
           <span class="save-link mq-edit-btn">Editar</span>
           &nbsp;·&nbsp;

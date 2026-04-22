@@ -1,6 +1,12 @@
 // ─── Shared state ────────────────────────────────────────────────
 let sec = 0, timerOn = false, timerInt;
 
+// ─── Global money formatter ───────────────────────────────────────
+function fmtMXN(n) {
+  const num = parseFloat(String(n).replace(/[$,]/g, '')) || 0;
+  return '$' + num.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 // ─── Machine store (localStorage-backed) ─────────────────────────
 const DEFAULT_MACHINES = [
   { id:'PM52',  name:'PM52',  tag:'Chica',   tamW:37,  tamH:51,  utilW:35, utilH:49,  gramaje:'16 pts', cph:850,  pliegoPrice:0.45 },
@@ -153,6 +159,54 @@ function saveRecubrimientos(arr) {
   if (typeof fsWrite === 'function') fsWrite('recubrimientos', arr);
 }
 
+// ─── Procesos store ──────────────────────────────────────────────
+const DEFAULT_PROCESOS = [
+  // Pre-prensa
+  { id:'diseno',      name:'Diseño',                  sub:'Nivel básico (A) · Intermedio (B) · Complejo (C)', cat:'Pre-prensa',    tarifaSrc:null, tarifaNombres:[], active:true  },
+  { id:'foto',        name:'Fotografía',               sub:'Por toma',                                         cat:'Pre-prensa',    tarifaSrc:null, tarifaNombres:[], active:true  },
+  { id:'prueba',      name:'Prueba de color',          sub:'Matchprint / impresión de referencia',             cat:'Pre-prensa',    tarifaSrc:null, tarifaNombres:[], active:true  },
+  { id:'negpos',      name:'Negativo / Positivo',      sub:'Chico · Mediano · Grande',                         cat:'Pre-prensa',    tarifaSrc:null, tarifaNombres:[], active:true  },
+  // Materiales (manejados aparte en cotizador)
+  { id:'papeles',     name:'Papeles',                  sub:'Tabla anexa de sustratos',                         cat:'Materiales',    tarifaSrc:null, tarifaNombres:[], active:true  },
+  { id:'laminas',     name:'Láminas para impresión',   sub:'Según máquina seleccionada',                       cat:'Materiales',    tarifaSrc:null, tarifaNombres:[], active:true  },
+  // Producción (impresión manejada aparte; recubrimientos y grabados sí generan chip)
+  { id:'impresion',   name:'Impresión',                sub:'4 tintas CMYK',                                    cat:'Producción',    tarifaSrc:null, tarifaNombres:[], active:true  },
+  { id:'recubr',      name:'Recubrimiento',            sub:'Barniz en máquina',                                cat:'Producción',    tarifaSrc:'rc', tarifaNombres:['Barniz máquina'],                                                active:true  },
+  { id:'recubr_r',    name:'Recubrimiento a registro', sub:'Solo áreas específicas',                           cat:'Producción',    tarifaSrc:'rc', tarifaNombres:['Arreglo de barniz a registro','Aplicación barniz registro UV Br.'], active:false },
+  { id:'grabados',    name:'Grabados',                 sub:'Hotstamping · Grabado en seco',                    cat:'Producción',    tarifaSrc:'ac', tarifaNombres:['Hot stamping'],                                                  active:true  },
+  // Acabados
+  { id:'suaje',       name:'Suaje',                    sub:'Matriz · Arreglo · Suajado · Desbarbado',          cat:'Acabados',      tarifaSrc:'ac', tarifaNombres:['Suaje (matriz)','Arreglo de suajado','Suajado'],                 active:true  },
+  { id:'redondeo',    name:'Redondeo de esquinas',     sub:'',                                                 cat:'Acabados',      tarifaSrc:'ac', tarifaNombres:['Redondeo esquinas'],                                             active:false },
+  { id:'ponchado',    name:'Ponchado',                 sub:'Orificio chico o mediano',                         cat:'Acabados',      tarifaSrc:null, tarifaNombres:[], active:false },
+  { id:'compag',      name:'Compaginado',              sub:'Manual o automático',                               cat:'Acabados',      tarifaSrc:null, tarifaNombres:[], active:false },
+  { id:'encuad',      name:'Encuadernado',             sub:'Rústico · Hotmelt · Grapa · Encolado',             cat:'Acabados',      tarifaSrc:null, tarifaNombres:[], active:false },
+  { id:'doblez',      name:'Doblez',                   sub:'Cruz · Mapa · Tríptico · Díptico',                 cat:'Acabados',      tarifaSrc:'ac', tarifaNombres:['Doblado'],                                                       active:true  },
+  { id:'plecado',     name:'Plecado',                  sub:'Rallado para doblez',                              cat:'Acabados',      tarifaSrc:'ac', tarifaNombres:['Plecado'],                                                       active:true  },
+  { id:'wire',        name:'Wire-O / Arillo',          sub:'Metálico · Espiral · Gancho',                      cat:'Acabados',      tarifaSrc:null, tarifaNombres:[], active:false },
+  { id:'corte',       name:'Corte',                    sub:'Guillotina · Trilateral',                          cat:'Acabados',      tarifaSrc:null, tarifaNombres:[], active:false },
+  { id:'folio',       name:'Folio / Perforado',        sub:'Numeración consecutiva',                           cat:'Acabados',      tarifaSrc:'ac', tarifaNombres:['Foliado'],                                                       active:true  },
+  { id:'pegado',      name:'Pegado',                   sub:'Folders · Caja lineal · Fondo automático',         cat:'Acabados',      tarifaSrc:'ac', tarifaNombres:['Pegado lineal'],                                                 active:false },
+  // Recubrimientos
+  { id:'barniz_uv',   name:'Barniz UV',                sub:'Brillo o mate',                                    cat:'Recubrimientos', tarifaSrc:'rc', tarifaNombres:['Barniz UV Brillante'],                                          active:true  },
+  { id:'laminado',    name:'Laminado',                 sub:'Brillante o mate',                                 cat:'Recubrimientos', tarifaSrc:'rc', tarifaNombres:['Plástico Mate'],                                                active:true  },
+  // Logística
+  { id:'empacado',    name:'Empacado',                 sub:'Por caja o empaque individual',                    cat:'Logística',     tarifaSrc:null, tarifaNombres:[], active:true  },
+  { id:'envarillado', name:'Envarillado',              sub:'Superior o inferior',                              cat:'Logística',     tarifaSrc:null, tarifaNombres:[], active:false },
+  { id:'empalmado',   name:'Empalmado',                sub:'SBS+Micro · SBS+Corrugado',                        cat:'Logística',     tarifaSrc:null, tarifaNombres:[], active:false },
+  { id:'envio',       name:'Envío',                    sub:'Por pieza · Por kilo · Por distancia',             cat:'Logística',     tarifaSrc:null, tarifaNombres:[], active:true  },
+];
+function getProcesos() {
+  try {
+    const raw = localStorage.getItem('sustrato_procesos');
+    if (raw) { const arr = JSON.parse(raw); if (arr.length) return arr; }
+  } catch {}
+  return DEFAULT_PROCESOS.map(p => ({...p}));
+}
+function saveProcesos(arr) {
+  localStorage.setItem('sustrato_procesos', JSON.stringify(arr));
+  if (typeof fsWrite === 'function') fsWrite('procesos', arr);
+}
+
 // ─── Clientes store ──────────────────────────────────────────────
 function getClientes() {
   try {
@@ -175,7 +229,7 @@ const titles = {
   procesos: 'Procesos de producción',
   maquinas: 'Máquinas',
   sustratos:'Sustratos & Mermas',
-  dashboard:'Dashboard',
+  dashboard:'Resumen',
   plan:     'Plan y facturación',
   clientes: 'Clientes',
   tarifario:'Tarifario de servicios',
@@ -338,30 +392,17 @@ function applyUnidad(entry, ctx) {
   return min > 0 ? Math.max(costo, min) : costo;
 }
 
-// Calcula costo de un terminado seleccionado usando maqId de la máquina seleccionada.
-function calcTerminadoCosto(nombre, maqId, cant, pliegos, utilW_m, utilH_m, tintas = 1, millares = 1) {
+// Calcula costo de un terminado seleccionado usando el id del proceso y maqId de la máquina.
+function calcTerminadoCosto(procId, maqId, cant, pliegos, utilW_m, utilH_m, tintas = 1, millares = 1) {
+  const proc = getProcesos().find(p => p.id === procId);
+  if (!proc || !proc.tarifaSrc) return 0;
   const ctx = { cant, pliegos, utilW_m, utilH_m, tintas, millares };
-  const ac  = getAcabados();
-  const rc  = getRecubrimientos();
-
-  // Mapa chip → nombre(s) en tarifario
-  const map = {
-    'Doblado':           { src:'ac', nombres:['Doblado'] },
-    'Plecado':           { src:'ac', nombres:['Plecado'] },
-    'Foliado':           { src:'ac', nombres:['Foliado'] },
-    'Hot stamping':      { src:'ac', nombres:['Hot stamping'] },
-    'Redondeo esquinas': { src:'ac', nombres:['Redondeo esquinas'] },
-    'Suajado':           { src:'ac', nombres:['Suaje (matriz)', 'Arreglo de suajado', 'Suajado'] },
-    'Barniz UV':         { src:'rc', nombres:['Barniz UV Brillante'] },
-    'Laminado mate':     { src:'rc', nombres:['Plástico Mate'] },
-  };
-
-  const def = map[nombre];
-  if (!def) return 0;
-
-  const arr = def.src === 'ac' ? ac : rc;
+  const arr = proc.tarifaSrc === 'rc' ? getRecubrimientos()
+            : proc.tarifaSrc === 'ac' ? getAcabados()
+            : proc.tarifaSrc === 'pp' ? getPreprensa()
+            : getProduccion();
   let total = 0;
-  for (const nom of def.nombres) {
+  for (const nom of proc.tarifaNombres) {
     const entry = lookupTarifa(arr, nom, maqId);
     if (entry) total += applyUnidad(entry, ctx);
   }

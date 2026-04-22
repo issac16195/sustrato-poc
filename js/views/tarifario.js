@@ -105,7 +105,7 @@ views['tarifario'] = {
       if (/[%a-zA-Z]/.test(s)) return s; // texto libre: "5%", "cotizar", etc.
       const num = Number(s.replace(/[$,]/g, ''));
       if (isNaN(num)) return s;
-      return num % 1 === 0 ? '$' + num.toLocaleString('es-MX') : '$' + num.toFixed(2);
+      return fmtMXN(num);
     }
 
     // ── Helpers de máquina ────────────────────────────────────────

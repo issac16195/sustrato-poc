@@ -30,32 +30,7 @@ views['procesos'] = {
   },
 
   init() {
-    const PROCS = [
-      {id:'diseno',     name:'Diseño',              sub:'Nivel básico (A) · Intermedio (B) · Complejo (C)', cat:'Pre-prensa'},
-      {id:'foto',       name:'Fotografía',           sub:'Por toma',                                         cat:'Pre-prensa'},
-      {id:'prueba',     name:'Prueba de color',      sub:'Chica 33×45 · Mediana 61×45 · Grande 61×80',       cat:'Pre-prensa'},
-      {id:'negpos',     name:'Negativo / Positivo',  sub:'Chico · Mediano · Grande',                         cat:'Pre-prensa'},
-      {id:'papeles',    name:'Papeles',              sub:'Tabla anexa de sustratos',                          cat:'Materiales'},
-      {id:'laminas',    name:'Láminas para impresión',sub:'Según máquina seleccionada',                      cat:'Materiales'},
-      {id:'impresion',  name:'Impresión',            sub:'4 tintas CMYK',                                     cat:'Producción'},
-      {id:'recubr',     name:'Recubrimiento',        sub:'Barniz máquina · Acrílico · UV · Plástico mate',   cat:'Producción'},
-      {id:'recubr_r',   name:'Recubrimiento a registro',sub:'Solo áreas específicas',                        cat:'Producción'},
-      {id:'grabados',   name:'Grabados',             sub:'Hotstamping · Grabado en seco · Arreglo',          cat:'Producción'},
-      {id:'suaje',      name:'Suaje',                sub:'Matriz · Arreglo · Suajado · Plecado · Desbarbado',cat:'Acabados'},
-      {id:'redondeo',   name:'Redondeo de esquinas', sub:'',                                                  cat:'Acabados'},
-      {id:'ponchado',   name:'Ponchado',             sub:'Orificio chico o mediano',                          cat:'Acabados'},
-      {id:'compag',     name:'Compaginado',          sub:'Manual o automático',                               cat:'Acabados'},
-      {id:'encuad',     name:'Encuadernado',         sub:'Rústico · Hotmelt · Grapa · Encolado de forma',    cat:'Acabados'},
-      {id:'doblez',     name:'Doblez',               sub:'Cruz · Mapa · Tríptico · Díptico · Arreglo',       cat:'Acabados'},
-      {id:'wire',       name:'Wire-O / Arillo',      sub:'Metálico · Espiral · Gancho para colgar',          cat:'Acabados'},
-      {id:'corte',      name:'Corte',                sub:'Guillotina · Trilateral',                           cat:'Acabados'},
-      {id:'folio',      name:'Folio / Perforado',    sub:'Foliado numerado o perforado',                      cat:'Acabados'},
-      {id:'pegado',     name:'Pegado',               sub:'Folders · Caja lineal · Fondo automático',         cat:'Acabados'},
-      {id:'empacado',   name:'Empacado',             sub:'Por caja o por empaque individual',                 cat:'Logística'},
-      {id:'envarillado',name:'Envarillado',          sub:'Superior o inferior',                               cat:'Logística'},
-      {id:'empalmado',  name:'Empalmado',            sub:'SBS+Micro · SBS+Corrugado · Liner+Micro · Liner+Corrugado', cat:'Logística'},
-      {id:'envio',      name:'Envío',                sub:'Por pieza · Por kilo · Por distancia',              cat:'Logística'},
-    ];
+    const PROCS = getProcesos();
 
     const OBLIG = {
       general: ['diseno','foto','prueba','papeles','laminas','impresion','recubr','grabados','suaje','redondeo','ponchado','corte','empacado','envio'],
@@ -65,6 +40,19 @@ views['procesos'] = {
 
     let curType = 'general';
     const optSel = {};
+
+    // ── Precio mínimo desde tarifario ────────────────────────────
+    function precioLabel(proc) {
+      if (!proc.tarifaSrc || !proc.tarifaNombres.length) return '';
+      const arr = proc.tarifaSrc === 'rc' ? getRecubrimientos()
+                : proc.tarifaSrc === 'ac' ? getAcabados()
+                : proc.tarifaSrc === 'pp' ? getPreprensa()
+                : getProduccion();
+      const entries = proc.tarifaNombres.flatMap(nom => arr.filter(x => x.nombre === nom));
+      if (!entries.length) return '';
+      const min = Math.min(...entries.map(e => parseFloat(e.precio) || 0));
+      return `desde ${fmtMXN(min)} · ${entries[0]?.unidad || ''}`;
+    }
 
     function renderProcs() {
       const ob   = OBLIG[curType];
@@ -81,10 +69,28 @@ views['procesos'] = {
         }
         const isOb  = ob.includes(p.id);
         const isSel = isOb || optSel[curType + p.id];
+        const precio = precioLabel(p);
         const row   = document.createElement('div');
         row.className = 'proc-row' + (isOb ? ' oblig' : '');
-        row.innerHTML = `<div class="proc-check ${isOb ? 'locked' : isSel ? 'checked' : ''}"></div><div class="proc-info"><div class="proc-name">${p.name}</div>${p.sub ? '<div class="proc-sub">' + p.sub + '</div>' : ''}</div><span class="proc-badge ${isOb ? 'pb-oblig' : 'pb-opc'}">${isOb ? 'Obligatorio' : 'Opcional'}</span>`;
-        if (!isOb) row.onclick = () => { optSel[curType + p.id] = !optSel[curType + p.id]; renderProcs(); };
+        row.innerHTML = `
+          <div class="proc-check ${isOb ? 'locked' : isSel ? 'checked' : ''}"></div>
+          <div class="proc-info">
+            <div class="proc-name">${p.name}</div>
+            ${p.sub ? '<div class="proc-sub">' + p.sub + '</div>' : ''}
+          </div>
+          ${precio ? `<span class="proc-precio">${precio}</span>` : ''}
+          <span class="proc-badge ${isOb ? 'pb-oblig' : 'pb-opc'}">${isOb ? 'Obligatorio' : 'Opcional'}</span>
+        `;
+        if (!isOb) {
+          row.onclick = () => {
+            optSel[curType + p.id] = !optSel[curType + p.id];
+            // Persistir active en el store global
+            const procs = getProcesos();
+            const stored = procs.find(x => x.id === p.id);
+            if (stored) { stored.active = !stored.active; saveProcesos(procs); }
+            renderProcs();
+          };
+        }
         grid.appendChild(row);
       });
       document.getElementById('cnt-oblig').textContent = ob.length;
@@ -101,7 +107,10 @@ views['procesos'] = {
     document.getElementById('tbtn-general').addEventListener('click', function() { switchType('general', this); });
     document.getElementById('tbtn-pliegos').addEventListener('click', function() { switchType('pliegos', this); });
     document.getElementById('tbtn-empaque').addEventListener('click', function() { switchType('empaque', this); });
-    document.getElementById('btn-usar-procs').addEventListener('click', () => alert('Procesos guardados para esta cotización'));
+
+    document.getElementById('btn-usar-procs').addEventListener('click', () => {
+      showView('cotizar', document.querySelector('.nav-item[onclick*="cotizar"]'));
+    });
 
     renderProcs();
   }
