@@ -23,7 +23,7 @@ views['tarifario'] = {
       <table class="tariff-table">
         <thead><tr>
           <th style="width:28%">Servicio</th><th style="width:24%">Nota</th>
-          <th>Tamaño / Nivel</th><th class="price-col">Precio MXN</th>
+          <th>Máquina</th><th class="price-col">Precio MXN</th>
           <th>Unidad</th><th style="width:96px"></th>
         </tr></thead>
         <tbody id="pp-tbody"></tbody>
@@ -42,7 +42,7 @@ views['tarifario'] = {
       <table class="tariff-table">
         <thead><tr>
           <th style="width:28%">Servicio</th><th style="width:24%">Nota</th>
-          <th>Tamaño / Nivel</th><th class="price-col">Precio MXN</th>
+          <th>Máquina</th><th class="price-col">Precio MXN</th>
           <th>Unidad</th><th style="width:96px"></th>
         </tr></thead>
         <tbody id="pr-tbody"></tbody>
@@ -61,7 +61,7 @@ views['tarifario'] = {
       <table class="tariff-table">
         <thead><tr>
           <th style="width:28%">Servicio</th><th style="width:24%">Nota</th>
-          <th>Tamaño / Nivel</th><th class="price-col">Precio MXN</th>
+          <th>Máquina</th><th class="price-col">Precio MXN</th>
           <th>Unidad</th><th style="width:96px"></th>
         </tr></thead>
         <tbody id="rc-tbody"></tbody>
@@ -80,7 +80,7 @@ views['tarifario'] = {
       <table class="tariff-table">
         <thead><tr>
           <th style="width:28%">Servicio</th><th style="width:24%">Nota</th>
-          <th>Tamaño / Nivel</th><th class="price-col">Precio MXN</th>
+          <th>Máquina</th><th class="price-col">Precio MXN</th>
           <th>Unidad</th><th style="width:96px"></th>
         </tr></thead>
         <tbody id="ac-tbody"></tbody>
@@ -90,7 +90,7 @@ views['tarifario'] = {
   </div>
 
   <div style="font-size:11px;color:var(--text3);margin-top:8px;padding:12px;background:var(--white);border-radius:var(--radius-sm);border:1px solid var(--border)">
-    💡 <strong>CH</strong> = Chico (PM52) &nbsp;|&nbsp; <strong>MD</strong> = Mediano (PM74) &nbsp;|&nbsp; <strong>GD</strong> = Grande (CD102) &nbsp;|&nbsp; Precios sin IVA
+    💡 Cada entrada está ligada a una máquina específica de tu catálogo. Las entradas con <strong>—</strong> aplican a todas las máquinas. Precios sin IVA.
   </div>
 </div>
 `;
@@ -108,19 +108,42 @@ views['tarifario'] = {
       return num % 1 === 0 ? '$' + num.toLocaleString('es-MX') : '$' + num.toFixed(2);
     }
 
+    // ── Helpers de máquina ────────────────────────────────────────
+    function maqLabel(tamano) {
+      if (!tamano || tamano === '—') return '<span style="color:var(--text3)">—</span>';
+      const m = getMachines().find(x => x.id === tamano);
+      return m
+        ? `<span class="tam-badge">${m.name}</span>`
+        : `<span class="tam-badge">${tamano}</span>`;
+    }
+
+    function maqSelectHTML(selected, cls, id) {
+      const machines = getMachines();
+      const opts = [
+        `<option value="—"${selected === '—' || !selected ? ' selected' : ''}>— Todas las máquinas</option>`,
+        ...machines.map(m =>
+          `<option value="${m.id}"${selected === m.id ? ' selected' : ''}>${m.name} · ${m.tag}</option>`
+        ),
+      ].join('');
+      return `<select${id ? ` id="${id}"` : ''} class="tf-f ${cls}" style="width:100%">${opts}</select>`;
+    }
+
     // ── CRUD section factory ──────────────────────────────────────
-    // cfg: { tbodyId, addFormId, addBtnId, cardId, prefix, addTitle, getItems, saveItems }
+    // cfg: { tbodyId, addFormId, addBtnId, cardId, prefix, addTitle, getItems, saveItems, hasMaq }
     function makeCrud(cfg) {
-      const { tbodyId, addFormId, addBtnId, cardId, prefix, addTitle, getItems, saveItems } = cfg;
+      const { tbodyId, addFormId, addBtnId, cardId, prefix, addTitle, getItems, saveItems, hasMaq } = cfg;
       const pfx = prefix + '-'; // e.g. 'pp-' or 'ac-'
 
       function rowHTML(item) {
+        const tamCell = hasMaq
+          ? maqLabel(item.tamano)
+          : `<span style="font-size:12px;font-weight:600;color:var(--text3)">${item.tamano || '—'}</span>`;
         return `<tr data-id="${item.id}" class="${prefix}-row"
-            data-search="${item.nombre.toLowerCase()} ${item.nota.toLowerCase()} ${item.tamano.toLowerCase()}"
+            data-search="${item.nombre.toLowerCase()} ${(item.nota||'').toLowerCase()} ${(item.tamano||'').toLowerCase()}"
             style="transition:opacity .18s,transform .18s">
           <td><div class="svc-name">${item.nombre}</div></td>
           <td><div class="svc-note" style="color:var(--text2);font-size:12px">${item.nota || '—'}</div></td>
-          <td style="font-size:12px;font-weight:600;color:var(--text3)">${item.tamano || '—'}</td>
+          <td>${tamCell}</td>
           <td class="price-col"><span class="price-chip navy">${fmtPrecio(item.precio)}</span></td>
           <td style="font-size:12px;color:var(--text3)">${item.unidad}</td>
           <td style="white-space:nowrap">
@@ -132,10 +155,13 @@ views['tarifario'] = {
       }
 
       function editRowHTML(item) {
+        const tamField = hasMaq
+          ? maqSelectHTML(item.tamano, `${pfx}tam`)
+          : `<input class="tf-f ${pfx}tam" value="${item.tamano}" placeholder="— o nivel" style="width:90px"/>`;
         return `<tr data-id="${item.id}" class="${prefix}-row" style="background:var(--teal-bg)">
           <td><input class="tf-f ${pfx}nombre" value="${item.nombre}" placeholder="Servicio" style="width:100%"/></td>
           <td><input class="tf-f ${pfx}nota" value="${item.nota}" placeholder="Nota (opcional)" style="width:100%"/></td>
-          <td><input class="tf-f ${pfx}tam" value="${item.tamano}" placeholder="— o CH" style="width:90px"/></td>
+          <td>${tamField}</td>
           <td><input class="tf-f ${pfx}precio" type="text" value="${item.precio}" placeholder="80 ó 5%" style="width:78px"/></td>
           <td><input class="tf-f ${pfx}unidad" value="${item.unidad}" placeholder="por pieza" style="width:88px"/></td>
           <td style="white-space:nowrap">
@@ -253,7 +279,7 @@ views['tarifario'] = {
               <div class="fg"><label>Nota (opcional)</label><input id="${prefix}-np-nota" placeholder="Ej. Una sola vez por proyecto"/></div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px">
-              <div class="fg"><label>Tamaño / Nivel</label><input id="${prefix}-np-tam" placeholder="— o CH, MD, GD"/></div>
+              <div class="fg"><label>${hasMaq ? 'Máquina' : 'Tamaño / Nivel'}</label>${hasMaq ? maqSelectHTML('—', `${prefix}-np-tam-cls`, `${prefix}-np-tam`) : `<input id="${prefix}-np-tam" placeholder="— o nivel"/>`}</div>
               <div class="fg"><label>Precio (MXN)</label><input id="${prefix}-np-precio" type="text" placeholder="80 ó 5%"/></div>
               <div class="fg"><label>Unidad</label><input id="${prefix}-np-unidad" placeholder="por proyecto, por pieza…"/></div>
             </div>
@@ -304,6 +330,7 @@ views['tarifario'] = {
       addTitle:  'Nuevo servicio — Pre-prensa',
       getItems:  getPreprensa,
       saveItems: savePreprensa,
+      hasMaq:    false,   // Pre-prensa no es por máquina
     });
 
     makeCrud({
@@ -315,6 +342,7 @@ views['tarifario'] = {
       addTitle:  'Nuevo servicio — Recubrimientos',
       getItems:  getRecubrimientos,
       saveItems: saveRecubrimientos,
+      hasMaq:    true,
     });
 
     makeCrud({
@@ -326,6 +354,7 @@ views['tarifario'] = {
       addTitle:  'Nuevo servicio — Producción & Prensa',
       getItems:  getProduccion,
       saveItems: saveProduccion,
+      hasMaq:    true,
     });
 
     makeCrud({
@@ -337,6 +366,7 @@ views['tarifario'] = {
       addTitle:  'Nuevo servicio — Acabados & Terminados',
       getItems:  getAcabados,
       saveItems: saveAcabados,
+      hasMaq:    true,
     });
 
     // ── Search / filter ───────────────────────────────────────────

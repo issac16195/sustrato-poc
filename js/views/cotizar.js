@@ -569,7 +569,7 @@ views['cotizar'] = {
       const imp   = _imps[sel.id] || {count:1};
       const pliegos = Math.ceil((cant + merma) / Math.max(1, imp.count));
       const tintas  = getTintas();
-      const size    = getMaqSize(sel.id);   // 'CH' | 'MD' | 'GD'
+      const maqId   = sel.id;   // usa el id real de la máquina para lookup en tarifario
 
       const produccion = getProduccion();
       const tipoPapel  = document.getElementById('ptipo').value;         // bond|couche|sulfatado
@@ -583,11 +583,11 @@ views['cotizar'] = {
       const cortePrensa  = costoPapel * 0.05;
 
       // ── 2. Láminas ────────────────────────────────────────────────
-      const lamEntry  = lookupTarifa(produccion, 'Láminas para impresión', size);
+      const lamEntry  = lookupTarifa(produccion, 'Láminas para impresión', maqId);
       const costoLam  = tintas * (parseFloat(lamEntry?.precio) || 0);
 
       // ── 3. Impresión (por color × millar de pliegos) ──────────────
-      const impEntry  = lookupTarifa(produccion, 'Impresión', size);
+      const impEntry  = lookupTarifa(produccion, 'Impresión', maqId);
       const millares  = Math.ceil(pliegos / 1000);
       const costoImp  = tintas * millares * (parseFloat(impEntry?.precio) || 0);
 
@@ -595,7 +595,7 @@ views['cotizar'] = {
       const chips = [...document.querySelectorAll('#chips-terminados .chip.on')];
       const termLines = chips.map(ch => {
         const nombre = ch.textContent.trim();
-        const costo  = calcTerminadoCosto(nombre, size, cant, pliegos, utilW_m, utilH_m);
+        const costo  = calcTerminadoCosto(nombre, maqId, cant, pliegos, utilW_m, utilH_m);
         return { nombre, costo };
       });
       const costoTerm = termLines.reduce((s, l) => s + l.costo, 0);

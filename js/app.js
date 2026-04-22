@@ -45,43 +45,43 @@ function savePreprensa(arr) {
 }
 
 const DEFAULT_ACABADOS = [
-  { id:'ac1',  nombre:'Suaje (matriz)',           nota:'Una sola vez por proyecto',       tamano:'CH', precio:1500, unidad:'por proyecto' },
-  { id:'ac2',  nombre:'Suaje (matriz)',           nota:'',                                tamano:'MD', precio:3000, unidad:'por proyecto' },
-  { id:'ac3',  nombre:'Suaje (matriz)',           nota:'',                                tamano:'GD', precio:6000, unidad:'por proyecto' },
-  { id:'ac4',  nombre:'Arreglo de suajado',       nota:'Una sola vez por proyecto',       tamano:'CH', precio:150,  unidad:'por proyecto' },
-  { id:'ac5',  nombre:'Arreglo de suajado',       nota:'',                                tamano:'MD', precio:300,  unidad:'por proyecto' },
-  { id:'ac6',  nombre:'Arreglo de suajado',       nota:'',                                tamano:'GD', precio:600,  unidad:'por proyecto' },
-  { id:'ac7',  nombre:'Suajado',                  nota:'De 1 a 1,000 pzas',              tamano:'CH', precio:150,  unidad:'por millar' },
-  { id:'ac8',  nombre:'Suajado',                  nota:'',                                tamano:'MD', precio:300,  unidad:'por millar' },
-  { id:'ac9',  nombre:'Suajado',                  nota:'',                                tamano:'GD', precio:600,  unidad:'por millar' },
-  { id:'ac10', nombre:'Desbarbado',               nota:'Limpieza de rebaba post-suajado', tamano:'CH', precio:0.10, unidad:'por pieza' },
-  { id:'ac11', nombre:'Desbarbado',               nota:'',                                tamano:'MD', precio:0.20, unidad:'por pieza' },
-  { id:'ac12', nombre:'Desbarbado',               nota:'',                                tamano:'GD', precio:0.30, unidad:'por pieza' },
-  { id:'ac13', nombre:'Encolado',                 nota:'Mín. $350',                       tamano:'CH', precio:0.30, unidad:'por pieza' },
-  { id:'ac14', nombre:'Encolado',                 nota:'',                                tamano:'MD', precio:0.60, unidad:'por pieza' },
-  { id:'ac15', nombre:'Encolado',                 nota:'',                                tamano:'GD', precio:1.20, unidad:'por pieza' },
-  { id:'ac16', nombre:'Pegado lineal',            nota:'Folders, cajas simples',          tamano:'CH', precio:0.30, unidad:'por pieza' },
-  { id:'ac17', nombre:'Pegado lineal',            nota:'',                                tamano:'MD', precio:0.60, unidad:'por pieza' },
-  { id:'ac18', nombre:'Pegado lineal',            nota:'',                                tamano:'GD', precio:1.20, unidad:'por pieza' },
-  { id:'ac19', nombre:'Pegado fondo automático',  nota:'',                                tamano:'CH', precio:0.90, unidad:'por pieza' },
-  { id:'ac20', nombre:'Pegado fondo automático',  nota:'',                                tamano:'MD', precio:1.80, unidad:'por pieza' },
-  { id:'ac21', nombre:'Pegado fondo automático',  nota:'',                                tamano:'GD', precio:3.60, unidad:'por pieza' },
-  { id:'ac22', nombre:'Doblado',                  nota:'',                                tamano:'CH', precio:60,   unidad:'por millar' },
-  { id:'ac23', nombre:'Doblado',                  nota:'',                                tamano:'MD', precio:120,  unidad:'por millar' },
-  { id:'ac24', nombre:'Doblado',                  nota:'',                                tamano:'GD', precio:220,  unidad:'por millar' },
-  { id:'ac25', nombre:'Plecado',                  nota:'',                                tamano:'CH', precio:50,   unidad:'por millar' },
-  { id:'ac26', nombre:'Plecado',                  nota:'',                                tamano:'MD', precio:100,  unidad:'por millar' },
-  { id:'ac27', nombre:'Plecado',                  nota:'',                                tamano:'GD', precio:180,  unidad:'por millar' },
-  { id:'ac28', nombre:'Foliado',                  nota:'Numeración consecutiva',          tamano:'—',  precio:0.05, unidad:'por pieza'  },
-  { id:'ac29', nombre:'Hot stamping',             nota:'',                                tamano:'CH', precio:0.80, unidad:'por pieza'  },
-  { id:'ac30', nombre:'Hot stamping',             nota:'',                                tamano:'MD', precio:1.50, unidad:'por pieza'  },
-  { id:'ac31', nombre:'Hot stamping',             nota:'',                                tamano:'GD', precio:2.50, unidad:'por pieza'  },
-  { id:'ac32', nombre:'Redondeo esquinas',        nota:'',                                tamano:'—',  precio:0.10, unidad:'por pieza'  },
+  { id:'ac1',  nombre:'Suaje (matriz)',           nota:'Una sola vez por proyecto',       tamano:'PM52', precio:1500, unidad:'por proyecto' },
+  { id:'ac2',  nombre:'Suaje (matriz)',           nota:'',                                tamano:'PM74', precio:3000, unidad:'por proyecto' },
+  { id:'ac3',  nombre:'Suaje (matriz)',           nota:'',                                tamano:'CD102',precio:6000, unidad:'por proyecto' },
+  { id:'ac4',  nombre:'Arreglo de suajado',       nota:'Una sola vez por proyecto',       tamano:'PM52', precio:150,  unidad:'por proyecto' },
+  { id:'ac5',  nombre:'Arreglo de suajado',       nota:'',                                tamano:'PM74', precio:300,  unidad:'por proyecto' },
+  { id:'ac6',  nombre:'Arreglo de suajado',       nota:'',                                tamano:'CD102',precio:600,  unidad:'por proyecto' },
+  { id:'ac7',  nombre:'Suajado',                  nota:'De 1 a 1,000 pzas',              tamano:'PM52', precio:150,  unidad:'por millar' },
+  { id:'ac8',  nombre:'Suajado',                  nota:'',                                tamano:'PM74', precio:300,  unidad:'por millar' },
+  { id:'ac9',  nombre:'Suajado',                  nota:'',                                tamano:'CD102',precio:600,  unidad:'por millar' },
+  { id:'ac10', nombre:'Desbarbado',               nota:'Limpieza de rebaba post-suajado', tamano:'PM52', precio:0.10, unidad:'por pieza' },
+  { id:'ac11', nombre:'Desbarbado',               nota:'',                                tamano:'PM74', precio:0.20, unidad:'por pieza' },
+  { id:'ac12', nombre:'Desbarbado',               nota:'',                                tamano:'CD102',precio:0.30, unidad:'por pieza' },
+  { id:'ac13', nombre:'Encolado',                 nota:'Mín. $350',                       tamano:'PM52', precio:0.30, unidad:'por pieza' },
+  { id:'ac14', nombre:'Encolado',                 nota:'',                                tamano:'PM74', precio:0.60, unidad:'por pieza' },
+  { id:'ac15', nombre:'Encolado',                 nota:'',                                tamano:'CD102',precio:1.20, unidad:'por pieza' },
+  { id:'ac16', nombre:'Pegado lineal',            nota:'Folders, cajas simples',          tamano:'PM52', precio:0.30, unidad:'por pieza' },
+  { id:'ac17', nombre:'Pegado lineal',            nota:'',                                tamano:'PM74', precio:0.60, unidad:'por pieza' },
+  { id:'ac18', nombre:'Pegado lineal',            nota:'',                                tamano:'CD102',precio:1.20, unidad:'por pieza' },
+  { id:'ac19', nombre:'Pegado fondo automático',  nota:'',                                tamano:'PM52', precio:0.90, unidad:'por pieza' },
+  { id:'ac20', nombre:'Pegado fondo automático',  nota:'',                                tamano:'PM74', precio:1.80, unidad:'por pieza' },
+  { id:'ac21', nombre:'Pegado fondo automático',  nota:'',                                tamano:'CD102',precio:3.60, unidad:'por pieza' },
+  { id:'ac22', nombre:'Doblado',                  nota:'',                                tamano:'PM52', precio:60,   unidad:'por millar' },
+  { id:'ac23', nombre:'Doblado',                  nota:'',                                tamano:'PM74', precio:120,  unidad:'por millar' },
+  { id:'ac24', nombre:'Doblado',                  nota:'',                                tamano:'CD102',precio:220,  unidad:'por millar' },
+  { id:'ac25', nombre:'Plecado',                  nota:'',                                tamano:'PM52', precio:50,   unidad:'por millar' },
+  { id:'ac26', nombre:'Plecado',                  nota:'',                                tamano:'PM74', precio:100,  unidad:'por millar' },
+  { id:'ac27', nombre:'Plecado',                  nota:'',                                tamano:'CD102',precio:180,  unidad:'por millar' },
+  { id:'ac28', nombre:'Foliado',                  nota:'Numeración consecutiva',          tamano:'—',    precio:0.05, unidad:'por pieza'  },
+  { id:'ac29', nombre:'Hot stamping',             nota:'',                                tamano:'PM52', precio:0.80, unidad:'por pieza'  },
+  { id:'ac30', nombre:'Hot stamping',             nota:'',                                tamano:'PM74', precio:1.50, unidad:'por pieza'  },
+  { id:'ac31', nombre:'Hot stamping',             nota:'',                                tamano:'CD102',precio:2.50, unidad:'por pieza'  },
+  { id:'ac32', nombre:'Redondeo esquinas',        nota:'',                                tamano:'—',    precio:0.10, unidad:'por pieza'  },
 ];
 function getAcabados() {
   try {
     const raw = localStorage.getItem('sustrato_acabados');
-    if (raw) { const arr = JSON.parse(raw); if (arr.length) return arr; }
+    if (raw) { const arr = JSON.parse(raw); if (arr.length) return migrateTamanoToMaqId(arr); }
   } catch {}
   return DEFAULT_ACABADOS.map(x => ({...x}));
 }
@@ -91,18 +91,35 @@ function saveAcabados(arr) {
 }
 
 const DEFAULT_PRODUCCION = [
-  { id:'pr1', nombre:'Corte a prensa',         nota:'Se suma sobre el costo de papel',      tamano:'—',              precio:'5%',  unidad:'sobre papel' },
-  { id:'pr2', nombre:'Láminas para impresión', nota:'4 láminas = color completo CMYK',      tamano:'CH 459×525 mm',  precio:'80',  unidad:'por lámina' },
-  { id:'pr3', nombre:'Láminas para impresión', nota:'',                                     tamano:'MD 605×745 mm',  precio:'160', unidad:'por lámina' },
-  { id:'pr4', nombre:'Láminas para impresión', nota:'',                                     tamano:'GD 790×1030 mm', precio:'320', unidad:'por lámina' },
-  { id:'pr5', nombre:'Impresión',              nota:'Unitario por color · 1 a 1,000 pzas',  tamano:'CH',             precio:'80',  unidad:'por color' },
-  { id:'pr6', nombre:'Impresión',              nota:'',                                     tamano:'MD',             precio:'160', unidad:'por color' },
-  { id:'pr7', nombre:'Impresión',              nota:'',                                     tamano:'GD',             precio:'320', unidad:'por color' },
+  { id:'pr1', nombre:'Corte a prensa',         nota:'Se suma sobre el costo de papel',     tamano:'—',    precio:'5%',  unidad:'sobre papel' },
+  { id:'pr2', nombre:'Láminas para impresión', nota:'4 láminas = color completo CMYK',     tamano:'PM52', precio:'80',  unidad:'por lámina' },
+  { id:'pr3', nombre:'Láminas para impresión', nota:'',                                    tamano:'PM74', precio:'160', unidad:'por lámina' },
+  { id:'pr4', nombre:'Láminas para impresión', nota:'',                                    tamano:'CD102',precio:'320', unidad:'por lámina' },
+  { id:'pr5', nombre:'Impresión',              nota:'Unitario por color · 1 a 1,000 pzas', tamano:'PM52', precio:'80',  unidad:'por color' },
+  { id:'pr6', nombre:'Impresión',              nota:'',                                    tamano:'PM74', precio:'160', unidad:'por color' },
+  { id:'pr7', nombre:'Impresión',              nota:'',                                    tamano:'CD102',precio:'320', unidad:'por color' },
 ];
+// ─── Migración: convierte tamano 'CH'/'MD'/'GD' a ids de máquina ─────────────
+function migrateTamanoToMaqId(arr) {
+  const machines = getMachines();
+  const map = {
+    CH: machines.find(m => m.tag === 'Chica')?.id,
+    MD: machines.find(m => m.tag === 'Mediana')?.id,
+    GD: machines.find(m => m.tag === 'Grande')?.id,
+  };
+  return arr.map(x => {
+    const prefix = x.tamano?.match(/^(CH|MD|GD)/)?.[1];
+    if (prefix && map[prefix]) return { ...x, tamano: map[prefix] };
+    // 'CH/MD/GD' multi-value → universal
+    if (x.tamano?.includes('/')) return { ...x, tamano: '—' };
+    return x;
+  });
+}
+
 function getProduccion() {
   try {
     const raw = localStorage.getItem('sustrato_produccion');
-    if (raw) { const arr = JSON.parse(raw); if (arr.length) return arr; }
+    if (raw) { const arr = JSON.parse(raw); if (arr.length) return migrateTamanoToMaqId(arr); }
   } catch {}
   return DEFAULT_PRODUCCION.map(x => ({...x}));
 }
@@ -112,22 +129,22 @@ function saveProduccion(arr) {
 }
 
 const DEFAULT_RECUBRIMIENTOS = [
-  { id:'rc1',  nombre:'Barniz máquina',                      nota:'De 1 a 1,000 pzas por lado', tamano:'CH',         precio:'100',  unidad:'por lado' },
-  { id:'rc2',  nombre:'Barniz máquina',                      nota:'',                            tamano:'MD',         precio:'200',  unidad:'por lado' },
-  { id:'rc3',  nombre:'Barniz máquina',                      nota:'',                            tamano:'GD',         precio:'400',  unidad:'por lado' },
-  { id:'rc4',  nombre:'Barniz UV Brillante',                 nota:'Mín. $500',                   tamano:'CH/MD/GD',   precio:'2.50', unidad:'por m²' },
-  { id:'rc5',  nombre:'Barniz UV Mate',                      nota:'Mín. $1,000',                 tamano:'CH/MD/GD',   precio:'5.00', unidad:'por m²' },
-  { id:'rc6',  nombre:'Plástico Brillante',                  nota:'Mín. $500',                   tamano:'CH/MD/GD',   precio:'6.00', unidad:'por m²' },
-  { id:'rc7',  nombre:'Plástico Mate',                       nota:'Mín. $500',                   tamano:'CH/MD/GD',   precio:'7.00', unidad:'por m²' },
-  { id:'rc8',  nombre:'Arreglo de barniz a registro',        nota:'Una sola vez por proyecto',   tamano:'CH',         precio:'1000', unidad:'por proyecto' },
-  { id:'rc9',  nombre:'Arreglo de barniz a registro',        nota:'',                            tamano:'MD',         precio:'2000', unidad:'por proyecto' },
-  { id:'rc10', nombre:'Arreglo de barniz a registro',        nota:'',                            tamano:'GD',         precio:'3000', unidad:'por proyecto' },
-  { id:'rc11', nombre:'Aplicación barniz registro UV Br.',   nota:'Mín. $1,800',                 tamano:'CH/MD/GD',   precio:'7.00', unidad:'por m²' },
+  { id:'rc1',  nombre:'Barniz máquina',                      nota:'De 1 a 1,000 pzas por lado', tamano:'PM52',  precio:'100',  unidad:'por lado' },
+  { id:'rc2',  nombre:'Barniz máquina',                      nota:'',                            tamano:'PM74',  precio:'200',  unidad:'por lado' },
+  { id:'rc3',  nombre:'Barniz máquina',                      nota:'',                            tamano:'CD102', precio:'400',  unidad:'por lado' },
+  { id:'rc4',  nombre:'Barniz UV Brillante',                 nota:'Mín. $500',                   tamano:'—',     precio:'2.50', unidad:'por m²' },
+  { id:'rc5',  nombre:'Barniz UV Mate',                      nota:'Mín. $1,000',                 tamano:'—',     precio:'5.00', unidad:'por m²' },
+  { id:'rc6',  nombre:'Plástico Brillante',                  nota:'Mín. $500',                   tamano:'—',     precio:'6.00', unidad:'por m²' },
+  { id:'rc7',  nombre:'Plástico Mate',                       nota:'Mín. $500',                   tamano:'—',     precio:'7.00', unidad:'por m²' },
+  { id:'rc8',  nombre:'Arreglo de barniz a registro',        nota:'Una sola vez por proyecto',   tamano:'PM52',  precio:'1000', unidad:'por proyecto' },
+  { id:'rc9',  nombre:'Arreglo de barniz a registro',        nota:'',                            tamano:'PM74',  precio:'2000', unidad:'por proyecto' },
+  { id:'rc10', nombre:'Arreglo de barniz a registro',        nota:'',                            tamano:'CD102', precio:'3000', unidad:'por proyecto' },
+  { id:'rc11', nombre:'Aplicación barniz registro UV Br.',   nota:'Mín. $1,800',                 tamano:'—',     precio:'7.00', unidad:'por m²' },
 ];
 function getRecubrimientos() {
   try {
     const raw = localStorage.getItem('sustrato_recubrimientos');
-    if (raw) { const arr = JSON.parse(raw); if (arr.length) return arr; }
+    if (raw) { const arr = JSON.parse(raw); if (arr.length) return migrateTamanoToMaqId(arr); }
   } catch {}
   return DEFAULT_RECUBRIMIENTOS.map(x => ({...x}));
 }
@@ -287,10 +304,10 @@ function getMaqSize(maqId) {
   return m.tag === 'Chica' ? 'CH' : m.tag === 'Mediana' ? 'MD' : 'GD';
 }
 
-// Busca entrada en un array de tarifario por nombre y prefijo de tamaño
-function lookupTarifa(arr, nombre, size) {
+// Busca entrada en un array de tarifario por nombre y machine id
+function lookupTarifa(arr, nombre, maqId) {
   return arr.find(x => x.nombre === nombre &&
-    (x.tamano === size || x.tamano === '—' || x.tamano.startsWith(size)));
+    (x.tamano === maqId || x.tamano === '—'));
 }
 
 // Extrae mínimo de nota tipo "Mín. $500" → 500
@@ -316,8 +333,8 @@ function applyUnidad(entry, { cant, pliegos, utilW_m, utilH_m }) {
   return min > 0 ? Math.max(costo, min) : costo;
 }
 
-// Calcula costo de un terminado seleccionado. Retorna {costo, label}.
-function calcTerminadoCosto(nombre, size, cant, pliegos, utilW_m, utilH_m) {
+// Calcula costo de un terminado seleccionado usando maqId de la máquina seleccionada.
+function calcTerminadoCosto(nombre, maqId, cant, pliegos, utilW_m, utilH_m) {
   const ctx = { cant, pliegos, utilW_m, utilH_m };
   const ac  = getAcabados();
   const rc  = getRecubrimientos();
@@ -340,7 +357,7 @@ function calcTerminadoCosto(nombre, size, cant, pliegos, utilW_m, utilH_m) {
   const arr = def.src === 'ac' ? ac : rc;
   let total = 0;
   for (const nom of def.nombres) {
-    const entry = lookupTarifa(arr, nom, size);
+    const entry = lookupTarifa(arr, nom, maqId);
     if (entry) total += applyUnidad(entry, ctx);
   }
   return total;
