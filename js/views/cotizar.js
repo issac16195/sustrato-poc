@@ -54,6 +54,8 @@ views['cotizar'] = {
   <div id="c2" style="display:none">
     <div class="card">
       <div class="card-title">Especificaciones del proyecto</div>
+
+      <!-- 1. Cliente -->
       <div class="row2" style="margin-bottom:14px">
         <div class="fg" style="position:relative">
           <label>Cliente</label>
@@ -63,27 +65,41 @@ views['cotizar'] = {
         </div>
         <div></div>
       </div>
-      <div class="row2">
+
+      <!-- 2. Nombre del proyecto + Cantidad -->
+      <div class="row2" style="margin-bottom:14px">
         <div class="fg"><label>Nombre del proyecto</label><input id="pnombre" type="text" value=""/></div>
         <div class="fg"><label>Cantidad de ejemplares</label><input id="pcantidad" type="number" value="5000"/></div>
       </div>
-      <div class="row2">
-        <div class="fg"><label>Tipo de papel</label>
-          <select id="ptipo"><!-- poblado dinámicamente desde catálogo --></select>
-        </div>
-        <div class="fg"><label>Gramaje / Calibre</label>
-          <select id="pgramaje"><!-- poblado dinámicamente --></select>
+
+      <!-- 3. Medida del producto -->
+      <div style="margin-bottom:14px">
+        <label>Medida del producto</label>
+        <div id="size-presets" class="size-presets" style="margin-top:6px"></div>
+        <div id="size-manual" class="size-manual" style="display:none;margin-top:8px">
+          <div class="fg"><label>Ancho (cm)</label><input id="pancho" type="number" step="0.1"/></div>
+          <div class="fg"><label>Alto (cm)</label><input id="palto" type="number" step="0.1"/></div>
         </div>
       </div>
-      <div class="row3">
-        <div class="fg size-full">
-          <label>Medida del producto</label>
-          <div id="size-presets" class="size-presets"></div>
-          <div id="size-manual" class="size-manual" style="display:none">
-            <div class="fg"><label>Ancho (cm)</label><input id="pancho" type="number" step="0.1"/></div>
-            <div class="fg"><label>Alto (cm)</label><input id="palto" type="number" step="0.1"/></div>
-          </div>
+
+      <!-- 4. Papel: Tipo · Gramaje · Medida del pliego -->
+      <div class="row3" style="margin-bottom:14px">
+        <div class="fg">
+          <label>Tipo de papel</label>
+          <select id="ptipo"><!-- poblado dinámicamente --></select>
         </div>
+        <div class="fg">
+          <label>Gramaje / Calibre</label>
+          <select id="pgramaje"><!-- poblado dinámicamente --></select>
+        </div>
+        <div class="fg">
+          <label>Medida del pliego</label>
+          <select id="pmedida"><!-- poblado dinámicamente --></select>
+        </div>
+      </div>
+
+      <!-- 5. Tintas -->
+      <div class="row2" style="margin-bottom:14px">
         <div class="fg"><label>Tintas</label>
           <select id="ptintas">
             <option value="4/0">4/0 (CMYK un lado)</option>
@@ -91,7 +107,10 @@ views['cotizar'] = {
             <option value="1/0">1/0 (un color)</option>
           </select>
         </div>
+        <div></div>
       </div>
+
+      <!-- 6. Terminados -->
       <div style="margin-bottom:0">
         <label>Terminados</label>
         <div class="chips" id="chips-terminados"></div>
@@ -356,47 +375,18 @@ views['cotizar'] = {
       return (w > 0 && h > 0) ? { w, h } : null;
     }
 
-    // ── getBestPaperForMachine — encuentra el mejor papel del catálogo para una máquina
-    // Prioridad 1: tipo+gramaje con maquina===machine.id
-    // Prioridad 2: tipo+gramaje universal (maquina='') cuya medida cabe en la máquina
-    // Fallback: null (usar util de la máquina)
-    function getBestPaperForMachine(tipoPapel, gramaje, machine) {
+    // ── findPapel — busca entrada exacta por tipo + gramaje + medida ──
+    function findPapel(tipoPapel, gramaje, medida) {
       const papeles = getPapeles();
       const cat = (tipoPapel || '').toLowerCase();
-      let candidates = papeles.filter(p => p.categoria.toLowerCase() === cat);
-
-      if (gramaje && /^\d+g$/.test(gramaje.trim())) {
-        const g = parseInt(gramaje);
-        candidates = candidates.filter(p => p.gramos === g);
-      } else if (gramaje && /pts/.test(gramaje)) {
-        const pts = parseInt(gramaje);
-        candidates = candidates.filter(p => p.puntos === pts);
-      } else if (gramaje) {
-        candidates = candidates.filter(p => p.medida === gramaje);
-      }
-
-      // Prioridad 1: machine-specific entry
-      const specific = candidates.find(p => p.maquina === machine.id);
-      if (specific) return specific;
-
-      // Prioridad 2: universal, medida cabe en la máquina (considerando rotación del pliego)
-      const fitting = candidates.filter(p => {
-        if (p.maquina && p.maquina !== '') return false; // exclusivo de otra máquina
-        const d = parseMedida(p.medida);
-        if (!d) return true; // sin medida → aceptar
-        return (d.w <= machine.tamW && d.h <= machine.tamH) ||
-               (d.h <= machine.tamW && d.w <= machine.tamH);
-      });
-
-      if (fitting.length > 0) {
-        // Elegir el de mayor área (maximiza espacio de imposición)
-        return fitting.sort((a, b) => {
-          const da = parseMedida(a.medida), db = parseMedida(b.medida);
-          return (db ? db.w * db.h : 0) - (da ? da.w * da.h : 0);
-        })[0];
-      }
-
-      return null; // sin papel en catálogo → fallback a util de la máquina
+      return papeles.find(p => {
+        if (p.categoria.toLowerCase() !== cat) return false;
+        if (medida && p.medida !== medida) return false;
+        if (!gramaje) return true;
+        if (/^\d+g$/.test(gramaje.trim())) return p.gramos === parseInt(gramaje);
+        if (/pts/.test(gramaje)) return p.puntos === parseInt(gramaje);
+        return p.medida === gramaje; // gramaje IS medida (fallback)
+      }) || null;
     }
 
     // ── Imposition calculator ─────────────────────────────────────
@@ -580,9 +570,12 @@ views['cotizar'] = {
 
       const papelDetail = _paperPerMachine[sel.id];
       const papelDims   = papelDetail ? parseMedida(papelDetail.medida) : null;
+      const selectedMedida = document.getElementById('pmedida')?.value || '';
       const papelInfo   = papelDetail
-        ? `${papelDetail.material} · ${papelDetail.medida} cm`
-        : `Área útil ${sel.util.w}×${sel.util.h} cm`;
+        ? `${papelDetail.material || papelDetail.categoria} · ${papelDetail.medida} cm`
+        : selectedMedida
+          ? `Pliego ${selectedMedida} no cabe en ${sel.name}`
+          : `Área útil ${sel.util.w}×${sel.util.h} cm`;
 
       detailEl.innerHTML = `
         <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:6px">
@@ -625,32 +618,46 @@ views['cotizar'] = {
         </div>` : ''}`;
     }
 
-    // ── Recalc — geometría por máquina usando medida del papel ──────
+    // ── Recalc — geometría basada en papel seleccionado por el usuario ─
     function recalc() {
-      const pW = +document.getElementById('pancho').value || 0;
-      const pH = +document.getElementById('palto').value || 0;
-      const tipoPapel = document.getElementById('ptipo')?.value || '';
-      const gramaje   = document.getElementById('pgramaje')?.value || '';
+      const pW       = +document.getElementById('pancho')?.value  || 0;
+      const pH       = +document.getElementById('palto')?.value   || 0;
+      const tipoPapel= document.getElementById('ptipo')?.value    || '';
+      const gramaje  = document.getElementById('pgramaje')?.value || '';
+      const medida   = document.getElementById('pmedida')?.value  || '';
+
+      // Papel exacto seleccionado por el usuario
+      const papel = findPapel(tipoPapel, gramaje, medida);
+      const dims  = papel ? parseMedida(papel.medida) : null;
 
       _imps = {};
       _paperPerMachine = {};
       let anyFit = false;
 
       for (const m of MACHINES) {
-        const papel = getBestPaperForMachine(tipoPapel, gramaje, m);
-        _paperPerMachine[m.id] = papel;
-        const dims = papel ? parseMedida(papel.medida) : null;
-
         let imp;
         if (dims) {
-          // Área efectiva = min(papel, util) — probar ambas orientaciones del pliego
+          // Verificar que el papel quepa físicamente en la máquina (considerando rotación)
+          const fitsNormal  = dims.w <= m.tamW && dims.h <= m.tamH;
+          const fitsRotated = dims.h <= m.tamW && dims.w <= m.tamH;
+
+          if (!fitsNormal && !fitsRotated) {
+            // El pliego es más grande que la máquina → No apta por tamaño de papel
+            _paperPerMachine[m.id] = null;
+            _imps[m.id] = { count:0, nx:0, ny:0, rotated:false, cw:0, ch:0, pw:pW, ph:pH };
+            continue;
+          }
+
+          _paperPerMachine[m.id] = papel;
+          // Área efectiva = min(pliego, util) — probar ambas orientaciones del pliego
           const eff1 = { w: Math.min(dims.w, m.util.w), h: Math.min(dims.h, m.util.h) };
           const eff2 = { w: Math.min(dims.h, m.util.w), h: Math.min(dims.w, m.util.h) };
           const i1 = calcImp(pW, pH, eff1);
           const i2 = calcImp(pW, pH, eff2);
           imp = i2.count > i1.count ? i2 : i1;
         } else {
-          // Sin papel en catálogo → fallback al util de la máquina
+          // Sin papel en catálogo o medida no seleccionada → fallback al util de la máquina
+          _paperPerMachine[m.id] = null;
           imp = calcImp(pW, pH, m.util);
         }
 
@@ -706,7 +713,7 @@ views['cotizar'] = {
       sel.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
       if (cats.includes('COUCHE')) sel.value = 'COUCHE';
       else if (cats.length) sel.value = cats[0];
-      updateGramajes();
+      updateGramajes(); // updateGramajes calls updateMedidas internally
     }
 
     // ── updateGramajes — filtra gramajes del catálogo por categoría ─
@@ -731,6 +738,39 @@ views['cotizar'] = {
       });
       // Default COUCHE → 150g
       if (cat === 'COUCHE' && s.querySelector('option[value="150g"]')) s.value = '150g';
+      updateMedidas();
+    }
+
+    // ── updateMedidas — filtra medidas del catálogo por categoría + gramaje ─
+    function updateMedidas() {
+      const cat     = document.getElementById('ptipo').value;
+      const gramaje = document.getElementById('pgramaje').value;
+      const s       = document.getElementById('pmedida');
+      if (!s) return;
+      const prev    = s.value; // preserve selection if still available
+      s.innerHTML   = '';
+
+      const papeles = getPapeles().filter(p => {
+        if (p.categoria !== cat) return false;
+        if (!gramaje) return true;
+        if (/^\d+g$/.test(gramaje.trim())) return p.gramos === parseInt(gramaje);
+        if (/pts/.test(gramaje)) return p.puntos === parseInt(gramaje);
+        return true;
+      });
+
+      const seen = new Set();
+      papeles.forEach(p => {
+        if (p.medida && !seen.has(p.medida)) {
+          seen.add(p.medida);
+          const op = document.createElement('option');
+          op.value = p.medida;
+          op.textContent = p.medida + ' cm';
+          s.appendChild(op);
+        }
+      });
+
+      // Restore previous selection if still available
+      if (prev && s.querySelector(`option[value="${prev}"]`)) s.value = prev;
     }
 
     // ── goC3 ──────────────────────────────────────────────────────
@@ -1141,7 +1181,8 @@ views['cotizar'] = {
 
     document.getElementById('ptintas').addEventListener('change', renderCards);
     document.getElementById('ptipo').addEventListener('change', () => { updateGramajes(); recalc(); });
-    document.getElementById('pgramaje').addEventListener('change', recalc);
+    document.getElementById('pgramaje').addEventListener('change', () => { updateMedidas(); recalc(); });
+    document.getElementById('pmedida').addEventListener('change', recalc);
 
     document.querySelectorAll('#pc-general,#pc-editorial,#pc-empaque').forEach(card => {
       card.addEventListener('click', () => pickProd(card));
