@@ -414,15 +414,26 @@ function savePapeles(arr) {
 // ─── Pricing engine helpers ───────────────────────────────────────
 
 // Devuelve $/pliego para un tipo+gramaje buscando en el catálogo de papeles.
-// gramaje puede ser '75g', '90g', '12 pts', etc.
-// Busca por categoría (case-insensitive) y gramos o puntos parseados.
+// gramaje puede ser '75g' (gramos), '12 pts' (puntos), o '36X50' (medida).
+// Busca por categoría (case-insensitive) detectando el tipo de identificador.
 function getPapelPriceFor(tipoPapel, gramaje, fallback) {
   const papeles = getPapeles();
-  const g = parseInt(gramaje) || 0;
-  const entry = papeles.find(p =>
-    p.categoria.toLowerCase() === tipoPapel.toLowerCase() &&
-    (p.gramos === g || (p.gramos === null && p.puntos === g))
-  );
+  const cat = (tipoPapel || '').toLowerCase();
+  let entry;
+
+  if (gramaje && /^\d+g$/.test(gramaje.trim())) {
+    // Gramaje en gramos: '75g', '150g' …
+    const g = parseInt(gramaje);
+    entry = papeles.find(p => p.categoria.toLowerCase() === cat && p.gramos === g);
+  } else if (gramaje && /pts/.test(gramaje)) {
+    // Calibre en puntos: '12 pts', '14 pts' …
+    const pts = parseInt(gramaje);
+    entry = papeles.find(p => p.categoria.toLowerCase() === cat && p.puntos === pts);
+  } else {
+    // Medida directa: '36X50', '50X70' … (tipos sin gramaje fijo)
+    entry = papeles.find(p => p.categoria.toLowerCase() === cat && p.medida === gramaje);
+  }
+
   return entry ? entry.precioMillar / 1000 : (fallback || 0.65);
 }
 

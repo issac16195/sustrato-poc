@@ -69,16 +69,10 @@ views['cotizar'] = {
       </div>
       <div class="row2">
         <div class="fg"><label>Tipo de papel</label>
-          <select id="ptipo">
-            <option value="bond">Papel Bond</option>
-            <option value="couche" selected>Papel Couché</option>
-            <option value="sulfatado">Sulfatado</option>
-          </select>
+          <select id="ptipo"><!-- poblado dinámicamente desde catálogo --></select>
         </div>
-        <div class="fg"><label>Gramaje</label>
-          <select id="pgramaje">
-            <option>100g</option><option selected>150g</option><option>200g</option><option>250g</option><option>300g</option><option>350g</option>
-          </select>
+        <div class="fg"><label>Gramaje / Calibre</label>
+          <select id="pgramaje"><!-- poblado dinámicamente --></select>
         </div>
       </div>
       <div class="row3">
@@ -504,6 +498,10 @@ views['cotizar'] = {
               <span class="imp-stat-n">${eff}%</span>
               <span class="imp-stat-l">Eficiencia de pliego</span>
             </div>
+            <div class="imp-stat-item">
+              <span class="imp-stat-n">${merma.toLocaleString('es-MX')}</span>
+              <span class="imp-stat-l">Merma · ${sel.name}</span>
+            </div>
             ${imp.rotated ? `<div class="imp-rotation-note">↻ Girado 90° — optimiza la imposición de ${imp.nx}×${imp.ny}</div>` : ''}
           </div>
         </div>`;
@@ -537,18 +535,38 @@ views['cotizar'] = {
       renderCards();
     }
 
-    // ── updateGramajes ────────────────────────────────────────────
+    // ── populateTipos — llena el select de tipo desde el catálogo ──
+    function populateTipos() {
+      const sel = document.getElementById('ptipo');
+      const cats = [...new Set(getPapeles().map(p => p.categoria))];
+      sel.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+      // Default: COUCHE si existe
+      if (cats.includes('COUCHE')) sel.value = 'COUCHE';
+      updateGramajes();
+    }
+
+    // ── updateGramajes — filtra gramajes del catálogo por categoría ─
     function updateGramajes() {
-      const t = document.getElementById('ptipo').value;
-      const s = document.getElementById('pgramaje');
+      const cat = document.getElementById('ptipo').value;
+      const s   = document.getElementById('pgramaje');
       s.innerHTML = '';
-      const opts = {
-        bond:      ['75g','90g','105g','120g'],
-        couche:    ['100g','150g','200g','250g','300g','350g'],
-        sulfatado: ['12 pts','14 pts','16 pts','18 pts','20 pts','24 pts'],
-      };
-      (opts[t]||[]).forEach(o => { const op=document.createElement('option'); op.textContent=o; s.appendChild(op); });
-      if (t==='couche') s.value='150g';
+      const papeles = getPapeles().filter(p => p.categoria === cat);
+      const seen = new Set();
+      papeles.forEach(p => {
+        let value;
+        if (p.gramos != null)       value = p.gramos + 'g';
+        else if (p.puntos != null)  value = p.puntos + ' pts';
+        else                        value = p.medida || '—';
+        if (!seen.has(value)) {
+          seen.add(value);
+          const op = document.createElement('option');
+          op.value = value;
+          op.textContent = value;
+          s.appendChild(op);
+        }
+      });
+      // Default COUCHE → 150g
+      if (cat === 'COUCHE' && s.querySelector('option[value="150g"]')) s.value = '150g';
     }
 
     // ── goC3 ──────────────────────────────────────────────────────
@@ -908,6 +926,9 @@ views['cotizar'] = {
         recalc();
       });
     });
+    // Populate tipo & gramaje from catalog on view load
+    populateTipos();
+
     document.getElementById('ptintas').addEventListener('change', renderCards);
     document.getElementById('ptipo').addEventListener('change', updateGramajes);
 
