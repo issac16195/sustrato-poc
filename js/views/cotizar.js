@@ -411,27 +411,45 @@ views['cotizar'] = {
 
     // ── Render machine cards ──────────────────────────────────────
     function renderCards() {
-      const cardsEl = document.getElementById('maq-cards');
+      const cardsEl  = document.getElementById('maq-cards');
       const detailEl = document.getElementById('imp-detail-card');
       if (!cardsEl || !detailEl) return;
 
-      const cant  = +document.getElementById('pcantidad').value || 0;
-      const merma = getMerma(cant, _selectedMaq);
+      const cant      = +document.getElementById('pcantidad').value || 0;
+      const tipoPapel = document.getElementById('ptipo').value;
+      const gramaje   = document.getElementById('pgramaje').value;
+      const tintas    = getTintas();
+      const params    = { cant, tipoPapel, gramaje, tintas };
 
-      // Build card HTML
+      // ── Calcular costo estimado por máquina → determina _bestMaq ──
+      const costs = {};
+      let bestCost = Infinity;
+      _bestMaq = null;
+      for (const m of MACHINES) {
+        const c = estimateCost(m, _imps[m.id], params);
+        costs[m.id] = c;
+        if (c < bestCost) { bestCost = c; _bestMaq = m.id; }
+      }
+
+      // Snap _selectedMaq si la actual no cabe o no existe
+      if (!_selectedMaq || !_imps[_selectedMaq] || _imps[_selectedMaq].count === 0) {
+        _selectedMaq = _bestMaq;
+      }
+
+      // ── Build cards ──────────────────────────────────────────────
       let html = '';
       for (const m of MACHINES) {
         const imp   = _imps[m.id];
         const nofit = !imp || imp.count === 0;
-        const isOpt = m.id === _bestMaq;
-        const isSel = m.id === _selectedMaq;
-        const eff   = efficiency(m, imp);
+        const isBest = m.id === _bestMaq;
+        const isSel  = m.id === _selectedMaq;
+        const cost   = costs[m.id];
         let cls = 'maq-card';
-        if (isSel) cls += ' selected';
-        if (nofit) cls += ' no-fit';
+        if (isSel)  cls += ' selected';
+        if (nofit)  cls += ' no-fit';
         const svgStr = buildSVG(m.util, imp, 84);
         html += `<div class="${cls}" data-maq="${m.id}">
-          ${isOpt && !nofit ? `<div class="maq-opt-badge">⭐ Óptima</div>` : ''}
+          ${isBest && !nofit ? `<div class="maq-opt-badge">⭐ Menor costo</div>` : ''}
           <div class="maq-card-name">${m.name}</div>
           <div class="maq-card-tag">${m.tag} · ${m.util.w}×${m.util.h} cm</div>
           <div class="maq-imp-preview">${svgStr}</div>
@@ -441,8 +459,10 @@ views['cotizar'] = {
               <div class="maq-stat-lbl">pzas/pliego</div>
             </div>
             <div class="maq-stat">
-              <span class="maq-stat-val${nofit?' zero':''}">${nofit?'—':eff+'%'}</span>
-              <div class="maq-stat-lbl">eficiencia</div>
+              <span class="maq-stat-val${nofit?' zero':''}${isBest&&!nofit?' teal':''}" style="${isBest&&!nofit?'color:var(--teal);font-size:13px':''}">
+                ${nofit ? '—' : fmtMXN(cost)}
+              </span>
+              <div class="maq-stat-lbl">costo estimado</div>
             </div>
           </div>
         </div>`;
@@ -457,10 +477,10 @@ views['cotizar'] = {
         });
       });
 
-      // Detail panel
-      const sel = MACHINES.find(m => m.id === _selectedMaq);
+      // ── Detail panel ─────────────────────────────────────────────
+      const sel   = MACHINES.find(m => m.id === _selectedMaq);
       if (!sel) { detailEl.innerHTML = ''; return; }
-      const imp = _imps[sel.id];
+      const imp   = _imps[sel.id];
       const nofit = !imp || imp.count === 0;
 
       if (nofit) {
@@ -472,10 +492,25 @@ views['cotizar'] = {
         return;
       }
 
-      const pliegos  = Math.ceil((cant + merma) / imp.count);
-      const tintas   = getTintas();
-      const eff      = efficiency(sel, imp);
-      const bigSVG   = buildSVG(sel.util, imp, 240);
+      const merma   = getMerma(cant, sel.id);
+      const pliegos = Math.ceil((cant + merma) / imp.count);
+      const eff     = efficiency(sel, imp);
+      const bigSVG  = buildSVG(sel.util, imp, 240);
+
+      // Comparativa de costos entre todas las máquinas que caben
+      const fittingMachines = MACHINES.filter(m => _imps[m.id] && _imps[m.id].count > 0);
+      const compRows = fittingMachines
+        .sort((a, b) => costs[a.id] - costs[b.id])
+        .map(m => {
+          const isBest = m.id === _bestMaq;
+          const isCurr = m.id === sel.id;
+          return `<div class="maq-comp-row${isCurr?' maq-comp-sel':''}">
+            <span class="maq-comp-name">${m.name}</span>
+            <span class="maq-comp-cost${isBest?' maq-comp-best':''}">${fmtMXN(costs[m.id])}</span>
+            ${isBest ? '<span class="maq-comp-badge">⭐ menor costo</span>' : ''}
+            ${isCurr && !isBest ? '<span class="maq-comp-curr">← seleccionada</span>' : ''}
+          </div>`;
+        }).join('');
 
       detailEl.innerHTML = `
         <div class="card-title" style="margin-bottom:14px">Detalle imposición · ${sel.name}</div>
@@ -504,35 +539,59 @@ views['cotizar'] = {
             </div>
             ${imp.rotated ? `<div class="imp-rotation-note">↻ Girado 90° — optimiza la imposición de ${imp.nx}×${imp.ny}</div>` : ''}
           </div>
-        </div>`;
+        </div>
+        ${fittingMachines.length > 1 ? `
+        <div class="maq-comp-block">
+          <div class="maq-comp-title">Comparativa de costo total estimado</div>
+          ${compRows}
+        </div>` : ''}`;
     }
 
-    // ── Recalc ────────────────────────────────────────────────────
+    // ── Recalc — solo geometría, renderCards determina _bestMaq ─────
     function recalc() {
       const pW = +document.getElementById('pancho').value || 0;
       const pH = +document.getElementById('palto').value || 0;
 
       _imps = {};
-      let bestCount = -1;
-      _bestMaq = null;
+      let anyFit = false;
       for (const m of MACHINES) {
         const imp = calcImp(pW, pH, m.util);
         _imps[m.id] = imp;
-        if (imp.count > bestCount) { bestCount = imp.count; _bestMaq = m.id; }
+        if (imp.count > 0) anyFit = true;
       }
 
-      const alrt = document.getElementById('alert-maq');
-      if (bestCount === 0) {
-        alrt.style.display = 'block';
-      } else {
-        alrt.style.display = 'none';
-        // keep selection only if it still fits; otherwise snap to best
-        if (!_selectedMaq || !_imps[_selectedMaq] || _imps[_selectedMaq].count === 0) {
-          _selectedMaq = _bestMaq;
-        }
-      }
-
+      document.getElementById('alert-maq').style.display = anyFit ? 'none' : 'block';
       renderCards();
+    }
+
+    // ── estimateCost — costo total estimado para una máquina ───────
+    function estimateCost(m, imp, { cant, tipoPapel, gramaje, tintas }) {
+      if (!imp || imp.count === 0) return Infinity;
+
+      const merma    = getMerma(cant, m.id);
+      const pliegos  = Math.ceil((cant + merma) / imp.count);
+      const millares = Math.ceil(pliegos / 1000);
+      const utilW_m  = m.utilW / 100;
+      const utilH_m  = m.utilH / 100;
+      const ctx      = { cant, pliegos, utilW_m, utilH_m, tintas, millares };
+
+      // Papel + corte a prensa (5%)
+      const papelPx    = getPapelPriceFor(tipoPapel, gramaje, m.pliegoPrice);
+      const costoPapel = pliegos * papelPx * 1.05;
+
+      // Láminas + Impresión (tarifario por máquina)
+      const prod     = getProduccion();
+      const lamE     = lookupTarifa(prod, 'Láminas para impresión', m.id);
+      const impE     = lookupTarifa(prod, 'Impresión', m.id);
+      const costoLam = lamE ? applyUnidad(lamE, ctx) : 0;
+      const costoImp = impE ? applyUnidad(impE, ctx) : 0;
+
+      // Terminados activos (chips on)
+      const chips     = [...document.querySelectorAll('#chips-terminados .chip.on')];
+      const costoTerm = chips.reduce((s, ch) =>
+        s + calcTerminadoCosto(ch.dataset.procId, m.id, cant, pliegos, utilW_m, utilH_m, tintas, millares), 0);
+
+      return costoPapel + costoLam + costoImp + costoTerm;
     }
 
     // ── populateTipos — llena el select de tipo desde el catálogo ──
@@ -934,7 +993,8 @@ views['cotizar'] = {
     populateTipos();
 
     document.getElementById('ptintas').addEventListener('change', renderCards);
-    document.getElementById('ptipo').addEventListener('change', updateGramajes);
+    document.getElementById('ptipo').addEventListener('change', () => { updateGramajes(); renderCards(); });
+    document.getElementById('pgramaje').addEventListener('change', renderCards);
 
     document.querySelectorAll('#pc-general,#pc-editorial,#pc-empaque').forEach(card => {
       card.addEventListener('click', () => pickProd(card));
@@ -947,7 +1007,7 @@ views['cotizar'] = {
         .map(p => `<div class="chip" data-proc-id="${p.id}">${p.name}</div>`)
         .join('');
       chipsEl.querySelectorAll('.chip').forEach(chip => {
-        chip.addEventListener('click', () => toggleChip(chip));
+        chip.addEventListener('click', () => { toggleChip(chip); renderCards(); });
       });
     }
 

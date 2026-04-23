@@ -668,3 +668,53 @@ input:hover,select:hover{border-color:var(--slate)}
   align-items:center;
   gap:4px;
 }
+
+/* ── Comparativa de costos por máquina ── */
+.maq-comp-block {
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid var(--border);
+}
+.maq-comp-title {
+  font-size:11px;
+  font-weight:700;
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  margin-bottom:8px;
+}
+.maq-comp-row {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:6px;
+  margin-bottom:2px;
+  font-size:13px;
+}
+.maq-comp-row.maq-comp-sel {
+  background:var(--teal-bg);
+}
+.maq-comp-name {
+  font-weight:600;
+  color:var(--text2);
+  min-width:70px;
+}
+.maq-comp-cost {
+  color:var(--text3);
+  font-variant-numeric:tabular-nums;
+}
+.maq-comp-cost.maq-comp-best {
+  color:var(--teal);
+  font-weight:700;
+}
+.maq-comp-badge {
+  font-size:11px;
+  color:var(--teal);
+  font-weight:600;
+}
+.maq-comp-curr {
+  font-size:11px;
+  color:var(--text3);
+  font-style:italic;
+}
