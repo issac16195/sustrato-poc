@@ -669,6 +669,22 @@ input:hover,select:hover{border-color:var(--slate)}
   gap:4px;
 }
 
+/* ── Selector de envío ── */
+.envio-chips { display:flex; flex-wrap:wrap; gap:8px; }
+.envio-chip {
+  display:inline-flex; align-items:center;
+  padding:7px 16px; border-radius:20px;
+  border:1.5px solid var(--border); background:var(--white);
+  font-size:12px; font-weight:600; cursor:pointer;
+  color:var(--text2); transition:border-color .15s, background .15s, color .15s;
+  user-select:none;
+}
+.envio-chip:hover { border-color:var(--teal); color:var(--teal); }
+.envio-chip.active {
+  border-color:var(--teal); background:var(--teal-bg);
+  color:var(--teal-dark); font-weight:700;
+}
+
 /* ── Comparativa de costos por máquina ── */
 .maq-comp-block {
   margin-top:16px;

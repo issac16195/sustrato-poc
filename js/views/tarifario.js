@@ -10,6 +10,7 @@ views['tarifario'] = {
       <option value="produccion">Producción</option>
       <option value="recubrimiento">Recubrimientos</option>
       <option value="acabados">Acabados</option>
+      <option value="logistica">Logística — Envíos</option>
     </select>
   </div>
 
@@ -87,6 +88,29 @@ views['tarifario'] = {
       </table>
     </div>
     <div id="ac-add-form" style="display:none;margin-top:12px"></div>
+  </div>
+
+  <!-- LOGÍSTICA — ENVÍOS CRUD -->
+  <div class="tariff-category" data-cat="logistica" id="section-logistica">
+    <div class="tariff-cat-header" style="display:flex;align-items:center;justify-content:space-between">
+      <span>Logística — Envíos</span>
+      <button class="btn-primary" id="btn-add-env" style="font-size:12px;padding:6px 14px">+ Agregar zona</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden" id="card-logistica">
+      <table class="tariff-table">
+        <thead><tr>
+          <th style="width:30%">Zona / Servicio</th>
+          <th style="width:34%">Nota</th>
+          <th class="price-col">Precio MXN</th>
+          <th style="width:96px"></th>
+        </tr></thead>
+        <tbody id="env-tbody"></tbody>
+      </table>
+    </div>
+    <div id="env-add-form" style="display:none;margin-top:12px"></div>
+    <p style="font-size:11px;color:var(--text3);margin-top:8px">
+      💡 Estos costos aparecen como opciones en el cotizador. El impresor elige la zona antes de calcular.
+    </p>
   </div>
 
   <div style="font-size:11px;color:var(--text3);margin-top:8px;padding:12px;background:var(--white);border-radius:var(--radius-sm);border:1px solid var(--border)">
@@ -394,6 +418,164 @@ views['tarifario'] = {
       saveItems: saveAcabados,
       hasMaq:    true,
     });
+
+    // ── CRUD de Envíos (simplificado: sin máquina ni unidad) ─────
+    (function makeEnviosCrud() {
+      function rowHTML(e) {
+        return `<tr data-id="${e.id}" class="env-row"
+            data-search="${e.nombre.toLowerCase()} ${(e.nota||'').toLowerCase()}">
+          <td><div class="svc-name">${e.nombre}</div></td>
+          <td><div class="svc-note" style="color:var(--text2);font-size:12px">${e.nota || '—'}</div></td>
+          <td class="price-col"><span class="price-chip navy">${fmtPrecio(e.precio)}</span></td>
+          <td style="white-space:nowrap">
+            <span class="save-link env-edit">Editar</span>
+            &nbsp;·&nbsp;
+            <span class="save-link env-del" style="color:#E05555">Eliminar</span>
+          </td>
+        </tr>`;
+      }
+      function editRowHTML(e) {
+        return `<tr data-id="${e.id}" class="env-row" style="background:var(--teal-bg)">
+          <td><input class="tf-f env-nombre" value="${e.nombre}" placeholder="Zona A" style="width:100%"/></td>
+          <td><input class="tf-f env-nota" value="${e.nota||''}" placeholder="Ciudad o área local" style="width:100%"/></td>
+          <td><input class="tf-f env-precio" type="number" value="${e.precio}" placeholder="150" style="width:90px" min="0" step="1"/></td>
+          <td style="white-space:nowrap">
+            <span class="save-link env-save">Guardar</span>
+            &nbsp;·&nbsp;
+            <span class="save-link env-cancel" style="color:var(--text3)">Cancelar</span>
+          </td>
+        </tr>`;
+      }
+      function deleteRowHTML(e) {
+        return `<tr data-id="${e.id}" class="env-row" style="background:rgba(224,85,85,.06)">
+          <td colspan="4">
+            <div style="display:flex;align-items:center;gap:16px;padding:2px 0">
+              <span style="font-size:13px;color:var(--text2);font-weight:500">¿Eliminar <strong>${e.nombre}</strong>?</span>
+              <span class="env-confirm-del" style="font-size:13px;font-weight:700;color:#E05555;cursor:pointer;flex-shrink:0">Sí, eliminar</span>
+              <span class="save-link env-cancel-del" style="flex-shrink:0">Cancelar</span>
+            </div>
+          </td>
+        </tr>`;
+      }
+      function flash() {
+        const card = document.getElementById('card-logistica');
+        if (!card) return;
+        card.style.transition='box-shadow .15s';
+        card.style.boxShadow='0 0 0 2px var(--teal)';
+        setTimeout(()=>{card.style.boxShadow='';},700);
+      }
+      function renderRows() {
+        const tbody = document.getElementById('env-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = getEnvios().map(rowHTML).join('');
+        attachListeners();
+      }
+      function attachListeners() {
+        const tbody = document.getElementById('env-tbody');
+        if (!tbody) return;
+        tbody.querySelectorAll('.env-edit').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const tr = btn.closest('tr');
+            const e  = getEnvios().find(x => x.id === tr.dataset.id);
+            if (e) { tr.outerHTML = editRowHTML(e); attachListeners(); }
+          });
+        });
+        tbody.querySelectorAll('.env-del').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const tr = btn.closest('tr');
+            const e  = getEnvios().find(x => x.id === tr.dataset.id);
+            if (e) { tr.outerHTML = deleteRowHTML(e); attachListeners(); }
+          });
+        });
+        tbody.querySelectorAll('.env-confirm-del').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const tr = btn.closest('tr');
+            saveEnvios(getEnvios().filter(x => x.id !== tr.dataset.id));
+            tr.style.opacity='0';
+            setTimeout(renderRows, 200);
+          });
+        });
+        tbody.querySelectorAll('.env-cancel-del').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const tr = btn.closest('tr');
+            const e  = getEnvios().find(x => x.id === tr.dataset.id);
+            if (e) { tr.outerHTML = rowHTML(e); attachListeners(); }
+          });
+        });
+        tbody.querySelectorAll('.env-save').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const tr    = btn.closest('tr');
+            const oldId = tr.dataset.id;
+            const nombre = tr.querySelector('.env-nombre').value.trim();
+            if (!nombre) { tr.querySelector('.env-nombre').focus(); return; }
+            const updated = {
+              id:     oldId,
+              nombre,
+              nota:   tr.querySelector('.env-nota').value.trim(),
+              precio: parseFloat(tr.querySelector('.env-precio').value) || 0,
+              tamano: '—', unidad: 'por proyecto',
+            };
+            saveEnvios(getEnvios().map(x => x.id === oldId ? updated : x));
+            tr.outerHTML = rowHTML(updated);
+            attachListeners(); flash();
+          });
+        });
+        tbody.querySelectorAll('.env-cancel').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const tr = btn.closest('tr');
+            const e  = getEnvios().find(x => x.id === tr.dataset.id);
+            if (e) { tr.outerHTML = rowHTML(e); attachListeners(); }
+          });
+        });
+      }
+      function showAddForm() {
+        const formEl = document.getElementById('env-add-form');
+        const addBtn = document.getElementById('btn-add-env');
+        formEl.style.display = '';
+        addBtn.disabled = true; addBtn.style.opacity = '0.5';
+        formEl.innerHTML = `
+          <div class="card" style="padding:16px 20px;animation:fadeSlideIn .2s cubic-bezier(.25,1,.5,1)">
+            <div class="card-title" style="margin-bottom:14px;font-size:13px">Nueva zona de envío</div>
+            <div class="row2" style="margin-bottom:12px">
+              <div class="fg"><label>Nombre / Zona</label><input id="env-np-nombre" placeholder="Ej. Zona A"/></div>
+              <div class="fg"><label>Nota (opcional)</label><input id="env-np-nota" placeholder="Ej. Ciudad o área local"/></div>
+            </div>
+            <div style="margin-bottom:16px;max-width:220px">
+              <div class="fg"><label>Precio MXN</label>
+                <div class="price-cell"><span class="price-prefix">$</span>
+                  <input id="env-np-precio" type="number" min="0" step="1" placeholder="150"/>
+                </div>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn-primary" id="env-np-submit">Agregar zona</button>
+              <button class="btn-ghost" id="env-np-cancel">Cancelar</button>
+            </div>
+          </div>`;
+        document.getElementById('env-np-cancel').addEventListener('click', hideAddForm);
+        document.getElementById('env-np-submit').addEventListener('click', () => {
+          const nombre = document.getElementById('env-np-nombre').value.trim();
+          if (!nombre) { document.getElementById('env-np-nombre').focus(); return; }
+          const newItem = {
+            id:     'env' + Date.now(),
+            nombre,
+            nota:   document.getElementById('env-np-nota').value.trim(),
+            precio: parseFloat(document.getElementById('env-np-precio').value) || 0,
+            tamano: '—', unidad: 'por proyecto',
+          };
+          saveEnvios([...getEnvios(), newItem]);
+          hideAddForm(); renderRows(); flash();
+        });
+      }
+      function hideAddForm() {
+        const formEl = document.getElementById('env-add-form');
+        const addBtn = document.getElementById('btn-add-env');
+        if (formEl) { formEl.style.display='none'; formEl.innerHTML=''; }
+        if (addBtn) { addBtn.disabled=false; addBtn.style.opacity=''; }
+      }
+      renderRows();
+      document.getElementById('btn-add-env').addEventListener('click', showAddForm);
+    })();
 
     // ── Search / filter ───────────────────────────────────────────
     function filterTariff() {

@@ -96,6 +96,19 @@ views['cotizar'] = {
         <label>Terminados</label>
         <div class="chips" id="chips-terminados"></div>
       </div>
+      <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+        <label style="display:flex;align-items:center;gap:8px">
+          Costo de envío
+          <span style="font-size:9px;font-weight:700;color:#E05555;letter-spacing:.4px;text-transform:uppercase">Requerido</span>
+        </label>
+        <div class="envio-chips" id="envio-chips" style="margin-top:8px"></div>
+        <div id="envio-custom-wrap" style="display:none;margin-top:10px">
+          <div class="price-cell" style="max-width:180px">
+            <span class="price-prefix">$</span>
+            <input type="number" id="envio-custom-val" min="0" step="1" placeholder="0"/>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="imp-section-label" style="margin-top:6px">Imposición y máquina óptima</div>
@@ -678,8 +691,21 @@ views['cotizar'] = {
       });
       const costoTerm = termLines.reduce((s, l) => s + l.costo, 0);
 
-      // ── 5. Total ──────────────────────────────────────────────────
-      const costoTotal = costoPapel + cortePrensa + costoLam + costoImp + costoTerm;
+      // ── 5. Envío ──────────────────────────────────────────────────
+      const envioChipEl = document.querySelector('#envio-chips .envio-chip.active');
+      let costoEnvio = 0, envioLabel = 'Envío';
+      if (envioChipEl) {
+        if (envioChipEl.dataset.precio === 'custom') {
+          costoEnvio = parseFloat(document.getElementById('envio-custom-val')?.value) || 0;
+          envioLabel = 'Envío personalizado';
+        } else {
+          costoEnvio = parseFloat(envioChipEl.dataset.precio) || 0;
+          envioLabel = 'Envío · ' + (envioChipEl.dataset.label || '');
+        }
+      }
+
+      // ── 6. Total ──────────────────────────────────────────────────
+      const costoTotal = costoPapel + cortePrensa + costoLam + costoImp + costoTerm + costoEnvio;
 
       // Helper: renders cost + re-calculates price when margen changes
       function renderResult(margenPct) {
@@ -701,6 +727,7 @@ views['cotizar'] = {
           { label: `Láminas (${tintas} ${tintas===1?'tinta':'tintas'} × ${fmtMXN(parseFloat(lamEntry?.precio)||0)})`, val: costoLam },
           { label: `Impresión ${tintasLabel} · ${millares} ${millares===1?'millar':'millares'}`,                 val: costoImp },
           ...termLines.map(l => ({ label: l.nombre, val: l.costo })),
+          { label: envioLabel, val: costoEnvio },
         ];
 
         document.getElementById('r-desglose').innerHTML = lines.map(l =>
@@ -747,6 +774,7 @@ views['cotizar'] = {
         impPrecio: parseFloat(impEntry?.precio) || 0,
         costoLam, costoImp,
         termLines,
+        costoEnvio, envioLabel,
         costoTotal,
         clientId: _clientId || null,
         clientNombre: clienteObj ? (clienteObj.empresa || clienteObj.nombre) : '',
@@ -794,6 +822,7 @@ views['cotizar'] = {
             papelPx: qd2.papelPx, costoPapel: qd2.costoPapel, cortePrensa: qd2.cortePrensa,
             lamPrecio: qd2.lamPrecio, costoLam: qd2.costoLam, costoImp: qd2.costoImp,
             termLines: qd2.termLines,
+            costoEnvio: qd2.costoEnvio, envioLabel: qd2.envioLabel,
           },
         });
       }
@@ -885,6 +914,7 @@ views['cotizar'] = {
         [`Láminas (${qd.tintas} × $${qd.lamPrecio})`,                                           fmtN(qd.costoLam)],
         [`Impresión ${qd.tintasLabel} · ${qd.millares} ${qd.millares===1?'millar':'millares'}`,  fmtN(qd.costoImp)],
         ...qd.termLines.map(t => [t.nombre, fmtN(t.costo)]),
+        [qd.envioLabel || 'Envío', fmtN(qd.costoEnvio || 0)],
       ];
 
       doc.autoTable({
@@ -940,7 +970,33 @@ views['cotizar'] = {
           papelPx: qd.papelPx, costoPapel: qd.costoPapel, cortePrensa: qd.cortePrensa,
           lamPrecio: qd.lamPrecio, costoLam: qd.costoLam, costoImp: qd.costoImp,
           termLines: qd.termLines,
+          costoEnvio: qd.costoEnvio, envioLabel: qd.envioLabel,
         },
+      });
+    }
+
+    // ── initEnvioChips — selector de zona de envío ───────────────
+    function initEnvioChips() {
+      const container = document.getElementById('envio-chips');
+      if (!container) return;
+      const envios = getEnvios();
+      let html = envios.map((e, i) =>
+        `<div class="envio-chip${i===0?' active':''}" data-precio="${e.precio}" data-label="${e.nombre}">
+           ${e.nombre} · ${fmtMXN(e.precio)}
+         </div>`
+      ).join('');
+      html += `<div class="envio-chip" data-precio="custom" data-label="Personalizado">✏ Personalizado</div>`;
+      container.innerHTML = html;
+      container.querySelectorAll('.envio-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          container.querySelectorAll('.envio-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          const wrap = document.getElementById('envio-custom-wrap');
+          wrap.style.display = chip.dataset.precio === 'custom' ? '' : 'none';
+          if (chip.dataset.precio === 'custom') {
+            document.getElementById('envio-custom-val').focus();
+          }
+        });
       });
     }
 
@@ -1012,6 +1068,7 @@ views['cotizar'] = {
     }
 
     initPresets();
+    initEnvioChips();
   }
 };
 
@@ -1082,6 +1139,7 @@ function generarPDFCotizacion(rec) {
     [`Láminas (${s.tintas||0} × ${fmtN(s.lamPrecio||0)})`, fmtN(s.costoLam||0)],
     [`Impresión ${rec.tintasLabel||''} · ${s.millares||0} ${(s.millares||0)===1?'millar':'millares'}`, fmtN(s.costoImp||0)],
     ...(s.termLines||[]).map(t => [t.nombre, fmtN(t.costo)]),
+    [rec.envioLabel || s.envioLabel || 'Envío', fmtN(rec.costoEnvio || s.costoEnvio || 0)],
   ];
 
   doc.autoTable({

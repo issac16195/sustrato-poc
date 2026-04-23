@@ -220,6 +220,23 @@ function saveProcesos(arr) {
   if (typeof fsWrite === 'function') fsWrite('procesos', arr);
 }
 
+// ─── Envíos store ────────────────────────────────────────────────
+const DEFAULT_ENVIOS = [
+  { id:'env1', nombre:'Zona A', nota:'Ciudad o área local',          precio:150, tamano:'—', unidad:'por proyecto' },
+  { id:'env2', nombre:'Zona B', nota:'Foráneo o zona metropolitana', precio:200, tamano:'—', unidad:'por proyecto' },
+];
+function getEnvios() {
+  try {
+    const raw = localStorage.getItem('sustrato_envios');
+    if (raw) { const arr = JSON.parse(raw); if (arr.length) return arr; }
+  } catch {}
+  return DEFAULT_ENVIOS.map(x => ({...x}));
+}
+function saveEnvios(arr) {
+  localStorage.setItem('sustrato_envios', JSON.stringify(arr));
+  if (typeof fsWrite === 'function') fsWrite('envios', arr);
+}
+
 // ─── Clientes store ──────────────────────────────────────────────
 function getClientes() {
   try {
