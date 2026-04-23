@@ -316,6 +316,7 @@ views['cotizar'] = {
 
     // ── Module state ──────────────────────────────────────────────
     let _imps = {};
+    let _paperPerMachine = {};   // m.id → paper catalog entry | null
     let _selectedMaq = 'CD102';
     let _bestMaq = 'CD102';
     let _quoteData = null;
@@ -344,6 +345,58 @@ views['cotizar'] = {
         if (p < 1) requestAnimationFrame(tick);
       }
       requestAnimationFrame(tick);
+    }
+
+    // ── parseMedida — "58X88" → {w:58, h:88} ────────────────────
+    function parseMedida(str) {
+      if (!str) return null;
+      const p = str.toUpperCase().split('X');
+      if (p.length !== 2) return null;
+      const w = parseFloat(p[0]), h = parseFloat(p[1]);
+      return (w > 0 && h > 0) ? { w, h } : null;
+    }
+
+    // ── getBestPaperForMachine — encuentra el mejor papel del catálogo para una máquina
+    // Prioridad 1: tipo+gramaje con maquina===machine.id
+    // Prioridad 2: tipo+gramaje universal (maquina='') cuya medida cabe en la máquina
+    // Fallback: null (usar util de la máquina)
+    function getBestPaperForMachine(tipoPapel, gramaje, machine) {
+      const papeles = getPapeles();
+      const cat = (tipoPapel || '').toLowerCase();
+      let candidates = papeles.filter(p => p.categoria.toLowerCase() === cat);
+
+      if (gramaje && /^\d+g$/.test(gramaje.trim())) {
+        const g = parseInt(gramaje);
+        candidates = candidates.filter(p => p.gramos === g);
+      } else if (gramaje && /pts/.test(gramaje)) {
+        const pts = parseInt(gramaje);
+        candidates = candidates.filter(p => p.puntos === pts);
+      } else if (gramaje) {
+        candidates = candidates.filter(p => p.medida === gramaje);
+      }
+
+      // Prioridad 1: machine-specific entry
+      const specific = candidates.find(p => p.maquina === machine.id);
+      if (specific) return specific;
+
+      // Prioridad 2: universal, medida cabe en la máquina (considerando rotación del pliego)
+      const fitting = candidates.filter(p => {
+        if (p.maquina && p.maquina !== '') return false; // exclusivo de otra máquina
+        const d = parseMedida(p.medida);
+        if (!d) return true; // sin medida → aceptar
+        return (d.w <= machine.tamW && d.h <= machine.tamH) ||
+               (d.h <= machine.tamW && d.w <= machine.tamH);
+      });
+
+      if (fitting.length > 0) {
+        // Elegir el de mayor área (maximiza espacio de imposición)
+        return fitting.sort((a, b) => {
+          const da = parseMedida(a.medida), db = parseMedida(b.medida);
+          return (db ? db.w * db.h : 0) - (da ? da.w * da.h : 0);
+        })[0];
+      }
+
+      return null; // sin papel en catálogo → fallback a util de la máquina
     }
 
     // ── Imposition calculator ─────────────────────────────────────
@@ -525,8 +578,20 @@ views['cotizar'] = {
           </div>`;
         }).join('');
 
+      const papelDetail = _paperPerMachine[sel.id];
+      const papelDims   = papelDetail ? parseMedida(papelDetail.medida) : null;
+      const papelInfo   = papelDetail
+        ? `${papelDetail.material} · ${papelDetail.medida} cm`
+        : `Área útil ${sel.util.w}×${sel.util.h} cm`;
+
       detailEl.innerHTML = `
-        <div class="card-title" style="margin-bottom:14px">Detalle imposición · ${sel.name}</div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:6px">
+          <div class="card-title">Detalle imposición · ${sel.name}</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text3);display:flex;align-items:center;gap:5px">
+            <svg width="12" height="12" fill="none" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Pliego: ${papelInfo}
+          </div>
+        </div>
         <div class="imp-detail">
           <div class="imp-big-preview">${bigSVG}</div>
           <div class="imp-stats">
@@ -560,15 +625,35 @@ views['cotizar'] = {
         </div>` : ''}`;
     }
 
-    // ── Recalc — solo geometría, renderCards determina _bestMaq ─────
+    // ── Recalc — geometría por máquina usando medida del papel ──────
     function recalc() {
       const pW = +document.getElementById('pancho').value || 0;
       const pH = +document.getElementById('palto').value || 0;
+      const tipoPapel = document.getElementById('ptipo')?.value || '';
+      const gramaje   = document.getElementById('pgramaje')?.value || '';
 
       _imps = {};
+      _paperPerMachine = {};
       let anyFit = false;
+
       for (const m of MACHINES) {
-        const imp = calcImp(pW, pH, m.util);
+        const papel = getBestPaperForMachine(tipoPapel, gramaje, m);
+        _paperPerMachine[m.id] = papel;
+        const dims = papel ? parseMedida(papel.medida) : null;
+
+        let imp;
+        if (dims) {
+          // Área efectiva = min(papel, util) — probar ambas orientaciones del pliego
+          const eff1 = { w: Math.min(dims.w, m.util.w), h: Math.min(dims.h, m.util.h) };
+          const eff2 = { w: Math.min(dims.h, m.util.w), h: Math.min(dims.w, m.util.h) };
+          const i1 = calcImp(pW, pH, eff1);
+          const i2 = calcImp(pW, pH, eff2);
+          imp = i2.count > i1.count ? i2 : i1;
+        } else {
+          // Sin papel en catálogo → fallback al util de la máquina
+          imp = calcImp(pW, pH, m.util);
+        }
+
         _imps[m.id] = imp;
         if (imp.count > 0) anyFit = true;
       }
@@ -588,8 +673,11 @@ views['cotizar'] = {
       const utilH_m  = m.utilH / 100;
       const ctx      = { cant, pliegos, utilW_m, utilH_m, tintas, millares };
 
-      // Papel + corte a prensa (5%)
-      const papelPx    = getPapelPriceFor(tipoPapel, gramaje, m.pliegoPrice);
+      // Papel + corte a prensa (5%) — precio del entry específico por máquina
+      const papelEntry = _paperPerMachine[m.id];
+      const papelPx    = papelEntry
+        ? papelEntry.precioMillar / 1000
+        : getPapelPriceFor(tipoPapel, gramaje, m.pliegoPrice);
       const costoPapel = pliegos * papelPx * 1.05;
 
       // Láminas + Impresión (tarifario por máquina)
@@ -663,7 +751,10 @@ views['cotizar'] = {
       const utilH_m    = (sel.utilH || sel.util?.h || 70) / 100;
 
       // ── 1. Papel ──────────────────────────────────────────────────
-      const papelPx      = getPapelPriceFor(tipoPapel, gramaje, sel.pliegoPrice);
+      const papelEntryC3 = _paperPerMachine[sel.id];
+      const papelPx      = papelEntryC3
+        ? papelEntryC3.precioMillar / 1000
+        : getPapelPriceFor(tipoPapel, gramaje, sel.pliegoPrice);
       const costoPapel   = pliegos * papelPx;
       const cortePrensa  = costoPapel * 0.05;
 
@@ -1049,8 +1140,8 @@ views['cotizar'] = {
     populateTipos();
 
     document.getElementById('ptintas').addEventListener('change', renderCards);
-    document.getElementById('ptipo').addEventListener('change', () => { updateGramajes(); renderCards(); });
-    document.getElementById('pgramaje').addEventListener('change', renderCards);
+    document.getElementById('ptipo').addEventListener('change', () => { updateGramajes(); recalc(); });
+    document.getElementById('pgramaje').addEventListener('change', recalc);
 
     document.querySelectorAll('#pc-general,#pc-editorial,#pc-empaque').forEach(card => {
       card.addEventListener('click', () => pickProd(card));
