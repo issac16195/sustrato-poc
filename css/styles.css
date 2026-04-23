@@ -613,3 +613,58 @@ input:hover,select:hover{border-color:var(--slate)}
   .btn-row       { flex-direction:column-reverse; gap:8px; }
   .btn-row .btn-ghost, .btn-row .btn-primary { width:100%; justify-content:center; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   SUSTRATOS — PAPELES CRUD
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Tab bar ── */
+.papel-tab-bar {
+  display:flex;
+  gap:4px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:2px;
+  margin-bottom:0;
+  scrollbar-width:none;
+}
+.papel-tab-bar::-webkit-scrollbar { display:none; }
+.papel-tab {
+  flex-shrink:0;
+  padding:7px 13px;
+  border-radius:var(--radius-sm);
+  font-size:12px;
+  font-weight:600;
+  color:var(--text3);
+  cursor:pointer;
+  background:var(--white);
+  border:1px solid var(--border);
+  transition:all .15s;
+  white-space:nowrap;
+  font-family:'Barlow Condensed',sans-serif;
+  letter-spacing:.4px;
+}
+.papel-tab:hover { color:var(--text); border-color:var(--border2); }
+.papel-tab.active {
+  background:var(--navy);
+  color:#fff;
+  border-color:var(--navy);
+}
+
+/* ── Table ── */
+.papel-table { min-width:640px; }
+.papel-table thead th { font-size:11px; }
+.papel-table td { font-size:13px; vertical-align:middle; }
+
+/* ── Empty state ── */
+.papel-empty {
+  padding:40px 0;
+  text-align:center;
+  color:var(--text3);
+  font-size:13px;
+  font-weight:500;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}

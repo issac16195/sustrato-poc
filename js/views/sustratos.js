@@ -1,160 +1,358 @@
+// ── Sustratos & Mermas view ──────────────────────────────────────────────────
+(function() {
+
+const CATS = [
+  'BOND','COUCHE','OPALINA','TEXCOTE','SULFATADO',
+  'CARTULINA SULFATADA','SBS MULTICAPA','MICRO FLAUTA E',
+  'CORRUGADO FLAUTA B','HUEVERO','PLIEGOS VARIOS'
+];
+const SHORT = {
+  'BOND':'BOND','COUCHE':'COUCHÉ','OPALINA':'OPALINA','TEXCOTE':'TEXCOTE',
+  'SULFATADO':'SULFATADO','CARTULINA SULFATADA':'CARTULINA','SBS MULTICAPA':'SBS',
+  'MICRO FLAUTA E':'MICRO E','CORRUGADO FLAUTA B':'CORRUGADO B',
+  'HUEVERO':'HUEVERO','PLIEGOS VARIOS':'VARIOS'
+};
+
+let _activeTab  = 'BOND';
+let _editingId  = null;
+
+// ── Render shell ────────────────────────────────────────────────────────────
 views['sustratos'] = {
   render() {
+    const tabsHtml = [...CATS, 'MERMAS'].map(c => `
+      <div class="papel-tab${c === _activeTab ? ' active' : ''}" data-cat="${c}">
+        ${SHORT[c] || c}
+      </div>`).join('');
+
     document.getElementById('app').innerHTML = `
-<div class="content" style="max-width:700px">
-  <div class="tabs">
-    <div class="tab active" data-panel="t-bond">Bond</div>
-    <div class="tab" data-panel="t-couche">Couché</div>
-    <div class="tab" data-panel="t-sulfatado">Sulfatado</div>
-    <div class="tab" data-panel="t-mermas">Mermas</div>
-  </div>
+<div class="content">
 
-  <!-- BOND -->
-  <div class="tab-panel active" id="t-bond">
-    <div class="card">
-      <div class="sust-header">
-        <div>
-          <div class="card-title">Papel Bond — costo por pliego</div>
-          <div class="sust-sizes-label">Tamaños disponibles</div>
-          <div class="sust-sizes">
-            <span class="sust-size-chip">57×87 cm</span>
-            <span class="sust-size-chip">61×90 cm</span>
-            <span class="sust-size-chip">70×95 cm</span>
+  <!-- Tab bar -->
+  <div class="papel-tab-bar">${tabsHtml}</div>
+
+  <!-- Dynamic panel -->
+  <div id="papel-panel"></div>
+
+  <!-- Add / Edit modal -->
+  <div class="cl-modal-bg" id="papel-modal-bg" style="display:none">
+    <div class="cl-modal" style="width:520px;max-width:95vw">
+      <div class="cl-modal-head" id="papel-modal-title">Agregar papel</div>
+      <div class="cl-modal-body">
+        <div class="row2" style="gap:12px;margin-bottom:12px">
+          <div class="fg">
+            <label>Categoría</label>
+            <select id="pm-cat">
+              ${CATS.map(c => `<option value="${c}">${c}</option>`).join('')}
+            </select>
+          </div>
+          <div class="fg">
+            <label>Material</label>
+            <input type="text" id="pm-mat" placeholder="Bond, Couché, Kraft…"/>
+          </div>
+        </div>
+        <div class="row2" style="gap:12px;margin-bottom:12px">
+          <div class="fg">
+            <label>Medida <span style="color:var(--text3);font-weight:400">(cm)</span></label>
+            <input type="text" id="pm-med" placeholder="57X87"/>
+          </div>
+          <div class="fg">
+            <label>Gramaje <span style="color:var(--text3);font-weight:400">(g, opcional)</span></label>
+            <input type="number" id="pm-gramos" min="1" placeholder="150"/>
+          </div>
+        </div>
+        <div class="row2" style="gap:12px;margin-bottom:12px">
+          <div class="fg">
+            <label>Puntos / Calibre <span style="color:var(--text3);font-weight:400">(opcional)</span></label>
+            <input type="number" id="pm-puntos" min="1" placeholder="12"/>
+          </div>
+          <div class="fg">
+            <label>Precio por millar <span style="color:var(--text3);font-weight:400">MXN</span></label>
+            <div class="price-cell">
+              <span class="price-prefix">$</span>
+              <input type="number" id="pm-precio" min="0" step="1" placeholder="2000"/>
+            </div>
+          </div>
+        </div>
+        <div class="row2" style="gap:12px">
+          <div class="fg">
+            <label>Máquina <span style="color:var(--text3);font-weight:400">(opcional)</span></label>
+            <input type="text" id="pm-maq" placeholder="PM52, PM74…"/>
+          </div>
+          <div class="fg">
+            <label>Observaciones</label>
+            <input type="text" id="pm-obs" placeholder="Notas adicionales"/>
           </div>
         </div>
       </div>
-      <table class="config-table sust-table">
-        <thead><tr><th>Gramaje</th><th>$/pliego MXN</th><th></th></tr></thead>
-        <tbody>
-          <tr><td><span class="gramaje-tag">75g</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="0.38" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-          <tr><td><span class="gramaje-tag">90g</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="0.45" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-          <tr><td><span class="gramaje-tag">105g</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="0.54" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-          <tr><td><span class="gramaje-tag">120g</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="0.62" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- COUCHÉ -->
-  <div class="tab-panel" id="t-couche">
-    <div class="card">
-      <div class="sust-header">
-        <div>
-          <div class="card-title">Papel Couché — costo por pliego</div>
-          <div class="sust-sizes-label">Tamaños disponibles</div>
-          <div class="sust-sizes">
-            <span class="sust-size-chip">57×87 cm</span>
-            <span class="sust-size-chip">61×96 cm</span>
-            <span class="sust-size-chip">70×85 cm</span>
-            <span class="sust-size-chip">72×102 cm</span>
-          </div>
-        </div>
+      <div class="cl-modal-foot">
+        <button class="btn-ghost" id="papel-modal-cancel">Cancelar</button>
+        <button class="btn-primary" id="papel-modal-save">Guardar papel</button>
       </div>
-      <table class="config-table sust-table">
-        <thead><tr><th>Gramaje</th><th>$/pliego MXN</th><th></th></tr></thead>
-        <tbody>
-          <tr><td><span class="gramaje-tag">100g</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="0.55" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-          <tr><td><span class="gramaje-tag">150g</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="0.65" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-          <tr><td><span class="gramaje-tag">200g</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="0.80" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-          <tr><td><span class="gramaje-tag">250g</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="0.98" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-          <tr><td><span class="gramaje-tag">300g</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="1.15" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-          <tr><td><span class="gramaje-tag">350g</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="1.30" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-        </tbody>
-      </table>
     </div>
   </div>
 
-  <!-- SULFATADO -->
-  <div class="tab-panel" id="t-sulfatado">
-    <div class="card">
-      <div class="sust-header">
-        <div>
-          <div class="card-title">Sulfatado — costo por pliego</div>
-          <div class="sust-sizes-label">Tamaños disponibles</div>
-          <div class="sust-sizes">
-            <span class="sust-size-chip">70×95 cm</span>
-            <span class="sust-size-chip">71×125 cm</span>
-            <span class="sust-size-chip">90×125 cm</span>
-          </div>
-        </div>
-      </div>
-      <table class="config-table sust-table">
-        <thead><tr><th>Calibre</th><th>$/pliego MXN</th><th></th></tr></thead>
-        <tbody>
-          <tr><td><span class="gramaje-tag">12 pts</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="1.10" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-          <tr><td><span class="gramaje-tag">14 pts</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="1.28" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-          <tr><td><span class="gramaje-tag">16 pts</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="1.48" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-          <tr><td><span class="gramaje-tag">18 pts</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="1.72" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-          <tr><td><span class="gramaje-tag">20 pts</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="1.95" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-          <tr><td><span class="gramaje-tag">24 pts</span></td><td><div class="price-cell"><span class="price-prefix">$</span><input type="number" value="2.30" step="0.01"/></div></td><td><span class="save-link sust-save">Guardar</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- MERMAS -->
-  <div class="tab-panel" id="t-mermas">
-    <div class="card">
-      <div class="card-title">Tabla de mermas por volumen</div>
-      <p style="font-size:12px;color:var(--text3);margin-bottom:20px;font-weight:500;line-height:1.5">Excedentes que se suman automáticamente al calcular cada cotización. El motor toma el rango que corresponde a la cantidad pedida.</p>
-      <table class="config-table sust-table">
-        <thead><tr><th>Rango de cantidad</th><th>Merma (piezas)</th><th></th></tr></thead>
-        <tbody>
-          <tr>
-            <td><div class="merma-range"><span class="merma-from">100</span><span class="merma-sep">—</span><span class="merma-to">500</span><span class="merma-unit">pzas</span></div></td>
-            <td><div class="price-cell"><input type="number" value="200" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
-            <td><span class="save-link sust-save">Guardar</span></td>
-          </tr>
-          <tr>
-            <td><div class="merma-range"><span class="merma-from">501</span><span class="merma-sep">—</span><span class="merma-to">1,000</span><span class="merma-unit">pzas</span></div></td>
-            <td><div class="price-cell"><input type="number" value="300" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
-            <td><span class="save-link sust-save">Guardar</span></td>
-          </tr>
-          <tr>
-            <td><div class="merma-range"><span class="merma-from">1,001</span><span class="merma-sep">—</span><span class="merma-to">5,000</span><span class="merma-unit">pzas</span></div></td>
-            <td><div class="price-cell"><input type="number" value="400" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
-            <td><span class="save-link sust-save">Guardar</span></td>
-          </tr>
-          <tr>
-            <td><div class="merma-range"><span class="merma-from">5,001</span><span class="merma-sep">—</span><span class="merma-to">10,000</span><span class="merma-unit">pzas</span></div></td>
-            <td><div class="price-cell"><input type="number" value="700" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
-            <td><span class="save-link sust-save">Guardar</span></td>
-          </tr>
-          <tr>
-            <td><div class="merma-range"><span class="merma-from">10,001</span><span class="merma-sep">—</span><span class="merma-to">∞</span><span class="merma-unit">sin límite</span></div></td>
-            <td><div class="price-cell"><input type="number" value="750" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
-            <td><span class="save-link sust-save">Guardar</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-`;
+</div>`;
   },
 
+  // ── Init (bind persistent events) ──────────────────────────────────────────
   init() {
+    renderPanel(_activeTab);
+
     // Tab switching
-    document.querySelectorAll('#app .tab').forEach(tab => {
+    document.querySelectorAll('.papel-tab').forEach(tab => {
       tab.addEventListener('click', () => {
-        const panelId = tab.dataset.panel;
-        document.querySelectorAll('#app .tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('#app .tab-panel').forEach(p => p.classList.remove('active'));
-        tab.classList.add('active');
-        const panel = document.getElementById(panelId);
-        panel.classList.add('active');
-        panel.style.animation = 'fadeSlideIn .18s cubic-bezier(.25,1,.5,1)';
+        _activeTab = tab.dataset.cat;
+        document.querySelectorAll('.papel-tab').forEach(t => t.classList.toggle('active', t.dataset.cat === _activeTab));
+        renderPanel(_activeTab);
       });
     });
 
-    // Per-row Guardar feedback
-    document.querySelectorAll('.sust-save').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const orig = btn.textContent;
-        btn.textContent = '✓ Guardado';
-        btn.style.color = 'var(--teal)';
-        setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1800);
-      });
+    // Modal close
+    document.getElementById('papel-modal-cancel').addEventListener('click', closeModal);
+    document.getElementById('papel-modal-bg').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeModal();
     });
+    document.getElementById('papel-modal-save').addEventListener('click', savePapelModal);
   }
 };
+
+// ── Render panel for active tab ────────────────────────────────────────────
+function renderPanel(cat) {
+  const panel = document.getElementById('papel-panel');
+  if (!panel) return;
+
+  if (cat === 'MERMAS') {
+    panel.innerHTML = mermasHtml();
+    initMermas();
+    return;
+  }
+
+  const papeles = getPapeles().filter(p => p.categoria === cat);
+
+  let rows;
+  if (papeles.length === 0) {
+    rows = `<tr><td colspan="8">
+      <div class="papel-empty">
+        <svg width="32" height="32" fill="none" viewBox="0 0 24 24" style="opacity:.3;margin-bottom:8px">
+          <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div>Sin papeles en esta categoría</div>
+        <div style="font-size:11px;margin-top:4px;color:var(--text3)">Usa "+ Agregar papel" para comenzar</div>
+      </div>
+    </td></tr>`;
+  } else {
+    rows = papeles.map(p => {
+      const precioU = p.precioMillar / 1000;
+      const gramStr  = p.gramos  != null ? p.gramos  + 'g'   : '—';
+      const punStr   = p.puntos  != null ? p.puntos  + ' pts' : '—';
+      return `<tr data-id="${p.id}">
+        <td><span style="font-weight:600;color:var(--text)">${p.material}</span></td>
+        <td><span class="gramaje-tag" style="font-size:11px">${p.medida || '—'}</span></td>
+        <td>${gramStr}</td>
+        <td>${punStr}</td>
+        <td style="font-weight:600">${fmtMXN(p.precioMillar)}</td>
+        <td style="color:var(--text3)">${fmtMXN(precioU)}</td>
+        <td style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text3);font-size:12px">${p.observaciones || '—'}</td>
+        <td>
+          <div style="display:flex;gap:4px;justify-content:flex-end">
+            <button class="dash-icon-btn papel-edit-btn" title="Editar">
+              <svg width="13" height="13" fill="none" viewBox="0 0 16 16"><path d="M11.5 2.5l2 2-9 9H2.5v-2l9-9z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="dash-icon-btn dash-del-btn papel-del-btn" title="Eliminar">
+              <svg width="13" height="13" fill="none" viewBox="0 0 16 16"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  panel.innerHTML = `
+<div class="card" style="margin-top:16px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div>
+      <div class="card-title">${cat}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px;font-weight:500">
+        ${papeles.length} entrada${papeles.length !== 1 ? 's' : ''} · $/Unidad = precio por pliego
+      </div>
+    </div>
+    <button class="btn-primary" id="papel-add-btn" style="font-size:12px;padding:8px 14px;gap:6px">
+      <svg width="12" height="12" fill="none" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Agregar papel
+    </button>
+  </div>
+  <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+    <table class="config-table papel-table">
+      <thead>
+        <tr>
+          <th>Material</th>
+          <th>Medida</th>
+          <th>Gramaje</th>
+          <th>Puntos</th>
+          <th>$/Millar</th>
+          <th>$/Unidad</th>
+          <th>Obs.</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>
+</div>`;
+
+  // Add button
+  document.getElementById('papel-add-btn').addEventListener('click', () => openModal(null, cat));
+
+  // Edit buttons
+  document.querySelectorAll('.papel-edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => openModal(btn.closest('tr').dataset.id, cat));
+  });
+
+  // Delete buttons
+  document.querySelectorAll('.papel-del-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.closest('tr').dataset.id;
+      const p  = getPapeles().find(x => x.id === id);
+      if (!p) return;
+      if (confirm(`¿Eliminar "${p.material} ${p.medida || ''} ${p.gramos ? p.gramos + 'g' : ''}"?`.replace(/\s+/g,' '))) {
+        savePapeles(getPapeles().filter(x => x.id !== id));
+        renderPanel(_activeTab);
+      }
+    });
+  });
+}
+
+// ── Modal helpers ──────────────────────────────────────────────────────────
+function openModal(id, defaultCat) {
+  _editingId = id || null;
+  const isEdit = !!_editingId;
+  document.getElementById('papel-modal-title').textContent = isEdit ? 'Editar papel' : 'Agregar papel';
+
+  if (isEdit) {
+    const p = getPapeles().find(x => x.id === _editingId);
+    if (!p) return;
+    document.getElementById('pm-cat').value    = p.categoria;
+    document.getElementById('pm-mat').value    = p.material;
+    document.getElementById('pm-med').value    = p.medida || '';
+    document.getElementById('pm-gramos').value = p.gramos  != null ? p.gramos  : '';
+    document.getElementById('pm-puntos').value = p.puntos  != null ? p.puntos  : '';
+    document.getElementById('pm-precio').value = p.precioMillar;
+    document.getElementById('pm-maq').value    = p.maquina || '';
+    document.getElementById('pm-obs').value    = p.observaciones || '';
+  } else {
+    document.getElementById('pm-cat').value    = defaultCat || 'BOND';
+    document.getElementById('pm-mat').value    = '';
+    document.getElementById('pm-med').value    = '';
+    document.getElementById('pm-gramos').value = '';
+    document.getElementById('pm-puntos').value = '';
+    document.getElementById('pm-precio').value = '';
+    document.getElementById('pm-maq').value    = '';
+    document.getElementById('pm-obs').value    = '';
+  }
+
+  document.getElementById('papel-modal-bg').style.display = 'flex';
+  setTimeout(() => document.getElementById('pm-mat').focus(), 50);
+}
+
+function closeModal() {
+  document.getElementById('papel-modal-bg').style.display = 'none';
+}
+
+function savePapelModal() {
+  const precioEl = document.getElementById('pm-precio');
+  const precio   = parseFloat(precioEl.value);
+  if (!precio || precio <= 0) {
+    precioEl.style.borderColor = '#e05252';
+    precioEl.focus();
+    return;
+  }
+  precioEl.style.borderColor = '';
+
+  const cat  = document.getElementById('pm-cat').value;
+  const mat  = document.getElementById('pm-mat').value.trim();
+  const g    = document.getElementById('pm-gramos').value;
+  const pts  = document.getElementById('pm-puntos').value;
+
+  const entry = {
+    id:           _editingId || ('pap-' + Date.now()),
+    categoria:    cat,
+    material:     mat || cat,
+    medida:       document.getElementById('pm-med').value.trim().toUpperCase() || '',
+    gramos:       g   !== '' ? parseInt(g)   : null,
+    puntos:       pts !== '' ? parseInt(pts) : null,
+    precioMillar: precio,
+    observaciones:document.getElementById('pm-obs').value.trim(),
+    maquina:      document.getElementById('pm-maq').value.trim(),
+  };
+
+  let arr = getPapeles();
+  if (_editingId) {
+    arr = arr.map(p => p.id === _editingId ? entry : p);
+  } else {
+    arr = [...arr, entry];
+  }
+
+  savePapeles(arr);
+  closeModal();
+  _activeTab = entry.categoria;
+  document.querySelectorAll('.papel-tab').forEach(t => t.classList.toggle('active', t.dataset.cat === _activeTab));
+  renderPanel(_activeTab);
+}
+
+// ── Mermas tab ────────────────────────────────────────────────────────────
+function mermasHtml() {
+  return `
+<div class="card" style="margin-top:16px">
+  <div class="card-title" style="margin-bottom:4px">Tabla de mermas por volumen</div>
+  <p style="font-size:12px;color:var(--text3);margin-bottom:20px;font-weight:500;line-height:1.5">
+    Excedentes que se suman automáticamente al calcular cada cotización.
+    El motor toma el rango que corresponde a la cantidad pedida.
+  </p>
+  <div style="overflow-x:auto">
+    <table class="config-table sust-table">
+      <thead><tr><th>Rango de cantidad</th><th>Merma (piezas)</th><th></th></tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="merma-range"><span class="merma-from">100</span><span class="merma-sep">—</span><span class="merma-to">500</span><span class="merma-unit">pzas</span></div></td>
+          <td><div class="price-cell"><input type="number" value="200" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
+          <td><span class="save-link sust-save">Guardar</span></td>
+        </tr>
+        <tr>
+          <td><div class="merma-range"><span class="merma-from">501</span><span class="merma-sep">—</span><span class="merma-to">1,000</span><span class="merma-unit">pzas</span></div></td>
+          <td><div class="price-cell"><input type="number" value="300" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
+          <td><span class="save-link sust-save">Guardar</span></td>
+        </tr>
+        <tr>
+          <td><div class="merma-range"><span class="merma-from">1,001</span><span class="merma-sep">—</span><span class="merma-to">5,000</span><span class="merma-unit">pzas</span></div></td>
+          <td><div class="price-cell"><input type="number" value="400" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
+          <td><span class="save-link sust-save">Guardar</span></td>
+        </tr>
+        <tr>
+          <td><div class="merma-range"><span class="merma-from">5,001</span><span class="merma-sep">—</span><span class="merma-to">10,000</span><span class="merma-unit">pzas</span></div></td>
+          <td><div class="price-cell"><input type="number" value="700" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
+          <td><span class="save-link sust-save">Guardar</span></td>
+        </tr>
+        <tr>
+          <td><div class="merma-range"><span class="merma-from">10,001</span><span class="merma-sep">—</span><span class="merma-to">∞</span><span class="merma-unit">sin límite</span></div></td>
+          <td><div class="price-cell"><input type="number" value="750" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
+          <td><span class="save-link sust-save">Guardar</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>`;
+}
+
+function initMermas() {
+  document.querySelectorAll('.sust-save').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const orig = btn.textContent;
+      btn.textContent = '✓ Guardado';
+      btn.style.color = 'var(--teal)';
+      setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1800);
+    });
+  });
+}
+
+})();

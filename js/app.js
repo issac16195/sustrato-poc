@@ -322,33 +322,85 @@ function getMerma(n) {
   return n <= 500 ? 200 : n <= 1000 ? 300 : n <= 5000 ? 400 : n <= 10000 ? 700 : 750;
 }
 
-// ─── Pricing engine helpers ───────────────────────────────────────
-
-// Lee precios de papel del localStorage (guardados en onboarding/sustratos)
-function getPapelPrices() {
+// ─── Papeles store ────────────────────────────────────────────────
+const DEFAULT_PAPELES = [
+  // BOND
+  { id:'pap-1',  categoria:'BOND',               material:'Bond',              medida:'57X87',  puntos:null, gramos:75,  precioMillar:1057, observaciones:'', maquina:'' },
+  { id:'pap-2',  categoria:'BOND',               material:'Bond',              medida:'57X87',  puntos:null, gramos:90,  precioMillar:1198, observaciones:'', maquina:'' },
+  { id:'pap-3',  categoria:'BOND',               material:'Bond',              medida:'58X88',  puntos:null, gramos:105, precioMillar:1356, observaciones:'', maquina:'' },
+  { id:'pap-4',  categoria:'BOND',               material:'Bond',              medida:'58X88',  puntos:null, gramos:120, precioMillar:1526, observaciones:'', maquina:'' },
+  // COUCHE
+  { id:'pap-5',  categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:90,  precioMillar:1668, observaciones:'', maquina:'' },
+  { id:'pap-6',  categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:100, precioMillar:1834, observaciones:'', maquina:'' },
+  { id:'pap-7',  categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:115, precioMillar:1987, observaciones:'', maquina:'' },
+  { id:'pap-8',  categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:135, precioMillar:2325, observaciones:'', maquina:'' },
+  { id:'pap-9',  categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:150, precioMillar:2120, observaciones:'', maquina:'' },
+  { id:'pap-10', categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:200, precioMillar:2987, observaciones:'', maquina:'' },
+  { id:'pap-11', categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:250, precioMillar:3654, observaciones:'', maquina:'' },
+  { id:'pap-12', categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:300, precioMillar:4120, observaciones:'', maquina:'' },
+  { id:'pap-13', categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:350, precioMillar:4876, observaciones:'', maquina:'' },
+  { id:'pap-14', categoria:'COUCHE',             material:'Couché',            medida:'70X100', puntos:null, gramos:150, precioMillar:3012, observaciones:'', maquina:'' },
+  // OPALINA
+  { id:'pap-15', categoria:'OPALINA',            material:'Opalina',           medida:'58X88',  puntos:null, gramos:130, precioMillar:2100, observaciones:'', maquina:'' },
+  { id:'pap-16', categoria:'OPALINA',            material:'Opalina',           medida:'58X88',  puntos:null, gramos:180, precioMillar:2876, observaciones:'', maquina:'' },
+  { id:'pap-17', categoria:'OPALINA',            material:'Opalina',           medida:'70X100', puntos:null, gramos:130, precioMillar:2658, observaciones:'', maquina:'' },
+  // TEXCOTE
+  { id:'pap-18', categoria:'TEXCOTE',            material:'Texcote C1S',       medida:'58X88',  puntos:12,   gramos:null,precioMillar:3245, observaciones:'Cara/vuelta', maquina:'PM52' },
+  { id:'pap-19', categoria:'TEXCOTE',            material:'Texcote C2S',       medida:'58X88',  puntos:12,   gramos:null,precioMillar:3456, observaciones:'Dos caras',   maquina:'PM52' },
+  { id:'pap-20', categoria:'TEXCOTE',            material:'Texcote C1S',       medida:'70X100', puntos:12,   gramos:null,precioMillar:4123, observaciones:'',             maquina:'PM74' },
+  // SULFATADO
+  { id:'pap-21', categoria:'SULFATADO',          material:'Sulfatado',         medida:'58X88',  puntos:12,   gramos:null,precioMillar:1456, observaciones:'', maquina:'' },
+  { id:'pap-22', categoria:'SULFATADO',          material:'Sulfatado',         medida:'58X88',  puntos:14,   gramos:null,precioMillar:1765, observaciones:'', maquina:'' },
+  { id:'pap-23', categoria:'SULFATADO',          material:'Sulfatado',         medida:'70X100', puntos:16,   gramos:null,precioMillar:2234, observaciones:'', maquina:'' },
+  { id:'pap-24', categoria:'SULFATADO',          material:'Sulfatado',         medida:'70X100', puntos:18,   gramos:null,precioMillar:2456, observaciones:'', maquina:'' },
+  { id:'pap-25', categoria:'SULFATADO',          material:'Sulfatado',         medida:'70X100', puntos:20,   gramos:null,precioMillar:2765, observaciones:'', maquina:'' },
+  { id:'pap-26', categoria:'SULFATADO',          material:'Sulfatado',         medida:'70X100', puntos:24,   gramos:null,precioMillar:3123, observaciones:'', maquina:'' },
+  // CARTULINA SULFATADA
+  { id:'pap-27', categoria:'CARTULINA SULFATADA',material:'Cartulina Sulfatada',medida:'58X88', puntos:null, gramos:162, precioMillar:2456, observaciones:'', maquina:'' },
+  { id:'pap-28', categoria:'CARTULINA SULFATADA',material:'Cartulina Sulfatada',medida:'58X88', puntos:null, gramos:215, precioMillar:3123, observaciones:'', maquina:'' },
+  { id:'pap-29', categoria:'CARTULINA SULFATADA',material:'Cartulina Sulfatada',medida:'70X100',puntos:null, gramos:215, precioMillar:3876, observaciones:'', maquina:'' },
+  // SBS MULTICAPA
+  { id:'pap-30', categoria:'SBS MULTICAPA',      material:'SBS Multicapa',     medida:'70X96',  puntos:10,   gramos:215, precioMillar:4874, observaciones:'', maquina:'' },
+  { id:'pap-31', categoria:'SBS MULTICAPA',      material:'SBS Multicapa',     medida:'70X96',  puntos:12,   gramos:215, precioMillar:5234, observaciones:'', maquina:'' },
+  { id:'pap-32', categoria:'SBS MULTICAPA',      material:'SBS Multicapa',     medida:'79X109', puntos:10,   gramos:215, precioMillar:5876, observaciones:'', maquina:'' },
+  // MICRO FLAUTA E
+  { id:'pap-33', categoria:'MICRO FLAUTA E',     material:'Micro Flauta E',    medida:'36X50',  puntos:null, gramos:null,precioMillar:2185, observaciones:'Sin gramaje fijo', maquina:'' },
+  { id:'pap-34', categoria:'MICRO FLAUTA E',     material:'Micro Flauta E',    medida:'50X70',  puntos:null, gramos:null,precioMillar:2987, observaciones:'', maquina:'' },
+  // CORRUGADO FLAUTA B
+  { id:'pap-35', categoria:'CORRUGADO FLAUTA B', material:'Corrugado Flauta B',medida:'36X50',  puntos:null, gramos:null,precioMillar:1415, observaciones:'', maquina:'' },
+  { id:'pap-36', categoria:'CORRUGADO FLAUTA B', material:'Corrugado Flauta B',medida:'50X70',  puntos:null, gramos:null,precioMillar:1987, observaciones:'', maquina:'' },
+  // HUEVERO
+  { id:'pap-37', categoria:'HUEVERO',            material:'Huevero',           medida:'30X40',  puntos:null, gramos:null,precioMillar:987,  observaciones:'', maquina:'' },
+  { id:'pap-38', categoria:'HUEVERO',            material:'Huevero',           medida:'50X70',  puntos:null, gramos:null,precioMillar:1654, observaciones:'', maquina:'' },
+  // PLIEGOS VARIOS
+  { id:'pap-39', categoria:'PLIEGOS VARIOS',     material:'Kraft',             medida:'70X100', puntos:null, gramos:null,precioMillar:654,  observaciones:'', maquina:'' },
+  { id:'pap-40', categoria:'PLIEGOS VARIOS',     material:'Manila',            medida:'57X87',  puntos:null, gramos:null,precioMillar:543,  observaciones:'', maquina:'' },
+];
+function getPapeles() {
   try {
-    const raw = localStorage.getItem('sustrato_papel');
-    if (raw) return JSON.parse(raw);
+    const raw = localStorage.getItem('sustrato_papeles');
+    if (raw) { const arr = JSON.parse(raw); if (arr.length) return arr; }
   } catch {}
-  return null;
+  return DEFAULT_PAPELES.map(p => ({...p}));
+}
+function savePapeles(arr) {
+  localStorage.setItem('sustrato_papeles', JSON.stringify(arr));
+  if (typeof fsWrite === 'function') fsWrite('papeles', arr);
 }
 
-// Devuelve $/pliego para un tipo+gramaje. Fallback: pliegoPrice de la máquina.
+// ─── Pricing engine helpers ───────────────────────────────────────
+
+// Devuelve $/pliego para un tipo+gramaje buscando en el catálogo de papeles.
+// gramaje puede ser '75g', '90g', '12 pts', etc.
+// Busca por categoría (case-insensitive) y gramos o puntos parseados.
 function getPapelPriceFor(tipoPapel, gramaje, fallback) {
-  const prices = getPapelPrices();
-  if (prices && prices[tipoPapel] && prices[tipoPapel][gramaje] != null) {
-    return +prices[tipoPapel][gramaje];
-  }
-  // Defaults integrados si no hay sustrato_papel configurado
-  const defaults = {
-    bond:      { '75g':0.38,'90g':0.45,'105g':0.54,'120g':0.62 },
-    couche:    { '100g':0.55,'150g':0.65,'200g':0.80,'250g':0.98,'300g':1.15,'350g':1.30 },
-    sulfatado: { '12 pts':1.10,'14 pts':1.28,'16 pts':1.48,'18 pts':1.72,'20 pts':1.95,'24 pts':2.30 },
-  };
-  if (defaults[tipoPapel] && defaults[tipoPapel][gramaje] != null) {
-    return +defaults[tipoPapel][gramaje];
-  }
-  return fallback || 0.65;
+  const papeles = getPapeles();
+  const g = parseInt(gramaje) || 0;
+  const entry = papeles.find(p =>
+    p.categoria.toLowerCase() === tipoPapel.toLowerCase() &&
+    (p.gramos === g || (p.gramos === null && p.puntos === g))
+  );
+  return entry ? entry.precioMillar / 1000 : (fallback || 0.65);
 }
 
 // Mapea id de máquina → 'CH'|'MD'|'GD'
