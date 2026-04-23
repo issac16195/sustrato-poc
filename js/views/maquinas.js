@@ -18,6 +18,7 @@ views['maquinas'] = {
   },
 
   init() {
+
     // ── Render table ──────────────────────────────────────────────
     function renderTable() {
       const machines = getMachines();
@@ -60,6 +61,8 @@ views['maquinas'] = {
         <td>${fmtMXN(m.cph)}</td>
         <td style="white-space:nowrap">
           <span class="save-link mq-edit-btn">Editar</span>
+          &nbsp;·&nbsp;
+          <span class="save-link mq-merma-btn" style="color:var(--teal)">Mermas</span>
           &nbsp;·&nbsp;
           <span class="save-link mq-del-btn" style="color:#E05555">Eliminar</span>
         </td>
@@ -106,6 +109,183 @@ views['maquinas'] = {
       </tr>`;
     }
 
+    // ── Merma expand row HTML ────────────────────────────────────
+    function mermaRowHTML(m) {
+      const mermas = m.mermas || DEFAULT_MERMAS.map(r => ({...r}));
+      const rows = mermas.map((r, i) => {
+        const hastaVal = r.hasta !== null ? r.hasta : '';
+        const hastaDisp = r.hasta !== null ? r.hasta.toLocaleString('es-MX') : '∞';
+        return `<tr class="merma-inner-row" data-idx="${i}">
+          <td>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input class="mq-f mq-merma-desde" type="number" min="0" value="${r.desde}" style="width:70px"/>
+              <span style="color:var(--text3);font-size:11px">pzas</span>
+            </div>
+          </td>
+          <td>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input class="mq-f mq-merma-hasta" type="number" min="0" value="${hastaVal}" placeholder="∞" style="width:70px"/>
+              <span style="color:var(--text3);font-size:11px">pzas</span>
+            </div>
+          </td>
+          <td>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input class="mq-f mq-merma-val" type="number" min="0" value="${r.merma}" style="width:70px"/>
+              <span style="color:var(--text3);font-size:11px">pzas</span>
+            </div>
+          </td>
+          <td>
+            <button class="dash-icon-btn dash-del-btn mq-merma-del" title="Eliminar rango">
+              <svg width="12" height="12" fill="none" viewBox="0 0 16 16"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </td>
+        </tr>`;
+      }).join('');
+
+      return `<tr class="merma-expand-row" data-for="${m.id}">
+        <td colspan="7" style="padding:0;border-top:2px solid var(--teal);background:rgba(0,168,120,.03)">
+          <div style="padding:14px 16px 16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div>
+                <span style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:var(--navy)">
+                  Mermas · ${m.name}
+                </span>
+                <span style="font-size:11px;color:var(--text3);margin-left:8px;font-weight:500">
+                  Piezas extra que el motor suma a cada tirada para absorber el desperdicio de arranque
+                </span>
+              </div>
+              <button class="btn-ghost mq-merma-close" data-maq="${m.id}" style="font-size:12px;padding:5px 10px">✕ Cerrar</button>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="config-table merma-inner-table" style="min-width:380px" data-maq="${m.id}">
+                <thead>
+                  <tr>
+                    <th>Desde (pzas)</th>
+                    <th>Hasta (pzas)</th>
+                    <th>Merma (pzas)</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody class="merma-inner-tbody">
+                  ${rows}
+                </tbody>
+              </table>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:8px">
+              <button class="btn-ghost mq-merma-add" data-maq="${m.id}" style="font-size:12px;padding:6px 12px;gap:6px">
+                <svg width="11" height="11" fill="none" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Agregar rango
+              </button>
+              <button class="btn-primary mq-merma-save" data-maq="${m.id}" style="font-size:12px;padding:7px 16px">
+                Guardar mermas
+              </button>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    }
+
+    // ── Toggle merma panel ────────────────────────────────────────
+    function toggleMermaPanel(maqId, sourceTr) {
+      const tbody = document.getElementById('maq-tbody');
+      if (!tbody) return;
+
+      // If already open → close
+      const existing = tbody.querySelector(`.merma-expand-row[data-for="${maqId}"]`);
+      if (existing) {
+        existing.remove();
+        return;
+      }
+
+      // Close any other open merma panels
+      tbody.querySelectorAll('.merma-expand-row').forEach(r => r.remove());
+
+      const m = getMachines().find(x => x.id === maqId);
+      if (!m) return;
+
+      const expandRow = document.createElement('tbody');
+      expandRow.innerHTML = mermaRowHTML(m);
+      const expandTr = expandRow.querySelector('tr');
+      sourceTr.insertAdjacentElement('afterend', expandTr);
+
+      // Attach merma panel listeners
+      attachMermaListeners(expandTr, maqId);
+    }
+
+    // ── Merma panel event listeners ───────────────────────────────
+    function attachMermaListeners(panel, maqId) {
+      // Close button
+      panel.querySelector('.mq-merma-close').addEventListener('click', () => panel.remove());
+
+      // Add row
+      panel.querySelector('.mq-merma-add').addEventListener('click', () => {
+        const tbody = panel.querySelector('.merma-inner-tbody');
+        const idx = tbody.querySelectorAll('.merma-inner-row').length;
+        const newRow = document.createElement('tr');
+        newRow.className = 'merma-inner-row';
+        newRow.dataset.idx = idx;
+        newRow.innerHTML = `
+          <td><div style="display:flex;align-items:center;gap:4px">
+            <input class="mq-f mq-merma-desde" type="number" min="0" value="" placeholder="0" style="width:70px"/>
+            <span style="color:var(--text3);font-size:11px">pzas</span>
+          </div></td>
+          <td><div style="display:flex;align-items:center;gap:4px">
+            <input class="mq-f mq-merma-hasta" type="number" min="0" value="" placeholder="∞" style="width:70px"/>
+            <span style="color:var(--text3);font-size:11px">pzas</span>
+          </div></td>
+          <td><div style="display:flex;align-items:center;gap:4px">
+            <input class="mq-f mq-merma-val" type="number" min="0" value="" placeholder="0" style="width:70px"/>
+            <span style="color:var(--text3);font-size:11px">pzas</span>
+          </div></td>
+          <td>
+            <button class="dash-icon-btn dash-del-btn mq-merma-del" title="Eliminar">
+              <svg width="12" height="12" fill="none" viewBox="0 0 16 16"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </td>`;
+        tbody.appendChild(newRow);
+        newRow.querySelector('.mq-merma-desde').focus();
+        // Attach delete listener to new row
+        newRow.querySelector('.mq-merma-del').addEventListener('click', () => newRow.remove());
+      });
+
+      // Delete row buttons (existing rows)
+      panel.querySelectorAll('.mq-merma-del').forEach(btn => {
+        btn.addEventListener('click', () => btn.closest('.merma-inner-row').remove());
+      });
+
+      // Save button
+      panel.querySelector('.mq-merma-save').addEventListener('click', () => {
+        const rows = panel.querySelectorAll('.merma-inner-row');
+        const mermas = [];
+        let valid = true;
+        rows.forEach(row => {
+          const desde = parseInt(row.querySelector('.mq-merma-desde').value);
+          const hastaRaw = row.querySelector('.mq-merma-hasta').value;
+          const hasta = hastaRaw !== '' ? parseInt(hastaRaw) : null;
+          const merma = parseInt(row.querySelector('.mq-merma-val').value);
+          if (isNaN(desde) || isNaN(merma)) { valid = false; return; }
+          mermas.push({ desde, hasta, merma });
+        });
+
+        if (!valid) return;
+
+        // Sort by desde
+        mermas.sort((a, b) => a.desde - b.desde);
+
+        const arr = getMachines().map(m => m.id === maqId ? { ...m, mermas } : m);
+        saveMachines(arr);
+
+        // Flash saved
+        const btn = panel.querySelector('.mq-merma-save');
+        const orig = btn.textContent;
+        btn.textContent = '✓ Mermas guardadas';
+        btn.style.background = 'var(--teal-dark)';
+        setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 1800);
+
+        flashSaved();
+      });
+    }
+
     // ── Attach row listeners ──────────────────────────────────────
     function attachRowListeners() {
       const tbody = document.getElementById('maq-tbody');
@@ -117,8 +297,18 @@ views['maquinas'] = {
           const id = tr.dataset.id;
           const m  = getMachines().find(x => x.id === id);
           if (!m) return;
+          // Close merma panel if open
+          const mermaPanel = tbody.querySelector(`.merma-expand-row[data-for="${id}"]`);
+          if (mermaPanel) mermaPanel.remove();
           tr.outerHTML = editRowHTML(m);
           attachRowListeners();
+        });
+      });
+
+      tbody.querySelectorAll('.mq-merma-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tr = btn.closest('tr');
+          toggleMermaPanel(tr.dataset.id, tr);
         });
       });
 
@@ -128,6 +318,8 @@ views['maquinas'] = {
           const id = tr.dataset.id;
           const m  = getMachines().find(x => x.id === id);
           if (!m) return;
+          const mermaPanel = tbody.querySelector(`.merma-expand-row[data-for="${id}"]`);
+          if (mermaPanel) mermaPanel.remove();
           tr.outerHTML = deleteRowHTML(m);
           attachRowListeners();
         });
@@ -169,7 +361,10 @@ views['maquinas'] = {
           const cph     = +tr.querySelector('.mq-cph').value || 0;
           if (!name) { tr.querySelector('.mq-name').focus(); return; }
           const newId = name.toUpperCase().replace(/\s+/g, '');
-          const updated = { id: newId, name, tag, tamW, tamH, utilW, utilH, gramaje, cph, pliegoPrice };
+          // Preserve mermas when saving machine edits
+          const oldMachine = getMachines().find(x => x.id === oldId);
+          const updated = { id: newId, name, tag, tamW, tamH, utilW, utilH, gramaje, cph, pliegoPrice,
+            mermas: oldMachine?.mermas || DEFAULT_MERMAS.map(r=>({...r})) };
           const arr = getMachines().map(x => x.id === oldId ? updated : x);
           saveMachines(arr);
           tr.outerHTML = rowHTML(updated);
@@ -200,7 +395,7 @@ views['maquinas'] = {
             <div class="fg"><label>Nombre</label><input id="nw-name" placeholder="Ej. KBA105" value=""/></div>
             <div class="fg"><label>Tag / descripción corta</label><input id="nw-tag" placeholder="Ej. Extra grande" value=""/></div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:12px">
+          <div class="maq-edit-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:12px">
             <div class="fg">
               <label>Tam. máx. — ancho (cm)</label><input id="nw-tw" type="number" placeholder="72"/>
             </div>
@@ -211,7 +406,7 @@ views['maquinas'] = {
               <label>Gramaje máx.</label><input id="nw-gram" placeholder="24 pts"/>
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px">
+          <div class="maq-edit-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px">
             <div class="fg">
               <label>Área útil — ancho (cm)</label><input id="nw-uw" type="number" placeholder="79"/>
             </div>
@@ -258,7 +453,8 @@ views['maquinas'] = {
           document.getElementById('nw-name').title = 'Ya existe una máquina con este nombre';
           return;
         }
-        arr.push({ id, name, tag, tamW, tamH, utilW, utilH, gramaje, cph, pliegoPrice });
+        arr.push({ id, name, tag, tamW, tamH, utilW, utilH, gramaje, cph, pliegoPrice,
+          mermas: DEFAULT_MERMAS.map(r=>({...r})) });
         saveMachines(arr);
         hideAddForm();
         renderTable();

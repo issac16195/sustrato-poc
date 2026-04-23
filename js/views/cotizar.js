@@ -422,7 +422,7 @@ views['cotizar'] = {
       if (!cardsEl || !detailEl) return;
 
       const cant  = +document.getElementById('pcantidad').value || 0;
-      const merma = getMerma(cant);
+      const merma = getMerma(cant, _selectedMaq);
 
       // Build card HTML
       let html = '';
@@ -555,8 +555,8 @@ views['cotizar'] = {
     function goC3() {
       const nom   = document.getElementById('pnombre').value || 'Sin nombre';
       const cant  = +document.getElementById('pcantidad').value || 5000;
-      const merma = getMerma(cant);
       const sel   = MACHINES.find(m => m.id === _selectedMaq) || MACHINES[2];
+      const merma = getMerma(cant, sel.id);
       const imp   = _imps[sel.id] || {count:1};
       const pliegos = Math.ceil((cant + merma) / Math.max(1, imp.count));
       const tintas  = getTintas();

@@ -4,7 +4,7 @@
 const CATS = [
   'BOND','COUCHE','OPALINA','TEXCOTE','SULFATADO',
   'CARTULINA SULFATADA','SBS MULTICAPA','MICRO FLAUTA E',
-  'CORRUGADO FLAUTA B','HUEVERO','PLIEGOS VARIOS'
+  'CORRUGADO FLAUTA B','HUEVERO','PLIEGOS VARIOS',
 ];
 const SHORT = {
   'BOND':'BOND','COUCHE':'COUCHÉ','OPALINA':'OPALINA','TEXCOTE':'TEXCOTE',
@@ -19,7 +19,7 @@ let _editingId  = null;
 // ── Render shell ────────────────────────────────────────────────────────────
 views['sustratos'] = {
   render() {
-    const tabsHtml = [...CATS, 'MERMAS'].map(c => `
+    const tabsHtml = CATS.map(c => `
       <div class="papel-tab${c === _activeTab ? ' active' : ''}" data-cat="${c}">
         ${SHORT[c] || c}
       </div>`).join('');
@@ -120,12 +120,6 @@ views['sustratos'] = {
 function renderPanel(cat) {
   const panel = document.getElementById('papel-panel');
   if (!panel) return;
-
-  if (cat === 'MERMAS') {
-    panel.innerHTML = mermasHtml();
-    initMermas();
-    return;
-  }
 
   const papeles = getPapeles().filter(p => p.categoria === cat);
 
@@ -300,59 +294,5 @@ function savePapelModal() {
   renderPanel(_activeTab);
 }
 
-// ── Mermas tab ────────────────────────────────────────────────────────────
-function mermasHtml() {
-  return `
-<div class="card" style="margin-top:16px">
-  <div class="card-title" style="margin-bottom:4px">Tabla de mermas por volumen</div>
-  <p style="font-size:12px;color:var(--text3);margin-bottom:20px;font-weight:500;line-height:1.5">
-    Excedentes que se suman automáticamente al calcular cada cotización.
-    El motor toma el rango que corresponde a la cantidad pedida.
-  </p>
-  <div style="overflow-x:auto">
-    <table class="config-table sust-table">
-      <thead><tr><th>Rango de cantidad</th><th>Merma (piezas)</th><th></th></tr></thead>
-      <tbody>
-        <tr>
-          <td><div class="merma-range"><span class="merma-from">100</span><span class="merma-sep">—</span><span class="merma-to">500</span><span class="merma-unit">pzas</span></div></td>
-          <td><div class="price-cell"><input type="number" value="200" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
-          <td><span class="save-link sust-save">Guardar</span></td>
-        </tr>
-        <tr>
-          <td><div class="merma-range"><span class="merma-from">501</span><span class="merma-sep">—</span><span class="merma-to">1,000</span><span class="merma-unit">pzas</span></div></td>
-          <td><div class="price-cell"><input type="number" value="300" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
-          <td><span class="save-link sust-save">Guardar</span></td>
-        </tr>
-        <tr>
-          <td><div class="merma-range"><span class="merma-from">1,001</span><span class="merma-sep">—</span><span class="merma-to">5,000</span><span class="merma-unit">pzas</span></div></td>
-          <td><div class="price-cell"><input type="number" value="400" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
-          <td><span class="save-link sust-save">Guardar</span></td>
-        </tr>
-        <tr>
-          <td><div class="merma-range"><span class="merma-from">5,001</span><span class="merma-sep">—</span><span class="merma-to">10,000</span><span class="merma-unit">pzas</span></div></td>
-          <td><div class="price-cell"><input type="number" value="700" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
-          <td><span class="save-link sust-save">Guardar</span></td>
-        </tr>
-        <tr>
-          <td><div class="merma-range"><span class="merma-from">10,001</span><span class="merma-sep">—</span><span class="merma-to">∞</span><span class="merma-unit">sin límite</span></div></td>
-          <td><div class="price-cell"><input type="number" value="750" style="width:80px"/><span style="font-size:12px;color:var(--text3);margin-left:6px">pzas</span></div></td>
-          <td><span class="save-link sust-save">Guardar</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>`;
-}
-
-function initMermas() {
-  document.querySelectorAll('.sust-save').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const orig = btn.textContent;
-      btn.textContent = '✓ Guardado';
-      btn.style.color = 'var(--teal)';
-      setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1800);
-    });
-  });
-}
 
 })();

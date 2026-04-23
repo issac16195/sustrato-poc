@@ -8,17 +8,30 @@ function fmtMXN(n) {
 }
 
 // ─── Machine store (localStorage-backed) ─────────────────────────
+const DEFAULT_MERMAS = [
+  { desde: 100,   hasta: 500,   merma: 200 },
+  { desde: 501,   hasta: 1000,  merma: 300 },
+  { desde: 1001,  hasta: 5000,  merma: 400 },
+  { desde: 5001,  hasta: 10000, merma: 700 },
+  { desde: 10001, hasta: null,  merma: 750 },
+];
 const DEFAULT_MACHINES = [
-  { id:'PM52',  name:'PM52',  tag:'Chica',   tamW:37,  tamH:51,  utilW:35, utilH:49,  gramaje:'16 pts', cph:850,  pliegoPrice:0.45 },
-  { id:'PM74',  name:'PM74',  tag:'Mediana', tamW:52,  tamH:72,  utilW:50, utilH:70,  gramaje:'20 pts', cph:1200, pliegoPrice:0.65 },
-  { id:'CD102', name:'CD102', tag:'Grande',  tamW:72,  tamH:102, utilW:79, utilH:100, gramaje:'24 pts', cph:2100, pliegoPrice:1.20 },
+  { id:'PM52',  name:'PM52',  tag:'Chica',   tamW:37,  tamH:51,  utilW:35, utilH:49,  gramaje:'16 pts', cph:850,  pliegoPrice:0.45, mermas: DEFAULT_MERMAS.map(r=>({...r})) },
+  { id:'PM74',  name:'PM74',  tag:'Mediana', tamW:52,  tamH:72,  utilW:50, utilH:70,  gramaje:'20 pts', cph:1200, pliegoPrice:0.65, mermas: DEFAULT_MERMAS.map(r=>({...r})) },
+  { id:'CD102', name:'CD102', tag:'Grande',  tamW:72,  tamH:102, utilW:79, utilH:100, gramaje:'24 pts', cph:2100, pliegoPrice:1.20, mermas: DEFAULT_MERMAS.map(r=>({...r})) },
 ];
 function getMachines() {
   try {
     const raw = localStorage.getItem('sustrato_machines');
-    if (raw) { const arr = JSON.parse(raw); if (arr.length) return arr; }
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (arr.length) return arr.map(m => ({
+        ...m,
+        mermas: m.mermas || DEFAULT_MERMAS.map(r => ({...r}))
+      }));
+    }
   } catch {}
-  return DEFAULT_MACHINES.map(m => ({...m}));
+  return DEFAULT_MACHINES.map(m => ({...m, mermas: m.mermas.map(r=>({...r}))}));
 }
 function saveMachines(arr) {
   localStorage.setItem('sustrato_machines', JSON.stringify(arr));
@@ -318,7 +331,17 @@ function startTimer() {
 }
 
 // ─── Shared util ─────────────────────────────────────────────────
-function getMerma(n) {
+// Devuelve la merma para cantidad n según los rangos configurados por máquina.
+// Si maqId no se provee o la máquina no tiene rangos, usa tabla global por defecto.
+function getMerma(n, maqId) {
+  if (maqId) {
+    const maq = getMachines().find(m => m.id === maqId);
+    if (maq && maq.mermas && maq.mermas.length) {
+      const rng = maq.mermas.find(r => n >= r.desde && (r.hasta === null || n <= r.hasta));
+      return rng ? rng.merma : 0;
+    }
+  }
+  // Fallback global
   return n <= 500 ? 200 : n <= 1000 ? 300 : n <= 5000 ? 400 : n <= 10000 ? 700 : 750;
 }
 
