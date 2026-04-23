@@ -536,12 +536,16 @@ views['cotizar'] = {
     }
 
     // ── populateTipos — llena el select de tipo desde el catálogo ──
+    // Micro Flauta E y Corrugado solo aparecen si el tipo de proyecto es Empaque
+    const EMPAQUE_ONLY = new Set(['MICRO FLAUTA E', 'CORRUGADO FLAUTA B']);
     function populateTipos() {
       const sel = document.getElementById('ptipo');
-      const cats = [...new Set(getPapeles().map(p => p.categoria))];
+      const isEmpaque = !!document.querySelector('#pc-empaque.active');
+      const cats = [...new Set(getPapeles().map(p => p.categoria))]
+        .filter(c => isEmpaque || !EMPAQUE_ONLY.has(c));
       sel.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
-      // Default: COUCHE si existe
       if (cats.includes('COUCHE')) sel.value = 'COUCHE';
+      else if (cats.length) sel.value = cats[0];
       updateGramajes();
     }
 
@@ -911,7 +915,7 @@ views['cotizar'] = {
     }
 
     // ── Attach listeners ──────────────────────────────────────────
-    document.getElementById('btn-c1-next').addEventListener('click', () => { showPanel('c2'); recalc(); setStep(2); });
+    document.getElementById('btn-c1-next').addEventListener('click', () => { showPanel('c2'); populateTipos(); recalc(); setStep(2); });
     document.getElementById('btn-c2-back').addEventListener('click', () => { showPanel('c1'); setStep(1); });
     document.getElementById('btn-c2-next').addEventListener('click', goC3);
     document.getElementById('btn-c3-back').addEventListener('click', () => { showPanel('c2'); recalc(); setStep(2); });
