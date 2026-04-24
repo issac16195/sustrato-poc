@@ -32,8 +32,9 @@ views['cotizar'] = {
       </div>
       <div class="prod-card" id="pc-editorial">
         <svg class="prod-card-icon" viewBox="0 0 44 44" fill="none">
-          <path d="M22 8L10 12v22l12 4 12-4V12L22 8z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-          <path d="M22 8v28M10 12l12 4 12-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10 8h16l8 8v22a2 2 0 01-2 2H10a2 2 0 01-2-2V10a2 2 0 012-2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M26 8v10h10" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M15 22h14M15 28h14M15 34h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
         <div class="prod-card-title">Editorial</div>
         <div class="prod-card-sub">Revistas, libros, folletos, catálogos, calendarios</div>
@@ -47,7 +48,6 @@ views['cotizar'] = {
         <div class="prod-card-sub">Plegadizo, corrugado, microcorrugado</div>
       </div>
     </div>
-    <button class="btn-primary" id="btn-c1-next">Continuar →</button>
   </div>
 
   <!-- ── PASO 2: ESPECIFICACIONES ─────────────────────────────── -->
@@ -1240,7 +1240,7 @@ views['cotizar'] = {
     }
 
     // ── Attach listeners ──────────────────────────────────────────
-    document.getElementById('btn-c1-next').addEventListener('click', () => { showPanel('c2'); populateTipos(); recalc(); setStep(2); });
+    // Card click → advance to step 2 immediately (no extra "Continuar" button needed)
     document.getElementById('btn-c2-back').addEventListener('click', () => { showPanel('c1'); setStep(1); });
     document.getElementById('btn-c2-next').addEventListener('click', goC3);
     document.getElementById('btn-c3-back').addEventListener('click', () => { showPanel('c2'); recalc(); setStep(2); });
@@ -1264,7 +1264,10 @@ views['cotizar'] = {
     document.getElementById('pmedida').addEventListener('change', recalc);
 
     document.querySelectorAll('#pc-general,#pc-editorial,#pc-empaque').forEach(card => {
-      card.addEventListener('click', () => pickProd(card));
+      card.addEventListener('click', () => {
+        pickProd(card);
+        showPanel('c2'); populateTipos(); recalc(); setStep(2);
+      });
     });
     // Generar chips desde procesos activos con tarifaSrc
     const chipsEl = document.getElementById('chips-terminados');
