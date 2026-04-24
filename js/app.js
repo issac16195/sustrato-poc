@@ -1,5 +1,16 @@
-// ─── Shared state ────────────────────────────────────────────────
-let timerOn = false, timerInt;
+// ─── app.js — Estado global y utilidades compartidas ─────────────
+//
+// Este archivo es el "modelo" de la app. Contiene:
+//   - DEFAULT_* : datos de fábrica para usuarios nuevos o sin datos en Firestore
+//   - get*()    : lectura desde localStorage (síncrona, nunca falla)
+//   - save*()   : escribe en localStorage + dispara fsWrite() a Firestore
+//   - applyUnidad() : motor de cálculo de precios por unidad del tarifario
+//   - calcTerminadoCosto() : calcula el costo de un terminado seleccionado en el cotizador
+//   - getMerma()    : devuelve la merma para una cantidad y máquina dadas
+//
+// Cargado antes que todos los views — sus funciones son globales.
+//
+// ─────────────────────────────────────────────────────────────────
 
 // ─── Global money formatter ───────────────────────────────────────
 function fmtMXN(n) {
@@ -463,8 +474,19 @@ function parseMinimo(nota) {
   return m ? parseFloat(m[1].replace(',', '')) : 0;
 }
 
-// Aplica la fórmula correcta según unidad de un entry de tarifario
-// ctx puede incluir: cant, pliegos, utilW_m, utilH_m, tintas, millares
+// ─── applyUnidad ─────────────────────────────────────────────────
+// Traduce un entry del tarifario a un monto en pesos según su unidad.
+//
+// ctx: { cant, pliegos, utilW_m, utilH_m, tintas, millares }
+//   cant     → ejemplares finales pedidos
+//   pliegos  → pliegos divididos que pasan por la máquina (ya con merma)
+//   utilW_m  → ancho útil de la máquina en METROS (para cálculo de m²)
+//   utilH_m  → alto útil de la máquina en METROS
+//   tintas   → número total de colores (4/0=4, 4/4=8, 1/0=1)
+//   millares → ceil(pliegos / 1000)
+//
+// Nota: 'sobre papel' devuelve el precio como porcentaje (ej. 5).
+//       El caller (goC3) aplica ese porcentaje sobre costoPapel separadamente.
 function applyUnidad(entry, ctx) {
   const { cant = 0, pliegos = 0, utilW_m = 0, utilH_m = 0, tintas = 1, millares = 1 } = ctx;
   const precio = parseFloat(entry.precio) || 0;
@@ -485,18 +507,30 @@ function applyUnidad(entry, ctx) {
   return min > 0 ? Math.max(costo, min) : costo;
 }
 
-// Calcula costo de un terminado seleccionado usando el id del proceso y maqId de la máquina.
+// ─── calcTerminadoCosto ───────────────────────────────────────────
+// Calcula el costo de un terminado seleccionado (chip activo en cotizar).
+//
+// Flujo:
+//   1. Busca el proceso por procId en getProcesos()
+//   2. Determina de qué sección del tarifario viene (rc|ac|pp|prod)
+//   3. Para cada nombre en proc.tarifaNombres busca la entrada exacta
+//      que corresponda a la máquina (o tamano='—' como comodín)
+//   4. Suma applyUnidad() de cada entrada encontrada
+//
+// Ejemplo: Suaje tiene tarifaNombres=['Suaje (matriz)', 'Arreglo de suajado', 'Suajado']
+// → busca esas 3 entradas en getAcabados() filtrando por maqId → suma los 3 costos.
 function calcTerminadoCosto(procId, maqId, cant, pliegos, utilW_m, utilH_m, tintas = 1, millares = 1) {
   const proc = getProcesos().find(p => p.id === procId);
   if (!proc || !proc.tarifaSrc) return 0;
   const ctx = { cant, pliegos, utilW_m, utilH_m, tintas, millares };
+  // Selecciona el array correcto del tarifario según tarifaSrc del proceso
   const arr = proc.tarifaSrc === 'rc' ? getRecubrimientos()
             : proc.tarifaSrc === 'ac' ? getAcabados()
             : proc.tarifaSrc === 'pp' ? getPreprensa()
             : getProduccion();
   let total = 0;
   for (const nom of proc.tarifaNombres) {
-    const entry = lookupTarifa(arr, nom, maqId);
+    const entry = lookupTarifa(arr, nom, maqId); // entry exacta por nombre + máquina
     if (entry) total += applyUnidad(entry, ctx);
   }
   return total;
@@ -504,6 +538,5 @@ function calcTerminadoCosto(procId, maqId, cant, pliegos, utilW_m, utilH_m, tint
 
 // ─── Boot ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  startTimer();
   showView('cotizar', document.querySelector('.nav-item.active'));
 });

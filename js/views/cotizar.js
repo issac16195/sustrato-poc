@@ -400,12 +400,24 @@ views['cotizar'] = {
     }
 
     // ── Imposition calculator ─────────────────────────────────────
-    const SANGRIA = 0.3; // cm bleed on each side
+    // Calcula cuántas piezas caben en el área útil del sub-pliego.
+    // Prueba orientación normal (pW×pH) y rotada 90° (pH×pW), elige la mejor.
+    // SANGRIA se suma a cada pieza para reservar margen de corte.
+    //
+    // Devuelve: { nx, ny, count, rotated, cw, ch, pw, ph }
+    //   nx/ny   → columnas/filas de la imposición
+    //   count   → nx × ny (pzas por pliego)
+    //   rotated → true si la orientación 90° fue mejor
+    //   cw/ch   → ancho/alto de celda (pieza + sangrías)
+    //   pw/ph   → ancho/alto de la pieza tal como quedó impuesta
+    const SANGRIA = 0.3; // cm de sangría por lado (se duplica en cada dimensión)
 
     function calcImp(pW, pH, util) {
       if (pW <= 0 || pH <= 0) return {nx:0,ny:0,count:0,rotated:false,cw:pW,ch:pH,pw:pW,ph:pH};
+      // Orientación normal
       const cw1=pW+SANGRIA*2, ch1=pH+SANGRIA*2;
       const nx1=Math.floor(util.w/cw1)||0, ny1=Math.floor(util.h/ch1)||0;
+      // Orientación girada 90°
       const cw2=pH+SANGRIA*2, ch2=pW+SANGRIA*2;
       const nx2=Math.floor(util.w/cw2)||0, ny2=Math.floor(util.h/ch2)||0;
       if (nx2*ny2 > nx1*ny1)
@@ -628,7 +640,16 @@ views['cotizar'] = {
         </div>` : ''}`;
     }
 
-    // ── Recalc — geometría basada en papel seleccionado por el usuario ─
+    // ── recalc — recalcula imposición para cada máquina ──────────────
+    // Se dispara en cada cambio de dimensiones, tipo/gramaje/medida de papel.
+    //
+    // Para cada máquina:
+    //   1. Si hay papel exacto en catálogo: verifica que el sub-pliego (según division)
+    //      quepa físicamente en tamW×tamH de la máquina.
+    //   2. Determina el área efectiva = min(sub-pliego, util) para no inflar imposición.
+    //   3. Llama calcImp() y guarda el mejor resultado en _imps[maqId].
+    //   4. Si no hay papel en catálogo: usa el área útil directamente como fallback.
+    // Resultado: _imps y _paperPerMachine actualizados → renderCards() redibuja tarjetas.
     function recalc() {
       const pW       = +document.getElementById('pancho')?.value  || 0;
       const pH       = +document.getElementById('palto')?.value   || 0;
@@ -688,7 +709,17 @@ views['cotizar'] = {
       renderCards();
     }
 
-    // ── estimateCost — costo total estimado para una máquina ───────
+    // ── estimateCost — costo total estimado para una máquina ──────
+    // Usado en el paso 2 para comparar el costo entre máquinas.
+    // Es una estimación rápida (no el cálculo final de goC3) — misma lógica
+    // pero sin detalle de terminados individuales.
+    //
+    // Componentes sumados:
+    //   costoPapel   = pliegos_full × precio/pliego × 1.05 (corte a prensa)
+    //   costoLam     = láminas según tarifario de producción
+    //   costoImp     = impresión según tarifario de producción
+    //   costoTerm    = suma de chips activos via calcTerminadoCosto()
+    //   costoCorte   = corte final 2×(nx+ny) × precio del tarifario
     function estimateCost(m, imp, { cant, tipoPapel, gramaje, tintas }) {
       if (!imp || imp.count === 0) return Infinity;
 
@@ -801,7 +832,17 @@ views['cotizar'] = {
       if (prev && s.querySelector(`option[value="${prev}"]`)) s.value = prev;
     }
 
-    // ── goC3 ──────────────────────────────────────────────────────
+    // ── goC3 — cálculo final y render del paso 3 ──────────────────
+    // Toma la máquina seleccionada y genera el desglose completo de costos.
+    // Secciones numeradas en el código: 1.Papel 2.Láminas 3.Impresión
+    //   4.Terminados 5.Corte final 6.Envío 7.Total
+    //
+    // Importante:
+    //   - pliegos      = pliegos divididos que pasan por la prensa (con merma)
+    //   - pliegos_full = ceil(pliegos / div) → pliegos completos que se compran
+    //   - costoPapel   usa pliegos_full (pagas el pliego completo aunque uses 1/4)
+    //   - cortePrensa  = 5% sobre costoPapel (merma de corte al tamaño del sub-pliego)
+    //   - renderResult() se llama al inicio y cada vez que el margen slider cambia
     function goC3() {
       const nom   = document.getElementById('pnombre').value || 'Sin nombre';
       const cant  = +document.getElementById('pcantidad').value || 5000;

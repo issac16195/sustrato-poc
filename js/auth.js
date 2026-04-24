@@ -1,4 +1,25 @@
 // ─── Sustrato Auth + Firestore sync layer ────────────────────────────────────
+//
+// PATRÓN DE DATOS: Dual-layer (localStorage + Firestore)
+//
+//   Escritura (save*()):
+//     localStorage.setItem(...)   → inmediato, síncrono → la UI nunca espera
+//     fsWrite(key, data)          → fire-and-forget a Firestore (async, no bloquea)
+//
+//   Lectura (get*()):
+//     localStorage.getItem(...)   → siempre síncrono, sin spinners
+//
+//   Login (signInUser / signInGoogle):
+//     syncUserData(uid)           → descarga Firestore → localStorage ANTES de mostrar la app
+//
+//   Logout (signOutUser):
+//     Borra TODOS los keys de LS_KEYS del localStorage para no dejar datos de un
+//     usuario en el dispositivo cuando otro inicia sesión.
+//
+// ESTRUCTURA FIRESTORE:
+//   users/{uid}/config/{key}  donde key = machines | preprensa | acabados | ...
+//   La mayoría se guardan como { data: [...] }. El perfil va como objeto plano.
+//
 // Uses Firebase compat SDK (db, auth globals from firebase-config.js)
 
 const LS_KEYS = [
