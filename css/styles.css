@@ -749,3 +749,44 @@ input:hover,select:hover{border-color:var(--slate)}
 .term-toggle-btn:active { transform: scale(.95); }
 .term-on  { background: rgba(0,168,120,.12); color: var(--teal); }
 .term-off { background: var(--bg2); color: var(--text3); }
+
+/* ── Máquinas — edit panel ────────────────────────────────────────
+   Panel expandible que reemplaza la fila inline de edición.
+   Mismo patrón que merma-expand-row pero con fondo navy claro.     */
+.maq-row.maq-editing > td {
+  background: rgba(26,32,21,.03);
+}
+.maq-edit-panel {
+  padding: 18px 20px 20px;
+  background: var(--white);
+}
+.maq-edit-panel-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.maq-edit-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.maq-edit-grid-4 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+/* Responsive: collapse edit grids on small screens */
+@media (max-width: 720px) {
+  .maq-edit-grid-3 { grid-template-columns: 1fr 1fr; }
+  .maq-edit-grid-4 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .maq-edit-grid-3, .maq-edit-grid-4 { grid-template-columns: 1fr; }
+}
