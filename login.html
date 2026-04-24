@@ -162,9 +162,14 @@ body{font-family:'Inter',sans-serif;background:var(--navy);min-height:100vh;disp
 <script src="js/auth.js"></script>
 
 <script>
+// Evita que onAuthStateChanged redirija durante un login activo
+// (doSignIn/doGoogle manejan la redirección después de que syncUserData termina)
+let _loginInProgress = false;
+
 // ── Auth state — if already logged in, go straight to app ─────────────────
 auth.onAuthStateChanged(async (user) => {
   if (user) {
+    if (_loginInProgress) return; // el flujo de login activo maneja la redirección
     const onboarded = await isOnboarded(user.uid);
     window.location.href = onboarded ? 'index.html' : 'onboarding.html';
     return;
@@ -223,11 +228,13 @@ async function doSignIn() {
   const pass  = document.getElementById('si-pass').value;
   if (!email || !pass) { showError('Ingresa tu correo y contraseña.'); return; }
   hideError();
+  _loginInProgress = true;
   setLoading('btn-signin', true);
   try {
-    await signInUser(email, pass);
+    await signInUser(email, pass); // incluye syncUserData — espera a que termine
     window.location.href = 'index.html';
   } catch(e) {
+    _loginInProgress = false;
     setLoading('btn-signin', false);
     showError(mapFirebaseError(e.code));
   }
@@ -256,10 +263,12 @@ async function doSignUp() {
 // ── Google ────────────────────────────────────────────────────────────────
 async function doGoogle() {
   hideError();
+  _loginInProgress = true;
   try {
-    const { isNew } = await signInGoogle();
+    const { isNew } = await signInGoogle(); // incluye syncUserData para usuarios existentes
     window.location.href = isNew ? 'onboarding.html' : 'index.html';
   } catch(e) {
+    _loginInProgress = false;
     showError(mapFirebaseError(e.code));
   }
 }

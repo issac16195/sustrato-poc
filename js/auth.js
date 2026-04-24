@@ -4,8 +4,8 @@
 const LS_KEYS = [
   'sustrato_machines','sustrato_preprensa','sustrato_acabados',
   'sustrato_produccion','sustrato_recubrimientos','sustrato_clientes',
-  'sustrato_papel','sustrato_profile','sustrato_cotizaciones',
-  'sustrato_onboarded',
+  'sustrato_papel','sustrato_papeles','sustrato_profile','sustrato_cotizaciones',
+  'sustrato_procesos','sustrato_envios','sustrato_onboarded',
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -25,24 +25,34 @@ function configRef(key, uid) {
 // Used by every save*() in app.js — keeps saves synchronous from app's POV
 function fsWrite(key, data) {
   const uid = currentUid();
-  if (!uid) return;
+  if (!uid) { console.warn('[fsWrite] sin usuario autenticado —', key); return; }
   configRef(key).set(key === 'profile' ? data : { data })
-    .catch(e => console.warn('[Firestore write error]', key, e));
+    .then(() => console.log('[fsWrite ✓]', key))
+    .catch(e => console.error('[fsWrite ✗]', key, e.code || e.message, e));
 }
 
 // ─── Sync Firestore → localStorage (called at login) ─────────────────────────
 async function syncUserData(uid) {
-  const configKeys = ['machines','preprensa','acabados','produccion','recubrimientos','papel'];
+  // Todas las colecciones almacenadas como { data: [...] }
+  const configKeys = [
+    'machines','preprensa','acabados','produccion','recubrimientos',
+    'papel','papeles','procesos','envios'
+  ];
+
   const snaps = await Promise.all(configKeys.map(k => configRef(k, uid).get()));
+  const missing = []; // llaves no encontradas en Firestore
 
   snaps.forEach((snap, i) => {
-    if (!snap.exists) return;
-    const key = 'sustrato_' + configKeys[i];
-    const d   = snap.data();
-    localStorage.setItem(key, JSON.stringify(d.data !== undefined ? d.data : d));
+    const lsKey = 'sustrato_' + configKeys[i];
+    if (snap.exists) {
+      const d = snap.data();
+      localStorage.setItem(lsKey, JSON.stringify(d.data !== undefined ? d.data : d));
+    } else {
+      missing.push(configKeys[i]);
+    }
   });
 
-  // Profile
+  // Profile (estructura especial — sin envolver .data)
   const profileSnap = await configRef('profile', uid).get();
   if (profileSnap.exists) {
     localStorage.setItem('sustrato_profile', JSON.stringify(profileSnap.data()));
@@ -59,6 +69,26 @@ async function syncUserData(uid) {
   const cotsSnap = await configRef('cotizaciones', uid).get();
   if (cotsSnap.exists && cotsSnap.data().data) {
     localStorage.setItem('sustrato_cotizaciones', JSON.stringify(cotsSnap.data().data));
+  }
+
+  // Para llaves sin datos en Firestore: subir lo que haya en localStorage.
+  // Migra datos existentes (ej. issac); es no-op en dispositivos limpios.
+  if (missing.length > 0) _seedMissingKeys(missing, uid);
+}
+
+// ─── Sube a Firestore las llaves que no existen aún ───────────────────────────
+// Fire-and-forget — no bloquea el flujo de login.
+function _seedMissingKeys(keys, uid) {
+  for (const k of keys) {
+    const raw = localStorage.getItem('sustrato_' + k);
+    if (!raw) continue; // nada en LS → el usuario verá DEFAULT_* del código JS
+    try {
+      const data = JSON.parse(raw);
+      configRef(k, uid).set({ data })
+        .catch(e => console.warn('[Firestore seed]', k, e));
+    } catch(e) {
+      console.warn('[Firestore seed parse]', k, e);
+    }
   }
 }
 
