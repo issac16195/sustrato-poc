@@ -734,3 +734,18 @@ input:hover,select:hover{border-color:var(--slate)}
   color:var(--text3);
   font-style:italic;
 }
+
+/* ── Terminados del cotizador — toggle buttons ─────────────────── */
+.term-toggle-btn {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: background .15s, color .15s, transform .1s;
+  letter-spacing: .2px;
+}
+.term-toggle-btn:active { transform: scale(.95); }
+.term-on  { background: rgba(0,168,120,.12); color: var(--teal); }
+.term-off { background: var(--bg2); color: var(--text3); }

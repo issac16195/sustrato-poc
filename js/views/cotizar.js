@@ -389,6 +389,16 @@ views['cotizar'] = {
       }) || null;
     }
 
+    // ── Sub-pliego options based on machine division ──────────────
+    // division=4 (cuarto): pliego se corta en 2×2 → dims/2 × dims/2
+    // division=2 (medio):  pliego se corta por mitad → 2 opciones de corte
+    // division=1 (completo): pliego entra entero
+    function subPliegoOptions(dims, division) {
+      if (division === 4) return [{ w: dims.w / 2, h: dims.h / 2 }];
+      if (division === 2) return [{ w: dims.w, h: dims.h / 2 }, { w: dims.w / 2, h: dims.h }];
+      return [{ w: dims.w, h: dims.h }];
+    }
+
     // ── Imposition calculator ─────────────────────────────────────
     const SANGRIA = 0.3; // cm bleed on each side
 
@@ -635,26 +645,35 @@ views['cotizar'] = {
       let anyFit = false;
 
       for (const m of MACHINES) {
+        const div = m.division || 1;
         let imp;
         if (dims) {
-          // Verificar que el papel quepa físicamente en la máquina (considerando rotación)
-          const fitsNormal  = dims.w <= m.tamW && dims.h <= m.tamH;
-          const fitsRotated = dims.h <= m.tamW && dims.w <= m.tamH;
+          // Verificar que el sub-pliego (según división de máquina) quepa físicamente
+          const subOptions = subPliegoOptions(dims, div);
+          let bestImp = { count: 0 };
+          let fits = false;
 
-          if (!fitsNormal && !fitsRotated) {
-            // El pliego es más grande que la máquina → No apta por tamaño de papel
+          for (const sub of subOptions) {
+            const fitsNormal  = sub.w <= m.tamW && sub.h <= m.tamH;
+            const fitsRotated = sub.h <= m.tamW && sub.w <= m.tamH;
+            if (!fitsNormal && !fitsRotated) continue;
+            fits = true;
+            _paperPerMachine[m.id] = papel;
+            // Área efectiva = min(sub-pliego, util) — probar ambas orientaciones
+            const eff1 = { w: Math.min(sub.w, m.util.w), h: Math.min(sub.h, m.util.h) };
+            const eff2 = { w: Math.min(sub.h, m.util.w), h: Math.min(sub.w, m.util.h) };
+            const i1 = calcImp(pW, pH, eff1);
+            const i2 = calcImp(pW, pH, eff2);
+            const candidate = i2.count > i1.count ? i2 : i1;
+            if (candidate.count > bestImp.count) bestImp = candidate;
+          }
+
+          if (!fits) {
             _paperPerMachine[m.id] = null;
             _imps[m.id] = { count:0, nx:0, ny:0, rotated:false, cw:0, ch:0, pw:pW, ph:pH };
             continue;
           }
-
-          _paperPerMachine[m.id] = papel;
-          // Área efectiva = min(pliego, util) — probar ambas orientaciones del pliego
-          const eff1 = { w: Math.min(dims.w, m.util.w), h: Math.min(dims.h, m.util.h) };
-          const eff2 = { w: Math.min(dims.h, m.util.w), h: Math.min(dims.w, m.util.h) };
-          const i1 = calcImp(pW, pH, eff1);
-          const i2 = calcImp(pW, pH, eff2);
-          imp = i2.count > i1.count ? i2 : i1;
+          imp = bestImp;
         } else {
           // Sin papel en catálogo o medida no seleccionada → fallback al util de la máquina
           _paperPerMachine[m.id] = null;
@@ -673,19 +692,21 @@ views['cotizar'] = {
     function estimateCost(m, imp, { cant, tipoPapel, gramaje, tintas }) {
       if (!imp || imp.count === 0) return Infinity;
 
+      const div      = m.division || 1;
       const merma    = getMerma(cant, m.id);
-      const pliegos  = Math.ceil((cant + merma) / imp.count);
+      const pliegos  = Math.ceil((cant + merma) / imp.count); // pliegos divididos → prensa
+      const pliegos_full = Math.ceil(pliegos / div);          // pliegos completos → compra
       const millares = Math.ceil(pliegos / 1000);
       const utilW_m  = m.utilW / 100;
       const utilH_m  = m.utilH / 100;
       const ctx      = { cant, pliegos, utilW_m, utilH_m, tintas, millares };
 
-      // Papel + corte a prensa (5%) — precio del entry específico por máquina
+      // Papel + corte a prensa (5%) — precio basado en pliegos completos comprados
       const papelEntry = _paperPerMachine[m.id];
       const papelPx    = papelEntry
         ? papelEntry.precioMillar / 1000
         : getPapelPriceFor(tipoPapel, gramaje, m.pliegoPrice);
-      const costoPapel = pliegos * papelPx * 1.05;
+      const costoPapel = pliegos_full * papelPx * 1.05;
 
       // Láminas + Impresión (tarifario por máquina)
       const prod     = getProduccion();
@@ -699,7 +720,14 @@ views['cotizar'] = {
       const costoTerm = chips.reduce((s, ch) =>
         s + calcTerminadoCosto(ch.dataset.procId, m.id, cant, pliegos, utilW_m, utilH_m, tintas, millares), 0);
 
-      return costoPapel + costoLam + costoImp + costoTerm;
+      // Corte final — aplica a todo trabajo sin suajado (2 cortes por cada fila+columna de la imposición)
+      const hasSuaje      = chips.some(ch => ch.textContent.trim().toLowerCase().includes('suaj'));
+      const numCortes     = hasSuaje ? 0 : 2 * ((imp.nx || 0) + (imp.ny || 0));
+      const corteEntryEst = getAcabados().find(a => a.nombre === 'Corte final');
+      const pCorte        = parseFloat(corteEntryEst?.precio) || 5;
+      const costoCorte    = numCortes * pCorte;
+
+      return costoPapel + costoLam + costoImp + costoTerm + costoCorte;
     }
 
     // ── populateTipos — llena el select de tipo desde el catálogo ──
@@ -784,6 +812,7 @@ views['cotizar'] = {
       const tintas  = getTintas();
       const maqId   = sel.id;   // usa el id real de la máquina para lookup en tarifario
 
+      const div        = sel.division || 1;
       const produccion = getProduccion();
       const tipoPapel  = document.getElementById('ptipo').value;         // bond|couche|sulfatado
       const gramaje    = document.getElementById('pgramaje').value;      // '150g', '12 pts', etc.
@@ -791,11 +820,12 @@ views['cotizar'] = {
       const utilH_m    = (sel.utilH || sel.util?.h || 70) / 100;
 
       // ── 1. Papel ──────────────────────────────────────────────────
+      const pliegos_full = Math.ceil(pliegos / div);  // pliegos completos que se compran
       const papelEntryC3 = _paperPerMachine[sel.id];
       const papelPx      = papelEntryC3
         ? papelEntryC3.precioMillar / 1000
         : getPapelPriceFor(tipoPapel, gramaje, sel.pliegoPrice);
-      const costoPapel   = pliegos * papelPx;
+      const costoPapel   = pliegos_full * papelPx;
       const cortePrensa  = costoPapel * 0.05;
 
       // ── 2. Láminas ────────────────────────────────────────────────
@@ -822,7 +852,15 @@ views['cotizar'] = {
       });
       const costoTerm = termLines.reduce((s, l) => s + l.costo, 0);
 
-      // ── 5. Envío ──────────────────────────────────────────────────
+      // ── 5. Corte final (para trabajos no suajados) ────────────────
+      // Fórmula: 2 × (columnas + filas de la imposición) cortes, precio del tarifario
+      const hasSuaje    = chips.some(ch => ch.textContent.trim().toLowerCase().includes('suaj'));
+      const numCortes   = hasSuaje ? 0 : 2 * ((imp.nx || 0) + (imp.ny || 0));
+      const corteEntry  = getAcabados().find(a => a.nombre === 'Corte final');
+      const precioCorteFinal = parseFloat(corteEntry?.precio) || 5;
+      const costoCorte  = numCortes * precioCorteFinal;
+
+      // ── 6. Envío ──────────────────────────────────────────────────
       const envioChipEl = document.querySelector('#envio-chips .envio-chip.active');
       let costoEnvio = 0, envioLabel = 'Envío';
       if (envioChipEl) {
@@ -835,8 +873,8 @@ views['cotizar'] = {
         }
       }
 
-      // ── 6. Total ──────────────────────────────────────────────────
-      const costoTotal = costoPapel + cortePrensa + costoLam + costoImp + costoTerm + costoEnvio;
+      // ── 7. Total ──────────────────────────────────────────────────
+      const costoTotal = costoPapel + cortePrensa + costoLam + costoImp + costoTerm + costoCorte + costoEnvio;
 
       // Helper: renders cost + re-calculates price when margen changes
       function renderResult(margenPct) {
@@ -853,11 +891,12 @@ views['cotizar'] = {
         const fmt = n => fmtMXN(n);
         const tintasLabel = document.getElementById('ptintas').value;
         const lines = [
-          { label: `Papel (${pliegos.toLocaleString('es-MX')} pliegos × ${fmtMXN(papelPx)})`, val: costoPapel },
+          { label: `Papel (${pliegos_full.toLocaleString('es-MX')} pliegos${div>1?` · ÷${div}`:''}  × ${fmtMXN(papelPx)})`, val: costoPapel },
           { label: 'Corte a prensa (5%)',                                                            val: cortePrensa, sub: true },
           { label: `Láminas (${tintas} ${tintas===1?'tinta':'tintas'} × ${fmtMXN(parseFloat(lamEntry?.precio)||0)})`, val: costoLam },
           { label: `Impresión ${tintasLabel} · ${millares} ${millares===1?'millar':'millares'}`,                 val: costoImp },
           ...termLines.map(l => ({ label: l.nombre, val: l.costo })),
+          ...(numCortes > 0 ? [{ label: `Corte final (${numCortes} cortes × ${fmtMXN(precioCorteFinal)})`, val: costoCorte }] : []),
           { label: envioLabel, val: costoEnvio },
         ];
 
@@ -895,7 +934,7 @@ views['cotizar'] = {
       const clienteObj = _clientId ? getClientes().find(c => c.id === _clientId) : null;
       _quoteData = {
         id: 'cot-' + Date.now(),
-        nom, cant, merma, pliegos, millares, tintas, tintasLabel,
+        nom, cant, merma, pliegos, pliegos_full, div, millares, tintas, tintasLabel,
         tipoPapelLabel, gramaje,
         tipo: tipoActivo,
         maqName: sel.name,
@@ -905,6 +944,7 @@ views['cotizar'] = {
         impPrecio: parseFloat(impEntry?.precio) || 0,
         costoLam, costoImp,
         termLines,
+        numCortes, costoCorte,
         costoEnvio, envioLabel,
         costoTotal,
         clientId: _clientId || null,
@@ -913,8 +953,6 @@ views['cotizar'] = {
       };
 
       showPanel('c3');
-      clearInterval(timerInt);
-      timerOn = false;
       setStep(3);
 
       renderResult(+(slider?.value || 30));

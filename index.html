@@ -48,10 +48,6 @@
     <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
     Nueva cotización
   </div>
-  <div class="nav-item" onclick="showView('procesos',this)">
-    <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-    Procesos
-  </div>
   <div class="nav-group">CRM</div>
   <div class="nav-item" onclick="showView('clientes',this)">
     <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M1 13c0-2.5 2.2-4 5-4s5 1.5 5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="5" r="2" stroke="currentColor" stroke-width="1.4"/><path d="M12 11c1.5.3 3 1.2 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
@@ -84,16 +80,6 @@
       </div>
       <button class="sidebar-logout" title="Cerrar sesión" onclick="signOutUser().then(()=>location.href='login.html')">⏏</button>
     </div>
-    <div class="sidebar-foot">
-    <div class="trial-card">
-      <div class="trial-label">Periodo de prueba</div>
-      <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:2px">
-        <div class="trial-days">28</div>
-        <div class="trial-unit">días restantes</div>
-      </div>
-      <button class="trial-cta" onclick="showView('plan',null)">Activar plan — $499/mes →</button>
-    </div>
-  </div>
   </div>
 </nav>
 
@@ -106,7 +92,6 @@
       <div class="page-title" id="top-title">Nueva cotización</div>
       <div class="page-sub" id="top-sub">Proyecto general · 3 pasos</div>
     </div>
-    <div class="timer" id="timer">⏱ 0:00</div>
   </div>
   <div id="app"></div>
 </main>
@@ -118,13 +103,12 @@
 <script src="js/firebase-config.js?v=2"></script>
 <script src="js/auth.js?v=2"></script>
 <!-- App -->
-<script src="js/app.js?v=17"></script>
+<script src="js/app.js?v=20"></script>
 <script src="js/views/dashboard.js?v=6"></script>
-<script src="js/views/cotizar.js?v=16"></script>
-<script src="js/views/procesos.js?v=3"></script>
-<script src="js/views/maquinas.js?v=5"></script>
+<script src="js/views/cotizar.js?v=20"></script>
+<script src="js/views/maquinas.js?v=6"></script>
 <script src="js/views/sustratos.js?v=5"></script>
-<script src="js/views/tarifario.js?v=10"></script>
+<script src="js/views/tarifario.js?v=11"></script>
 <script src="js/views/clientes.js?v=1"></script>
 <script src="js/views/perfil.js?v=1"></script>
 <script src="js/views/plan.js?v=2"></script>

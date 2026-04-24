@@ -1,5 +1,5 @@
 // ─── Shared state ────────────────────────────────────────────────
-let sec = 0, timerOn = false, timerInt;
+let timerOn = false, timerInt;
 
 // ─── Global money formatter ───────────────────────────────────────
 function fmtMXN(n) {
@@ -16,9 +16,9 @@ const DEFAULT_MERMAS = [
   { desde: 10001, hasta: null,  merma: 750 },
 ];
 const DEFAULT_MACHINES = [
-  { id:'PM52',  name:'PM52',  tag:'Chica',   tamW:37,  tamH:51,  utilW:35, utilH:49,  gramaje:'16 pts', cph:850,  pliegoPrice:0.45, mermas: DEFAULT_MERMAS.map(r=>({...r})) },
-  { id:'PM74',  name:'PM74',  tag:'Mediana', tamW:52,  tamH:72,  utilW:50, utilH:70,  gramaje:'20 pts', cph:1200, pliegoPrice:0.65, mermas: DEFAULT_MERMAS.map(r=>({...r})) },
-  { id:'CD102', name:'CD102', tag:'Grande',  tamW:72,  tamH:102, utilW:79, utilH:100, gramaje:'24 pts', cph:2100, pliegoPrice:1.20, mermas: DEFAULT_MERMAS.map(r=>({...r})) },
+  { id:'PM52',  name:'PM52',  tag:'Chica',   tamW:37,  tamH:51,  utilW:35, utilH:49,  gramaje:'16 pts', cph:850,  pliegoPrice:0.45, division:4, mermas: DEFAULT_MERMAS.map(r=>({...r})) },
+  { id:'PM74',  name:'PM74',  tag:'Mediana', tamW:52,  tamH:72,  utilW:50, utilH:70,  gramaje:'20 pts', cph:1200, pliegoPrice:0.65, division:2, mermas: DEFAULT_MERMAS.map(r=>({...r})) },
+  { id:'CD102', name:'CD102', tag:'Grande',  tamW:72,  tamH:102, utilW:79, utilH:100, gramaje:'24 pts', cph:2100, pliegoPrice:1.20, division:1, mermas: DEFAULT_MERMAS.map(r=>({...r})) },
 ];
 function getMachines() {
   try {
@@ -27,7 +27,8 @@ function getMachines() {
       const arr = JSON.parse(raw);
       if (arr.length) return arr.map(m => ({
         ...m,
-        mermas: m.mermas || DEFAULT_MERMAS.map(r => ({...r}))
+        mermas: m.mermas || DEFAULT_MERMAS.map(r => ({...r})),
+        division: m.division || 1,
       }));
     }
   } catch {}
@@ -96,6 +97,7 @@ const DEFAULT_ACABADOS = [
   { id:'ac30', nombre:'Hot stamping',             nota:'',                                tamano:'PM74', precio:1.50, unidad:'por pieza'  },
   { id:'ac31', nombre:'Hot stamping',             nota:'',                                tamano:'CD102',precio:2.50, unidad:'por pieza'  },
   { id:'ac32', nombre:'Redondeo esquinas',        nota:'',                                tamano:'—',    precio:0.10, unidad:'por pieza'  },
+  { id:'ac33', nombre:'Corte final',              nota:'Guillotina · se calcula por la imposición del trabajo', tamano:'—', precio:5, unidad:'por corte' },
 ];
 function getAcabados() {
   try {
@@ -333,18 +335,6 @@ function showView(id, el) {
   if (views[id] && views[id].init) {
     views[id].init();
   }
-  // side-effects
-  if (id === 'cotizar' && !timerOn) startTimer();
-}
-
-// ─── Timer ────────────────────────────────────────────────────────
-function startTimer() {
-  timerOn = true;
-  timerInt = setInterval(() => {
-    sec++;
-    const m = Math.floor(sec / 60), s = sec % 60;
-    document.getElementById('timer').textContent = '⏱ ' + m + ':' + (s < 10 ? '0' : '') + s;
-  }, 1000);
 }
 
 // ─── Shared util ─────────────────────────────────────────────────

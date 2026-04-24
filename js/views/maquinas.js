@@ -37,6 +37,7 @@ views['maquinas'] = {
               <th>Máquina</th>
               <th>Tam. máx. (cm)</th>
               <th>Área útil (cm)</th>
+              <th>División</th>
               <th>Gramaje máx.</th>
               <th>$/pliego</th>
               <th>$/hora</th>
@@ -52,10 +53,12 @@ views['maquinas'] = {
 
     // ── Display row HTML ──────────────────────────────────────────
     function rowHTML(m) {
+      const divLabel = m.division === 4 ? 'Cuarto (÷4)' : m.division === 2 ? 'Medio (÷2)' : 'Pliego (÷1)';
       return `<tr data-id="${m.id}" class="maq-row">
         <td><strong>${m.name}</strong><br><span style="font-size:11px;color:var(--text3)">${m.tag}</span></td>
         <td>${m.tamW}×${m.tamH}</td>
         <td>${m.utilW}×${m.utilH}</td>
+        <td><span style="font-size:11px;font-weight:600;color:var(--teal)">${divLabel}</span></td>
         <td>${m.gramaje}</td>
         <td>${fmtMXN(m.pliegoPrice)}</td>
         <td>${fmtMXN(m.cph)}</td>
@@ -71,6 +74,7 @@ views['maquinas'] = {
 
     // ── Edit row HTML ─────────────────────────────────────────────
     function editRowHTML(m) {
+      const div = m.division || 1;
       return `<tr data-id="${m.id}" class="maq-row maq-editing">
         <td>
           <input class="mq-f mq-name" value="${m.name}" placeholder="Nombre" style="width:70px" title="Nombre"/>
@@ -84,6 +88,13 @@ views['maquinas'] = {
         <td style="white-space:nowrap">
           <input class="mq-f mq-uw" type="number" value="${m.utilW}" style="width:40px"/> ×
           <input class="mq-f mq-uh" type="number" value="${m.utilH}" style="width:40px"/>
+        </td>
+        <td>
+          <select class="mq-f mq-div" style="width:100px">
+            <option value="1" ${div===1?'selected':''}>Pliego (÷1)</option>
+            <option value="2" ${div===2?'selected':''}>Medio (÷2)</option>
+            <option value="4" ${div===4?'selected':''}>Cuarto (÷4)</option>
+          </select>
         </td>
         <td><input class="mq-f mq-gram" value="${m.gramaje}" style="width:62px"/></td>
         <td>$<input class="mq-f mq-pp" type="number" step="0.01" value="${m.pliegoPrice}" style="width:52px"/></td>
@@ -99,7 +110,7 @@ views['maquinas'] = {
     // ── Delete confirm row HTML ───────────────────────────────────
     function deleteRowHTML(m) {
       return `<tr data-id="${m.id}" class="maq-row maq-deleting">
-        <td colspan="7" style="background:rgba(224,85,85,.06);border-radius:var(--radius-sm)">
+        <td colspan="8" style="background:rgba(224,85,85,.06);border-radius:var(--radius-sm)">
           <div style="display:flex;align-items:center;gap:16px;padding:4px 0">
             <span style="font-size:13px;color:var(--text2);font-weight:500">¿Eliminar <strong>${m.name}</strong>? Esta acción no se puede deshacer.</span>
             <span class="mq-confirm-del" style="font-size:13px;font-weight:700;color:#E05555;cursor:pointer;flex-shrink:0">Sí, eliminar</span>
@@ -143,7 +154,7 @@ views['maquinas'] = {
       }).join('');
 
       return `<tr class="merma-expand-row" data-for="${m.id}">
-        <td colspan="7" style="padding:0;border-top:2px solid var(--teal);background:rgba(0,168,120,.03)">
+        <td colspan="8" style="padding:0;border-top:2px solid var(--teal);background:rgba(0,168,120,.03)">
           <div style="padding:14px 16px 16px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
               <div>
@@ -356,6 +367,7 @@ views['maquinas'] = {
           const tamH    = +tr.querySelector('.mq-th').value || 0;
           const utilW   = +tr.querySelector('.mq-uw').value || 0;
           const utilH   = +tr.querySelector('.mq-uh').value || 0;
+          const division = +tr.querySelector('.mq-div').value || 1;
           const gramaje = tr.querySelector('.mq-gram').value.trim();
           const pliegoPrice = +tr.querySelector('.mq-pp').value || 0;
           const cph     = +tr.querySelector('.mq-cph').value || 0;
@@ -363,7 +375,7 @@ views['maquinas'] = {
           const newId = name.toUpperCase().replace(/\s+/g, '');
           // Preserve mermas when saving machine edits
           const oldMachine = getMachines().find(x => x.id === oldId);
-          const updated = { id: newId, name, tag, tamW, tamH, utilW, utilH, gramaje, cph, pliegoPrice,
+          const updated = { id: newId, name, tag, tamW, tamH, utilW, utilH, gramaje, cph, pliegoPrice, division,
             mermas: oldMachine?.mermas || DEFAULT_MERMAS.map(r=>({...r})) };
           const arr = getMachines().map(x => x.id === oldId ? updated : x);
           saveMachines(arr);
@@ -417,11 +429,18 @@ views['maquinas'] = {
               <label>Costo / hora (MXN)</label><input id="nw-cph" type="number" placeholder="2100"/>
             </div>
           </div>
-          <div class="row2" style="margin-bottom:16px">
+          <div class="maq-edit-row" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
             <div class="fg">
               <label>Costo por pliego (MXN)</label><input id="nw-pp" type="number" step="0.01" placeholder="1.20"/>
             </div>
-            <div></div>
+            <div class="fg">
+              <label>División de pliego</label>
+              <select id="nw-div">
+                <option value="1">Pliego completo (÷1)</option>
+                <option value="2">Medio pliego (÷2)</option>
+                <option value="4">Cuarto de pliego (÷4)</option>
+              </select>
+            </div>
           </div>
           <div class="btn-row">
             <button class="btn-primary" id="nw-submit">Agregar máquina</button>
@@ -442,6 +461,7 @@ views['maquinas'] = {
         const gramaje = document.getElementById('nw-gram').value.trim() || '—';
         const cph   = +document.getElementById('nw-cph').value || 0;
         const pliegoPrice = +document.getElementById('nw-pp').value || 0;
+        const division = +document.getElementById('nw-div').value || 1;
 
         if (!name) { document.getElementById('nw-name').focus(); return; }
         if (!utilW || !utilH) { document.getElementById('nw-uw').focus(); return; }
@@ -453,7 +473,7 @@ views['maquinas'] = {
           document.getElementById('nw-name').title = 'Ya existe una máquina con este nombre';
           return;
         }
-        arr.push({ id, name, tag, tamW, tamH, utilW, utilH, gramaje, cph, pliegoPrice,
+        arr.push({ id, name, tag, tamW, tamH, utilW, utilH, gramaje, cph, pliegoPrice, division,
           mermas: DEFAULT_MERMAS.map(r=>({...r})) });
         saveMachines(arr);
         hideAddForm();

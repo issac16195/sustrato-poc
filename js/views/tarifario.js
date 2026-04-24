@@ -11,6 +11,7 @@ views['tarifario'] = {
       <option value="recubrimiento">Recubrimientos</option>
       <option value="acabados">Acabados</option>
       <option value="logistica">Logística — Envíos</option>
+      <option value="terminados">Terminados del cotizador</option>
     </select>
   </div>
 
@@ -115,6 +116,25 @@ views['tarifario'] = {
 
   <div style="font-size:11px;color:var(--text3);margin-top:8px;padding:12px;background:var(--white);border-radius:var(--radius-sm);border:1px solid var(--border)">
     💡 Cada entrada está ligada a una máquina específica de tu catálogo. Las entradas con <strong>—</strong> aplican a todas las máquinas. Precios sin IVA.
+  </div>
+
+  <!-- TERMINADOS DEL COTIZADOR -->
+  <div class="tariff-category" data-cat="terminados" id="section-terminados">
+    <div class="tariff-cat-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <span>Terminados del cotizador</span>
+      <span style="font-size:11px;font-weight:500;color:var(--text3)">Activa o desactiva qué servicios aparecen como opciones en el cotizador</span>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden" id="card-terminados">
+      <table class="tariff-table">
+        <thead><tr>
+          <th style="width:24%">Servicio</th>
+          <th>Descripción</th>
+          <th style="width:110px">Precio desde</th>
+          <th style="width:110px;text-align:center">En cotizador</th>
+        </tr></thead>
+        <tbody id="term-tbody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 `;
@@ -576,6 +596,46 @@ views['tarifario'] = {
       renderRows();
       document.getElementById('btn-add-env').addEventListener('click', showAddForm);
     })();
+
+    // ── Terminados del cotizador ──────────────────────────────────
+    function renderTerminados() {
+      const tbody = document.getElementById('term-tbody');
+      if (!tbody) return;
+      const procs = getProcesos().filter(p => p.tarifaSrc !== null);
+      tbody.innerHTML = procs.map(p => {
+        const arr = p.tarifaSrc === 'rc' ? getRecubrimientos()
+                  : p.tarifaSrc === 'ac' ? getAcabados()
+                  : p.tarifaSrc === 'pp' ? getPreprensa()
+                  : getProduccion();
+        const prices = p.tarifaNombres
+          .flatMap(nom => arr.filter(e => e.nombre === nom))
+          .map(e => parseFloat(e.precio))
+          .filter(n => !isNaN(n) && n > 0);
+        const minPx   = prices.length ? Math.min(...prices) : null;
+        const pxLabel = minPx != null ? fmtMXN(minPx) : '—';
+        return `<tr data-search="${p.name.toLowerCase()} ${(p.sub||'').toLowerCase()}">
+          <td><strong>${p.name}</strong></td>
+          <td style="font-size:12px;color:var(--text3)">${p.sub || '—'}</td>
+          <td><span class="price-chip navy">${pxLabel}</span></td>
+          <td style="text-align:center">
+            <button class="term-toggle-btn ${p.active ? 'term-on' : 'term-off'}"
+                    data-proc-id="${p.id}">
+              ${p.active ? '● Activo' : '○ Inactivo'}
+            </button>
+          </td>
+        </tr>`;
+      }).join('');
+
+      tbody.querySelectorAll('.term-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id  = btn.dataset.procId;
+          const arr = getProcesos().map(p => p.id === id ? { ...p, active: !p.active } : p);
+          saveProcesos(arr);
+          renderTerminados();
+        });
+      });
+    }
+    renderTerminados();
 
     // ── Search / filter ───────────────────────────────────────────
     function filterTariff() {
