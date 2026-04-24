@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Bienvenido a Sustrato</title>
+<title>Configura tu imprenta · Sustrato</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,13 +21,14 @@
 html,body{height:100%}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
 
+/* ── AUTH OVERLAY ───────────────────────────────────────────────── */
+.auth-overlay{position:fixed;inset:0;background:#1C2015;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999}
+
 /* ── TOPBAR ─────────────────────────────────────────────────────── */
 .ob-topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0}
-.ob-logo{display:flex;align-items:center;gap:10px}
+.ob-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
 .ob-logo-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--navy);letter-spacing:.5px}
 .ob-logo-tag{font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.6px;margin-top:2px}
-.ob-demo-link{font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline;text-underline-offset:3px;transition:color .15s;padding:6px 0}
-.ob-demo-link:hover{color:var(--navy)}
 
 /* ── PROGRESS ────────────────────────────────────────────────────── */
 .ob-progress{display:flex;align-items:center;gap:0}
@@ -38,12 +39,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
 .ob-dot.done span{display:none}
 .ob-line{width:36px;height:2px;background:var(--border);transition:background .4s}
 .ob-line.done{background:var(--teal)}
+.ob-step-label{font-size:11px;font-weight:500;color:var(--text3)}
 
 /* ── MAIN ────────────────────────────────────────────────────────── */
 .ob-main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:48px 24px 60px}
 
 /* ── CARD ────────────────────────────────────────────────────────── */
 .ob-card{background:var(--white);border-radius:14px;box-shadow:var(--shadow);width:100%;padding:44px 44px 36px;animation:slideIn .28s cubic-bezier(.25,1,.5,1)}
+@media(max-width:560px){.ob-card{padding:28px 20px 24px}}
 @keyframes slideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 .ob-step-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--teal-dark);margin-bottom:8px}
 .ob-title{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:800;color:var(--navy);margin-bottom:6px;line-height:1.1}
@@ -51,11 +54,29 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
 
 /* ── FORM ELEMENTS ───────────────────────────────────────────────── */
 .fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
-.fg label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.fg label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:5px}
+.fg label .opt-tag{font-size:9px;font-weight:600;color:var(--border2);background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:1px 5px;text-transform:uppercase;letter-spacing:.3px}
 .fg input,.fg textarea{border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 13px;font-size:14px;font-family:'Inter',sans-serif;color:var(--navy);background:var(--white);transition:border-color .15s;width:100%}
 .fg input:focus,.fg textarea:focus{outline:none;border-color:var(--teal)}
 .fg input.err{border-color:#E05555}
+.fg input[readonly]{background:var(--bg);color:var(--text3);cursor:default}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.row2{grid-template-columns:1fr}}
+
+/* ── LOGO UPLOAD ─────────────────────────────────────────────────── */
+.logo-upload-area{border:2px dashed var(--border2);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;overflow:hidden}
+.logo-upload-area:hover{border-color:var(--teal);background:var(--teal-bg)}
+.logo-upload-area.has-logo{border-style:solid;border-color:var(--teal-border);background:var(--teal-bg);padding:12px}
+.logo-upload-icon{font-size:28px;margin-bottom:6px}
+.logo-upload-hint{font-size:12px;color:var(--text3);font-weight:500;line-height:1.5}
+.logo-upload-hint strong{display:block;color:var(--text2);font-size:13px;margin-bottom:2px}
+.logo-preview{max-height:80px;max-width:200px;object-fit:contain;border-radius:4px;display:none}
+.logo-upload-area.has-logo .logo-preview{display:block;margin:0 auto}
+.logo-upload-area.has-logo .logo-upload-icon,.logo-upload-area.has-logo .logo-upload-hint{display:none}
+.logo-remove{position:absolute;top:8px;right:8px;font-size:11px;color:var(--text3);background:var(--white);border:1px solid var(--border);border-radius:4px;padding:3px 8px;cursor:pointer;display:none;font-weight:600}
+.logo-upload-area.has-logo .logo-remove{display:block}
+#logo-file-input{display:none}
+.logo-upload-size{font-size:10px;color:var(--text3);margin-top:6px;text-align:center}
 
 /* ── BUTTONS ─────────────────────────────────────────────────────── */
 .btn-p{background:var(--teal);color:#fff;border:none;border-radius:var(--radius-sm);padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background .15s,transform .1s;white-space:nowrap}
@@ -68,42 +89,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
 .ob-skip{font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline;text-underline-offset:3px;transition:color .15s}
 .ob-skip:hover{color:var(--navy)}
 
-/* ── WELCOME CARD — SPLIT LAYOUT ────────────────────────────────── */
-#s0.ob-card{max-width:860px;padding:0;overflow:hidden;display:flex;min-height:420px}
-.ob-welcome-left{flex:1;padding:52px 48px 44px;display:flex;flex-direction:column;justify-content:center}
-.ob-welcome-right{width:296px;flex-shrink:0;background:var(--bg);border-left:1px solid var(--border);padding:36px 28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
-.ob-site-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--teal-dark);margin-bottom:14px}
-.ob-hero-title{font-family:'Barlow Condensed',sans-serif;font-size:56px;font-weight:800;color:var(--navy);line-height:1;letter-spacing:-.5px;margin-bottom:32px}
-.ob-hero-stats{display:flex;gap:32px;margin-bottom:36px}
-.ob-hero-n{display:block;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;color:var(--teal-dark);line-height:1}
-.ob-hero-l{display:block;font-size:11px;color:var(--text3);font-weight:500;margin-top:3px;line-height:1.4}
-.ob-welcome-actions{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
-.ob-demo-cta{font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline;text-underline-offset:3px;transition:color .15s}
-.ob-demo-cta:hover{color:var(--navy)}
-/* Press sheet animation */
-.ob-press-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);text-align:center}
-.ob-press-sheet{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 2px 12px rgba(28,32,21,.07)}
-@keyframes piecePop{0%{opacity:0;transform:scale(.65)}70%{transform:scale(1.05);opacity:1}100%{opacity:1;transform:scale(1)}}
-.ob-piece{opacity:0;transform-box:fill-box;transform-origin:center}
-.ob-piece.play{animation:piecePop .28s cubic-bezier(.25,1.5,.5,1) forwards}
-@keyframes statBadgeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.ob-demo-stat-badge{display:flex;align-items:center;gap:7px;background:var(--teal-bg);border:1px solid var(--teal-border);border-radius:20px;padding:7px 16px;font-size:12px;font-weight:700;color:var(--teal-dark);font-family:'Barlow Condensed',sans-serif;letter-spacing:.3px;opacity:0;text-align:center}
-.ob-demo-stat-badge.play{animation:statBadgeIn .3s ease forwards;animation-delay:2.9s}
-.ob-press-desc{font-size:10px;color:var(--text3);text-align:center;line-height:1.6;font-weight:500}
-
 /* ── STEP 1 — IMPRENTA ───────────────────────────────────────────── */
-#s1.ob-card{max-width:540px}
+#s1.ob-card{max-width:580px}
 
 /* ── STEP 2 — PRENSAS ────────────────────────────────────────────── */
 #s2.ob-card{max-width:680px}
 .ob-maq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:4px}
+@media(max-width:560px){.ob-maq-grid{grid-template-columns:1fr}}
 .ob-maq-card{border:1px solid var(--border);border-radius:8px;padding:16px 14px;background:var(--bg);transition:border-color .15s}
 .ob-maq-card:hover{border-color:var(--teal-border)}
 .ob-maq-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--navy);line-height:1}
 .ob-maq-tag{font-size:10px;color:var(--text3);font-weight:500;margin-bottom:12px;margin-top:2px}
 .ob-maq-row{font-size:11px;color:var(--text2);margin-bottom:4px}
 .ob-maq-row strong{color:var(--navy);font-weight:600}
-.ob-maq-hint{font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5;padding:10px;background:var(--teal-bg);border:1px solid var(--teal-border);border-radius:6px}
+.ob-maq-hint{font-size:11px;color:var(--text3);margin-top:14px;line-height:1.5;padding:10px;background:var(--teal-bg);border:1px solid var(--teal-border);border-radius:6px}
 
 /* ── STEP 3 — PAPEL ──────────────────────────────────────────────── */
 #s3.ob-card{max-width:560px}
@@ -131,6 +130,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
 </head>
 <body>
 
+<!-- Auth loading overlay -->
+<div class="auth-overlay" id="auth-loading">
+  <svg width="38" height="38" viewBox="0 0 30 30" fill="none">
+    <path d="M3 22 L15 28 L27 22 L15 16 Z" fill="#00BDA5" opacity="0.3"/>
+    <path d="M3 18 L15 24 L27 18 L15 12 Z" fill="#00BDA5" opacity="0.55"/>
+    <path d="M3 14 L15 20 L27 14 L15 8 Z" fill="#00BDA5" opacity="0.8"/>
+    <path d="M3 10 L15 16 L27 10 L15 4 Z" fill="#00BDA5"/>
+  </svg>
+  <div style="color:rgba(255,255,255,.38);font-size:12px;font-family:'Inter',sans-serif;letter-spacing:.3px">Preparando tu cuenta…</div>
+</div>
+
+<!-- Main wrapper — shown after auth check -->
+<div id="ob-wrap" style="display:none;min-height:100vh;display:none;flex-direction:column">
+
 <!-- TOPBAR -->
 <header class="ob-topbar">
   <div class="ob-logo">
@@ -146,8 +159,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
     </div>
   </div>
 
-  <!-- Progress (hidden on welcome) -->
-  <div class="ob-progress" id="ob-progress" style="display:none">
+  <!-- Progress — 3 steps -->
+  <div class="ob-progress" id="ob-progress">
     <div class="ob-dot active" id="d1"><span>1</span></div>
     <div class="ob-line" id="l1"></div>
     <div class="ob-dot" id="d2"><span>2</span></div>
@@ -155,117 +168,63 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
     <div class="ob-dot" id="d3"><span>3</span></div>
   </div>
 
-  <span class="ob-demo-link" id="ob-demo-top" onclick="goDemo()">Ir al demo directo →</span>
+  <span class="ob-step-label" id="ob-step-label">Tu imprenta</span>
 </header>
 
 <!-- MAIN CONTENT -->
 <main class="ob-main" id="ob-main">
 
-  <!-- STEP 0: WELCOME -->
-  <div class="ob-card" id="s0">
-
-    <!-- LEFT: copy + CTAs -->
-    <div class="ob-welcome-left">
-      <div class="ob-site-cat">Cotizador para imprentas · México</div>
-      <h1 class="ob-hero-title">Cotiza<br>en minutos,<br>no en horas.</h1>
-      <div class="ob-hero-stats">
-        <div class="ob-hero-stat">
-          <span class="ob-hero-n">3</span>
-          <span class="ob-hero-l">pasos para<br>cotizar</span>
-        </div>
-        <div class="ob-hero-stat">
-          <span class="ob-hero-n">100%</span>
-          <span class="ob-hero-l">tus precios<br>y máquinas</span>
-        </div>
-        <div class="ob-hero-stat">
-          <span class="ob-hero-n">0</span>
-          <span class="ob-hero-l">fórmulas<br>de Excel</span>
-        </div>
-      </div>
-      <div class="ob-welcome-actions">
-        <button class="btn-p lg" onclick="goTo(1)">Registrar mi imprenta →</button>
-        <span class="ob-demo-cta" onclick="goDemo()">Solo quiero ver el demo, sin registro</span>
-      </div>
-    </div>
-
-    <!-- RIGHT: live imposition demo -->
-    <div class="ob-welcome-right">
-      <div class="ob-press-label">Imposición en tiempo real</div>
-      <div class="ob-press-sheet">
-        <svg id="ob-demo-svg" viewBox="0 0 200 280" width="178" height="249" style="display:block">
-          <defs>
-            <pattern id="hatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
-              <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(28,32,21,.09)" stroke-width="1.2"/>
-            </pattern>
-          </defs>
-          <!-- Sheet: hatch = waste area -->
-          <rect width="200" height="280" rx="2" fill="url(#hatch)"/>
-          <!-- Useful print area: 3×3 pieces of 14×21cm at 4px/cm -->
-          <rect width="175.2" height="259.2" rx="1" fill="#FAF9F5"/>
-          <!-- Row 0 — outer g = position, inner g.ob-piece = animation -->
-          <g><g class="ob-piece" style="animation-delay:.55s">
-            <rect x="1.2" y="1.2" width="56" height="84" fill="#00A878" fill-opacity=".86" rx="2"/>
-            <text x="29.2" y="43.2" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="16" font-weight="700" font-family="Barlow Condensed,sans-serif">1</text>
-          </g></g>
-          <g transform="translate(58.4,0)"><g class="ob-piece" style="animation-delay:.8s">
-            <rect x="1.2" y="1.2" width="56" height="84" fill="#00A878" fill-opacity=".86" rx="2"/>
-            <text x="29.2" y="43.2" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="16" font-weight="700" font-family="Barlow Condensed,sans-serif">2</text>
-          </g></g>
-          <g transform="translate(116.8,0)"><g class="ob-piece" style="animation-delay:1.05s">
-            <rect x="1.2" y="1.2" width="56" height="84" fill="#00A878" fill-opacity=".86" rx="2"/>
-            <text x="29.2" y="43.2" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="16" font-weight="700" font-family="Barlow Condensed,sans-serif">3</text>
-          </g></g>
-          <!-- Row 1 -->
-          <g transform="translate(0,86.4)"><g class="ob-piece" style="animation-delay:1.3s">
-            <rect x="1.2" y="1.2" width="56" height="84" fill="#00A878" fill-opacity=".86" rx="2"/>
-            <text x="29.2" y="43.2" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="16" font-weight="700" font-family="Barlow Condensed,sans-serif">4</text>
-          </g></g>
-          <g transform="translate(58.4,86.4)"><g class="ob-piece" style="animation-delay:1.55s">
-            <rect x="1.2" y="1.2" width="56" height="84" fill="#00A878" fill-opacity=".86" rx="2"/>
-            <text x="29.2" y="43.2" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="16" font-weight="700" font-family="Barlow Condensed,sans-serif">5</text>
-          </g></g>
-          <g transform="translate(116.8,86.4)"><g class="ob-piece" style="animation-delay:1.8s">
-            <rect x="1.2" y="1.2" width="56" height="84" fill="#00A878" fill-opacity=".86" rx="2"/>
-            <text x="29.2" y="43.2" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="16" font-weight="700" font-family="Barlow Condensed,sans-serif">6</text>
-          </g></g>
-          <!-- Row 2 -->
-          <g transform="translate(0,172.8)"><g class="ob-piece" style="animation-delay:2.05s">
-            <rect x="1.2" y="1.2" width="56" height="84" fill="#00A878" fill-opacity=".86" rx="2"/>
-            <text x="29.2" y="43.2" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="16" font-weight="700" font-family="Barlow Condensed,sans-serif">7</text>
-          </g></g>
-          <g transform="translate(58.4,172.8)"><g class="ob-piece" style="animation-delay:2.3s">
-            <rect x="1.2" y="1.2" width="56" height="84" fill="#00A878" fill-opacity=".86" rx="2"/>
-            <text x="29.2" y="43.2" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="16" font-weight="700" font-family="Barlow Condensed,sans-serif">8</text>
-          </g></g>
-          <g transform="translate(116.8,172.8)"><g class="ob-piece" style="animation-delay:2.55s">
-            <rect x="1.2" y="1.2" width="56" height="84" fill="#00A878" fill-opacity=".86" rx="2"/>
-            <text x="29.2" y="43.2" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="16" font-weight="700" font-family="Barlow Condensed,sans-serif">9</text>
-          </g></g>
-        </svg>
-      </div>
-      <!-- Badge appears after all pieces -->
-      <div class="ob-demo-stat-badge" id="ob-stat-badge">
-        <svg width="11" height="11" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        9 pzas/pliego · PM74 · 50×70 cm
-      </div>
-      <div class="ob-press-desc">Tarjetas 14×21 cm · sangría incluida</div>
-    </div>
-
-  </div>
-
-  <!-- STEP 1: TU IMPRENTA -->
-  <div class="ob-card" id="s1" style="display:none">
+  <!-- ── STEP 1: DATOS DE LA IMPRENTA ───────────────────────────── -->
+  <div class="ob-card" id="s1">
     <div class="ob-step-badge">Paso 1 de 3</div>
     <div class="ob-title">Tu imprenta</div>
-    <div class="ob-sub">Esta información aparecerá en tus cotizaciones. Tarda menos de un minuto.</div>
+    <div class="ob-sub">Esta información aparecerá en tus cotizaciones y PDFs. Tarda menos de dos minutos.</div>
 
     <div class="row2">
-      <div class="fg"><label>Tu nombre *</label><input id="f-nombre" placeholder="Ej. Carlos Mendoza" type="text"/></div>
-      <div class="fg"><label>Nombre de la imprenta *</label><input id="f-imprenta" placeholder="Ej. Impresora del Bajío" type="text"/></div>
+      <div class="fg">
+        <label>Nombre del responsable *</label>
+        <input id="f-nombre" placeholder="Ej. Carlos Mendoza" type="text"/>
+      </div>
+      <div class="fg">
+        <label>Nombre de la imprenta *</label>
+        <input id="f-imprenta" placeholder="Ej. Impresora del Bajío" type="text"/>
+      </div>
     </div>
     <div class="row2">
-      <div class="fg"><label>Ciudad</label><input id="f-ciudad" placeholder="Ej. Guadalajara, Jal." type="text"/></div>
-      <div class="fg"><label>WhatsApp / Teléfono</label><input id="f-tel" placeholder="Ej. 33 1234 5678" type="tel"/></div>
+      <div class="fg">
+        <label>Ciudad *</label>
+        <input id="f-ciudad" placeholder="Ej. Guadalajara, Jal." type="text"/>
+      </div>
+      <div class="fg">
+        <label>WhatsApp / Teléfono *</label>
+        <input id="f-tel" placeholder="Ej. 33 1234 5678" type="tel"/>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="fg">
+        <label>Correo de contacto *</label>
+        <input id="f-email" type="email" readonly/>
+      </div>
+      <div class="fg">
+        <label>RFC <span class="opt-tag">Opcional</span></label>
+        <input id="f-rfc" placeholder="Ej. IMP-930101-XXX" type="text" maxlength="14"/>
+      </div>
+    </div>
+
+    <!-- Logo upload -->
+    <div class="fg">
+      <label>Logo de la imprenta <span class="opt-tag">Opcional</span></label>
+      <div class="logo-upload-area" id="logo-area" onclick="document.getElementById('logo-file-input').click()">
+        <div class="logo-upload-icon">🖼️</div>
+        <div class="logo-upload-hint">
+          <strong>Clic para subir tu logo</strong>
+          PNG, JPG o SVG · Se mostrará en los PDFs de cotización
+        </div>
+        <img class="logo-preview" id="logo-preview" alt="Logo"/>
+        <span class="logo-remove" id="logo-remove" onclick="removeLogo(event)">✕ Quitar</span>
+      </div>
+      <input type="file" id="logo-file-input" accept="image/*" onchange="handleLogoFile(this)"/>
+      <div class="logo-upload-size" id="logo-size-hint"></div>
     </div>
 
     <div class="ob-btn-row">
@@ -274,7 +233,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
     </div>
   </div>
 
-  <!-- STEP 2: TUS PRENSAS -->
+  <!-- ── STEP 2: TUS PRENSAS ────────────────────────────────────── -->
   <div class="ob-card" id="s2" style="display:none">
     <div class="ob-step-badge">Paso 2 de 3</div>
     <div class="ob-title">Tus prensas</div>
@@ -292,7 +251,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
     </div>
   </div>
 
-  <!-- STEP 3: PRECIOS DE PAPEL -->
+  <!-- ── STEP 3: PRECIOS DE PAPEL ───────────────────────────────── -->
   <div class="ob-card" id="s3" style="display:none">
     <div class="ob-step-badge">Paso 3 de 3</div>
     <div class="ob-title">Precios de papel</div>
@@ -348,56 +307,89 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
     </div>
   </div>
 
-  <!-- STEP 4: LISTO -->
+  <!-- ── STEP 4: LISTO ──────────────────────────────────────────── -->
   <div class="ob-card" id="s4" style="display:none;text-align:center">
     <div class="ob-done-icon">🎉</div>
     <div class="ob-done-title" id="done-title">¡Tu imprenta está lista!</div>
     <div class="ob-done-sub" id="done-sub">Todo configurado. Tu cotizador ya sabe cómo trabaja tu taller.</div>
-
     <div class="ob-checklist" id="done-checklist"></div>
-
     <button class="btn-p lg" onclick="goDashboard()" style="width:100%">Ir a mi dashboard →</button>
   </div>
 
 </main>
+</div><!-- /ob-wrap -->
+
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js?v=2"></script>
+<script src="js/auth.js?v=2"></script>
 
 <script>
 // ── State ──────────────────────────────────────────────────────────
-let _step = 0;
+let _step = 1;
 let _profile = {};
+let _logoBase64 = null;
 let _step2done = false;
 let _step3done = false;
 
+const STEP_LABELS = { 1: 'Tu imprenta', 2: 'Tus prensas', 3: 'Precios de papel' };
+
 const DEFAULTS = [
-  { id:'PM52',  name:'PM52',  tag:'Chica',   tamW:37, tamH:51, utilW:35, utilH:49, gramaje:'16 pts', cph:850,  pliegoPrice:0.45 },
-  { id:'PM74',  name:'PM74',  tag:'Mediana', tamW:52, tamH:72, utilW:50, utilH:70, gramaje:'20 pts', cph:1200, pliegoPrice:0.65 },
-  { id:'CD102', name:'CD102', tag:'Grande',  tamW:72, tamH:102, utilW:79, utilH:100, gramaje:'24 pts', cph:2100, pliegoPrice:1.20 },
+  { id:'PM52',  name:'PM52',  tag:'Chica',   tamW:37,  tamH:51,  utilW:35, utilH:49,  gramaje:'16 pts', cph:850,  pliegoPrice:0.45, division:4 },
+  { id:'PM74',  name:'PM74',  tag:'Mediana', tamW:52,  tamH:72,  utilW:50, utilH:70,  gramaje:'20 pts', cph:1200, pliegoPrice:0.65, division:2 },
+  { id:'CD102', name:'CD102', tag:'Grande',  tamW:72,  tamH:102, utilW:79, utilH:100, gramaje:'24 pts', cph:2100, pliegoPrice:1.20, division:1 },
 ];
+
+// ── Auth guard ─────────────────────────────────────────────────────
+// Runs once on load. Redirects to login if not authenticated,
+// or to app if already onboarded (e.g. user navigated back here).
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    window.location.href = 'login.html';
+    return;
+  }
+  // Returning user who already completed onboarding → go to app
+  const profileSnap = await db.collection('users').doc(user.uid)
+    .collection('config').doc('profile').get();
+  if (profileSnap.exists) {
+    window.location.href = 'index.html';
+    return;
+  }
+  // New user — show onboarding
+  document.getElementById('auth-loading').style.display = 'none';
+  const wrap = document.getElementById('ob-wrap');
+  wrap.style.display = 'flex';
+  // Pre-fill email from auth
+  document.getElementById('f-email').value = user.email || '';
+  updateProgress(1);
+});
 
 // ── Navigation ─────────────────────────────────────────────────────
 function goTo(n) {
   document.getElementById('s' + _step).style.display = 'none';
   _step = n;
-  document.getElementById('s' + n).style.display = '';
-  document.getElementById('s' + n).style.animation = 'slideIn .28s cubic-bezier(.25,1,.5,1)';
+  const card = document.getElementById('s' + n);
+  card.style.display = '';
+  card.style.animation = 'slideIn .28s cubic-bezier(.25,1,.5,1)';
 
-  const prog = document.getElementById('ob-progress');
-  if (n === 0) {
-    prog.style.display = 'none';
-  } else if (n <= 3) {
-    prog.style.display = 'flex';
+  if (n <= 3) {
+    document.getElementById('ob-progress').style.display = 'flex';
+    document.getElementById('ob-step-label').textContent = STEP_LABELS[n] || '';
     updateProgress(n);
   } else {
-    prog.style.display = 'none';
+    // Step 4 (done) — hide progress
+    document.getElementById('ob-progress').style.display = 'none';
+    document.getElementById('ob-step-label').textContent = '';
   }
 
   if (n === 2) renderMachineCards();
+  if (n === 4) renderDone();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function skipTo(n) {
-  goTo(n);
-}
+function skipTo(n) { goTo(n); }
 
 function updateProgress(active) {
   for (let i = 1; i <= 3; i++) {
@@ -411,54 +403,7 @@ function updateProgress(active) {
   }
 }
 
-// ── Demo ───────────────────────────────────────────────────────────
-function goDemo() {
-  localStorage.setItem('sustrato_onboarded', '1');
-  window.location.href = 'index.html';
-}
-
-// ── Dashboard ──────────────────────────────────────────────────────
-async function goDashboard() {
-  localStorage.setItem('sustrato_onboarded', '1');
-  if (_profile.nombre) {
-    localStorage.setItem('sustrato_profile', JSON.stringify(_profile));
-  }
-
-  // Persist onboarding data to Firestore if user is authenticated
-  try {
-    const user = typeof auth !== 'undefined' && auth.currentUser;
-    if (user) {
-      const base = db.collection('users').doc(user.uid).collection('config');
-      const writes = [];
-      if (_profile.nombre) writes.push(base.doc('profile').set(_profile));
-      const machinesRaw = localStorage.getItem('sustrato_machines');
-      if (machinesRaw) writes.push(base.doc('machines').set({ data: JSON.parse(machinesRaw) }));
-      const papelRaw = localStorage.getItem('sustrato_papel');
-      if (papelRaw) writes.push(base.doc('papel').set({ data: JSON.parse(papelRaw) }));
-      await Promise.all(writes);
-    }
-  } catch (e) {
-    console.warn('[Firestore onboarding]', e);
-  }
-
-  window.location.href = 'index.html';
-}
-
-// ── Step 1 ─────────────────────────────────────────────────────────
-function saveStep1() {
-  const nombre   = document.getElementById('f-nombre').value.trim();
-  const imprenta = document.getElementById('f-imprenta').value.trim();
-  if (!nombre) { flash('f-nombre'); return; }
-  if (!imprenta) { flash('f-imprenta'); return; }
-  _profile = {
-    nombre,
-    imprenta,
-    ciudad: document.getElementById('f-ciudad').value.trim(),
-    tel:    document.getElementById('f-tel').value.trim(),
-  };
-  goTo(2);
-}
-
+// ── Flash invalid field ─────────────────────────────────────────────
 function flash(id) {
   const el = document.getElementById(id);
   el.classList.add('err');
@@ -466,77 +411,138 @@ function flash(id) {
   setTimeout(() => el.classList.remove('err'), 1800);
 }
 
+// ── Step 1 — Save datos de imprenta ────────────────────────────────
+function saveStep1() {
+  const nombre   = document.getElementById('f-nombre').value.trim();
+  const imprenta = document.getElementById('f-imprenta').value.trim();
+  const ciudad   = document.getElementById('f-ciudad').value.trim();
+  const tel      = document.getElementById('f-tel').value.trim();
+  const email    = document.getElementById('f-email').value.trim();
+
+  if (!nombre)   { flash('f-nombre');   return; }
+  if (!imprenta) { flash('f-imprenta'); return; }
+  if (!ciudad)   { flash('f-ciudad');   return; }
+  if (!tel)      { flash('f-tel');      return; }
+
+  _profile = {
+    nombre,
+    imprenta,
+    ciudad,
+    tel,
+    email,
+    rfc:       document.getElementById('f-rfc').value.trim().toUpperCase(),
+    logoBase64: _logoBase64 || null,
+  };
+  goTo(2);
+}
+
+// ── Logo upload ─────────────────────────────────────────────────────
+// Resizes image to max 400×400 via canvas → stores as base64 JPEG
+function handleLogoFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const MAX_PX = 400;
+  const QUALITY = 0.88;
+  const reader  = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      // Scale down if needed
+      let w = img.width, h = img.height;
+      if (w > MAX_PX || h > MAX_PX) {
+        const ratio = Math.min(MAX_PX / w, MAX_PX / h);
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const b64 = canvas.toDataURL('image/jpeg', QUALITY);
+      _logoBase64 = b64;
+
+      // Show preview
+      const area    = document.getElementById('logo-area');
+      const preview = document.getElementById('logo-preview');
+      preview.src   = b64;
+      area.classList.add('has-logo');
+
+      // Size hint
+      const kb = Math.round(b64.length * 0.75 / 1024);
+      document.getElementById('logo-size-hint').textContent = `Logo guardado · ${w}×${h}px · ~${kb} KB`;
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  // Reset input so same file can be re-selected if removed
+  input.value = '';
+}
+
+function removeLogo(e) {
+  e.stopPropagation();
+  _logoBase64 = null;
+  document.getElementById('logo-area').classList.remove('has-logo');
+  document.getElementById('logo-preview').src = '';
+  document.getElementById('logo-size-hint').textContent = '';
+}
+
 // ── Step 2 — Machines ──────────────────────────────────────────────
 function renderMachineCards() {
   const grid = document.getElementById('ob-maq-grid');
-  grid.innerHTML = DEFAULTS.map((m, i) => `
-    <div class="ob-maq-card" id="mc${i}">
+  grid.innerHTML = DEFAULTS.map((m) => {
+    const divLabel = m.division === 4 ? 'Cuarto (÷4)' : m.division === 2 ? 'Medio (÷2)' : 'Pliego (÷1)';
+    return `
+    <div class="ob-maq-card">
       <div class="ob-maq-name">${m.name}</div>
       <div class="ob-maq-tag">${m.tag}</div>
       <div class="ob-maq-row">Área útil: <strong>${m.utilW}×${m.utilH} cm</strong></div>
+      <div class="ob-maq-row">División: <strong style="color:var(--teal)">${divLabel}</strong></div>
       <div class="ob-maq-row">Costo/hora: <strong>$${m.cph.toLocaleString('es-MX')}</strong></div>
-      <div class="ob-maq-row">Costo/pliego: <strong>$${m.pliegoPrice.toFixed(2)}</strong></div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function saveMachinesStep() {
-  localStorage.setItem('sustrato_machines', JSON.stringify(DEFAULTS));
+  const DEFAULT_MERMAS = [
+    { desde:100,   hasta:500,   merma:200 },
+    { desde:501,   hasta:1000,  merma:300 },
+    { desde:1001,  hasta:5000,  merma:400 },
+    { desde:5001,  hasta:10000, merma:700 },
+    { desde:10001, hasta:null,  merma:750 },
+  ];
+  const machines = DEFAULTS.map(m => ({ ...m, mermas: DEFAULT_MERMAS.map(r => ({...r})) }));
+  localStorage.setItem('sustrato_machines', JSON.stringify(machines));
   _step2done = true;
   goTo(3);
 }
 
-// ── Step 3 — Paper ─────────────────────────────────────────────────
+// ── Step 3 — Paper prices ──────────────────────────────────────────
 function savePapelStep() {
-  // Read values and store (overrides defaults in sustratos view)
-  // We store in a generic config object; sustratos.js reads defaults from code
-  // So we save to a dedicated key that sustratos can pick up later
   const papel = {
-    bond: {
-      '75g':  +document.getElementById('pb75').value || 0.38,
-      '90g':  +document.getElementById('pb90').value || 0.45,
-      '105g': +document.getElementById('pb105').value || 0.54,
-    },
-    couche: {
-      '100g': +document.getElementById('pc100').value || 0.55,
-      '150g': +document.getElementById('pc150').value || 0.65,
-      '200g': +document.getElementById('pc200').value || 0.80,
-    },
-    sulfatado: {
-      '12 pts': +document.getElementById('ps12').value || 1.10,
-      '14 pts': +document.getElementById('ps14').value || 1.28,
-    },
+    bond:      { '75g': +document.getElementById('pb75').value  || 0.38, '90g': +document.getElementById('pb90').value  || 0.45, '105g': +document.getElementById('pb105').value || 0.54 },
+    couche:    { '100g':+document.getElementById('pc100').value || 0.55, '150g':+document.getElementById('pc150').value || 0.65, '200g': +document.getElementById('pc200').value || 0.80 },
+    sulfatado: { '12 pts':+document.getElementById('ps12').value||1.10,  '14 pts':+document.getElementById('ps14').value||1.28 },
   };
   localStorage.setItem('sustrato_papel', JSON.stringify(papel));
   _step3done = true;
   goTo(4);
 }
 
-// ── Step 4 — Done ──────────────────────────────────────────────────
-function goTo4() {
-  goTo(4);
-}
-
-// When step 4 renders, show checklist
-document.addEventListener('DOMContentLoaded', () => {
-  // Intercept goTo to render checklist on step 4
-  const origGoTo = window.goTo;
-  window.goTo = function(n) {
-    origGoTo(n);
-    if (n === 4) renderDone();
-  };
-});
-
+// ── Step 4 — Render done screen ────────────────────────────────────
 function renderDone() {
   const name = _profile.imprenta || 'Tu imprenta';
   document.getElementById('done-title').textContent = '¡' + name + ' está lista!';
   document.getElementById('done-sub').textContent =
-    'Configurada en menos de 3 minutos. Tu cotizador ya sabe cómo trabaja tu taller.';
+    'Configurada en minutos. Tu cotizador ya sabe cómo trabaja tu taller.';
 
   document.getElementById('done-checklist').innerHTML = `
     <div class="ob-chk">
       <div class="ob-chk-tick">✓</div>
       <span>Imprenta registrada · <strong>${_profile.imprenta || '—'}</strong></span>
+    </div>
+    <div class="ob-chk">
+      <div class="${_logoBase64 ? 'ob-chk-tick' : 'ob-chk-skip'}">${_logoBase64 ? '✓' : '—'}</div>
+      <span>Logo${_logoBase64 ? ' · cargado' : ' · (omitido — puedes agregarlo después en Mi imprenta)'}</span>
     </div>
     <div class="ob-chk">
       <div class="${_step2done ? 'ob-chk-tick' : 'ob-chk-skip'}">${_step2done ? '✓' : '—'}</div>
@@ -548,49 +554,45 @@ function renderDone() {
     </div>
   `;
 
-  // Save profile
-  if (_profile.nombre) {
-    localStorage.setItem('sustrato_profile', JSON.stringify(_profile));
-  }
-  // If machines weren't customized, still save defaults
+  // Save profile and default machines to localStorage
+  localStorage.setItem('sustrato_profile', JSON.stringify(_profile));
+  localStorage.setItem('sustrato_onboarded', '1');
   if (!_step2done) {
-    localStorage.setItem('sustrato_machines', JSON.stringify(DEFAULTS));
+    const DEFAULT_MERMAS = [
+      { desde:100,   hasta:500,   merma:200 },
+      { desde:501,   hasta:1000,  merma:300 },
+      { desde:1001,  hasta:5000,  merma:400 },
+      { desde:5001,  hasta:10000, merma:700 },
+      { desde:10001, hasta:null,  merma:750 },
+    ];
+    const machines = DEFAULTS.map(m => ({ ...m, mermas: DEFAULT_MERMAS.map(r => ({...r})) }));
+    localStorage.setItem('sustrato_machines', JSON.stringify(machines));
   }
 }
 
-// ── Press sheet animation loop ──────────────────────────────────────
-(function loopPressSheet() {
-  const pieces = document.querySelectorAll('#s0 .ob-piece');
-  const badge  = document.getElementById('ob-stat-badge');
-  if (!pieces.length) return;
-
-  // Play fn: adds .play class to trigger CSS animation
-  function playAll() {
-    pieces.forEach(p => p.classList.add('play'));
-    if (badge) badge.classList.add('play');
+// ── Dashboard — persist everything to Firestore ────────────────────
+async function goDashboard() {
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      const base   = db.collection('users').doc(user.uid).collection('config');
+      const writes = [];
+      // Profile (flat object — no .data wrapper)
+      writes.push(base.doc('profile').set(_profile));
+      // Machines
+      const machinesRaw = localStorage.getItem('sustrato_machines');
+      if (machinesRaw) writes.push(base.doc('machines').set({ data: JSON.parse(machinesRaw) }));
+      // Legacy papel key
+      const papelRaw = localStorage.getItem('sustrato_papel');
+      if (papelRaw) writes.push(base.doc('papel').set({ data: JSON.parse(papelRaw) }));
+      await Promise.all(writes);
+    }
+  } catch (e) {
+    console.warn('[Firestore onboarding]', e);
+    // Non-fatal — data is already in localStorage
   }
-
-  // Reset fn: removes .play, forces reflow, re-adds .play
-  function resetAndPlay() {
-    pieces.forEach(p => p.classList.remove('play'));
-    if (badge) badge.classList.remove('play');
-    void document.body.offsetHeight; // force reflow so browser sees class removal
-    playAll();
-  }
-
-  // Start immediately on load
-  playAll();
-
-  // Last piece done at 2.55s + 0.28s ≈ 2.83s; badge at 2.9s + 0.3s = 3.2s
-  // Pause 2s after badge appears, then replay
-  const TOTAL = 3200 + 2000; // 5.2s per cycle
-  setInterval(resetAndPlay, TOTAL);
-})();
+  window.location.href = 'index.html';
+}
 </script>
-<!-- Firebase (needed for goDashboard Firestore writes) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="js/firebase-config.js?v=2"></script>
 </body>
 </html>
