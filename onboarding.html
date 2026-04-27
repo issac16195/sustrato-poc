@@ -21,38 +21,41 @@
 html,body{height:100%}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
 
-/* ── AUTH OVERLAY ───────────────────────────────────────────────── */
+/* ── AUTH OVERLAY ─────────────────────────────────────────────── */
 .auth-overlay{position:fixed;inset:0;background:#1C2015;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999}
 
-/* ── TOPBAR ─────────────────────────────────────────────────────── */
-.ob-topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0}
-.ob-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+/* ── TOPBAR ───────────────────────────────────────────────────── */
+.ob-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 32px;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0}
+@media(max-width:520px){.ob-topbar{padding:12px 16px}}
+.ob-logo{display:flex;align-items:center;gap:10px}
 .ob-logo-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--navy);letter-spacing:.5px}
 .ob-logo-tag{font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.6px;margin-top:2px}
 
-/* ── PROGRESS ────────────────────────────────────────────────────── */
+/* ── PROGRESS (5 dots) ────────────────────────────────────────── */
 .ob-progress{display:flex;align-items:center;gap:0}
-.ob-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--text3);background:var(--white);transition:all .28s;font-family:'Barlow Condensed',sans-serif;flex-shrink:0}
+.ob-dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--text3);background:var(--white);transition:all .28s;font-family:'Barlow Condensed',sans-serif;flex-shrink:0}
 .ob-dot.active{border-color:var(--teal);color:var(--teal-dark);background:var(--teal-bg)}
 .ob-dot.done{border-color:var(--teal);background:var(--teal);color:#fff}
-.ob-dot.done::after{content:'✓';font-size:13px}
+.ob-dot.done::after{content:'✓';font-size:11px}
 .ob-dot.done span{display:none}
-.ob-line{width:36px;height:2px;background:var(--border);transition:background .4s}
+.ob-line{width:24px;height:2px;background:var(--border);transition:background .4s;flex-shrink:0}
+@media(max-width:520px){.ob-line{width:14px}}
 .ob-line.done{background:var(--teal)}
-.ob-step-label{font-size:11px;font-weight:500;color:var(--text3)}
+.ob-step-label{font-size:11px;font-weight:500;color:var(--text3);min-width:80px;text-align:right}
+@media(max-width:520px){.ob-step-label{display:none}}
 
-/* ── MAIN ────────────────────────────────────────────────────────── */
-.ob-main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:48px 24px 60px}
+/* ── MAIN ─────────────────────────────────────────────────────── */
+.ob-main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px 60px}
 
-/* ── CARD ────────────────────────────────────────────────────────── */
-.ob-card{background:var(--white);border-radius:14px;box-shadow:var(--shadow);width:100%;padding:44px 44px 36px;animation:slideIn .28s cubic-bezier(.25,1,.5,1)}
-@media(max-width:560px){.ob-card{padding:28px 20px 24px}}
-@keyframes slideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+/* ── CARD ─────────────────────────────────────────────────────── */
+.ob-card{background:var(--white);border-radius:14px;box-shadow:var(--shadow);width:100%;padding:40px 40px 32px;animation:slideIn .28s cubic-bezier(.25,1,.5,1)}
+@media(max-width:560px){.ob-card{padding:24px 18px 20px}}
+@keyframes slideIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 .ob-step-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--teal-dark);margin-bottom:8px}
-.ob-title{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:800;color:var(--navy);margin-bottom:6px;line-height:1.1}
+.ob-title{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;color:var(--navy);margin-bottom:6px;line-height:1.1}
 .ob-sub{font-size:13px;color:var(--text3);font-weight:500;margin-bottom:28px;line-height:1.65}
 
-/* ── FORM ELEMENTS ───────────────────────────────────────────────── */
+/* ── FORM ELEMENTS ────────────────────────────────────────────── */
 .fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
 .fg label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:5px}
 .fg label .opt-tag{font-size:9px;font-weight:600;color:var(--border2);background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:1px 5px;text-transform:uppercase;letter-spacing:.3px}
@@ -63,7 +66,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:520px){.row2{grid-template-columns:1fr}}
 
-/* ── LOGO UPLOAD ─────────────────────────────────────────────────── */
+/* ── LOGO UPLOAD ──────────────────────────────────────────────── */
 .logo-upload-area{border:2px dashed var(--border2);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;overflow:hidden}
 .logo-upload-area:hover{border-color:var(--teal);background:var(--teal-bg)}
 .logo-upload-area.has-logo{border-style:solid;border-color:var(--teal-border);background:var(--teal-bg);padding:12px}
@@ -78,54 +81,111 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
 #logo-file-input{display:none}
 .logo-upload-size{font-size:10px;color:var(--text3);margin-top:6px;text-align:center}
 
-/* ── BUTTONS ─────────────────────────────────────────────────────── */
+/* ── BUTTONS ──────────────────────────────────────────────────── */
 .btn-p{background:var(--teal);color:#fff;border:none;border-radius:var(--radius-sm);padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background .15s,transform .1s;white-space:nowrap}
 .btn-p:hover{background:var(--teal-dark)}
 .btn-p:active{transform:scale(.98)}
 .btn-p.lg{padding:14px 36px;font-size:15px}
-.btn-g{background:none;color:var(--text3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 22px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .15s,color .15s}
-.btn-g:hover{border-color:var(--text3);color:var(--navy)}
-.ob-btn-row{display:flex;align-items:center;justify-content:space-between;margin-top:32px;gap:12px}
-.ob-skip{font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline;text-underline-offset:3px;transition:color .15s}
-.ob-skip:hover{color:var(--navy)}
+.ob-btn-row{display:flex;align-items:center;justify-content:flex-end;margin-top:28px;gap:12px}
 
-/* ── STEP 1 — IMPRENTA ───────────────────────────────────────────── */
+/* ── STEP 1 ───────────────────────────────────────────────────── */
 #s1.ob-card{max-width:580px}
 
-/* ── STEP 2 — PRENSAS ────────────────────────────────────────────── */
+/* ── STEP 2 — TIPO DE TRABAJOS ────────────────────────────────── */
 #s2.ob-card{max-width:680px}
-.ob-maq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:4px}
-@media(max-width:560px){.ob-maq-grid{grid-template-columns:1fr}}
-.ob-maq-card{border:1px solid var(--border);border-radius:8px;padding:16px 14px;background:var(--bg);transition:border-color .15s}
-.ob-maq-card:hover{border-color:var(--teal-border)}
-.ob-maq-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--navy);line-height:1}
-.ob-maq-tag{font-size:10px;color:var(--text3);font-weight:500;margin-bottom:12px;margin-top:2px}
-.ob-maq-row{font-size:11px;color:var(--text2);margin-bottom:4px}
-.ob-maq-row strong{color:var(--navy);font-weight:600}
-.ob-maq-hint{font-size:11px;color:var(--text3);margin-top:14px;line-height:1.5;padding:10px;background:var(--teal-bg);border:1px solid var(--teal-border);border-radius:6px}
+.tipo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:8px}
+@media(max-width:560px){.tipo-grid{grid-template-columns:1fr}}
+.tipo-card{border:2px solid var(--border);border-radius:12px;padding:22px 16px 18px;cursor:pointer;transition:border-color .2s,background .2s;text-align:center;position:relative;user-select:none}
+.tipo-card:hover:not(.locked){border-color:var(--teal-border);background:rgba(0,168,120,.04)}
+.tipo-card.on{border-color:var(--teal);background:var(--teal-bg)}
+.tipo-card.locked{cursor:default}
+.tipo-check{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;background:var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;transition:background .2s}
+.tipo-card.on .tipo-check{background:var(--teal)}
+.tipo-card-icon{width:44px;height:44px;margin:0 auto 12px;color:var(--text3);transition:color .2s}
+.tipo-card.on .tipo-card-icon{color:var(--teal-dark)}
+.tipo-card-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--navy);margin-bottom:6px}
+.tipo-card-desc{font-size:11px;color:var(--text3);line-height:1.5}
+.tipo-locked-tag{display:inline-block;margin-top:8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--teal-dark);background:rgba(0,168,120,.12);border-radius:3px;padding:2px 7px}
 
-/* ── STEP 3 — PAPEL ──────────────────────────────────────────────── */
-#s3.ob-card{max-width:560px}
-.ob-papel-section{margin-bottom:20px}
-.ob-papel-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
-.ob-papel-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
-.ob-papel-row:last-child{border-bottom:none}
-.ob-gramaje-tag{display:inline-block;font-size:12px;font-weight:700;color:var(--navy);background:rgba(26,32,53,.06);border:1px solid rgba(26,32,53,.12);border-radius:6px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.3px}
-.ob-price-input{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--text3)}
-.ob-price-input input{width:76px;border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:13px;font-weight:600;color:var(--navy);text-align:right;font-family:'Inter',sans-serif;transition:border-color .15s}
-.ob-price-input input:focus{outline:none;border-color:var(--teal)}
+/* ── STEP 3 — PRENSAS ─────────────────────────────────────────── */
+#s3.ob-card{max-width:620px}
+.prensa-list{display:flex;flex-direction:column;gap:12px;margin-bottom:4px}
+.prensa-card{border:2px solid var(--border);border-radius:10px;background:var(--bg);transition:border-color .2s,background .2s;overflow:hidden}
+.prensa-card.on{border-color:var(--teal);background:var(--white)}
+.prensa-card-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;cursor:pointer}
+.prensa-card.on .prensa-card-header{padding-bottom:12px}
+.prensa-info{}
+.prensa-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--navy);line-height:1}
+.prensa-tag{font-size:11px;color:var(--text3);font-weight:500;margin-top:2px}
+.prensa-toggle-btn{width:44px;height:24px;border-radius:12px;background:var(--border2);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.prensa-toggle-btn::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.prensa-card.on .prensa-toggle-btn{background:var(--teal)}
+.prensa-card.on .prensa-toggle-btn::after{transform:translateX(20px)}
+.prensa-pricing{display:none;padding:0 18px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.prensa-card:not(.on) .prensa-pricing{display:none}
+.prensa-card.on .prensa-pricing{display:grid}
+.prensa-info-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.prensa-pill{font-size:10px;font-weight:600;color:var(--text3);background:rgba(28,32,21,.06);border-radius:4px;padding:2px 7px}
+.prensa-min-error{font-size:12px;color:#C0392B;background:#fef0ed;border:1px solid #f8c5bc;border-radius:6px;padding:8px 12px;margin-top:4px;display:none}
 
-/* ── STEP 4 — DONE ───────────────────────────────────────────────── */
-#s4.ob-card{max-width:480px;text-align:center}
+/* ── STEP 4 — PAPELES ─────────────────────────────────────────── */
+#s4.ob-card{max-width:580px}
+.papel-section{margin-bottom:20px}
+.papel-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.papel-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+.papel-row:last-child{border-bottom:none}
+.papel-row-left{display:flex;align-items:center;gap:8px}
+.papel-tag{display:inline-block;font-size:12px;font-weight:700;color:var(--navy);background:rgba(26,32,21,.06);border:1px solid rgba(26,32,21,.12);border-radius:6px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.3px}
+.papel-medida{font-size:11px;color:var(--text3)}
+.papel-price-input{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3);white-space:nowrap}
+.papel-price-input span{color:var(--text3)}
+.papel-price-input input{width:82px;border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:13px;font-weight:600;color:var(--navy);text-align:right;font-family:'Inter',sans-serif;transition:border-color .15s}
+.papel-price-input input:focus{outline:none;border-color:var(--teal)}
+.papel-millar-hint{font-size:11px;color:var(--text3);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-bottom:20px;line-height:1.5}
+
+/* ── STEP 5 — PRECIOS DE PRODUCCIÓN ──────────────────────────── */
+#s5.ob-card{max-width:640px}
+.prod-machine-block{border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.prod-machine-header{background:var(--bg);padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.prod-machine-hname{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:var(--navy)}
+.prod-machine-htag{font-size:11px;color:var(--text3)}
+.prod-machine-body{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.prod-machine-body{grid-template-columns:1fr}}
+.prod-fg{display:flex;flex-direction:column;gap:5px}
+.prod-fg label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px}
+.prod-input-wrap{display:flex;align-items:center;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--white)}
+.prod-input-prefix{padding:9px 10px;font-size:13px;color:var(--text3);background:var(--bg);border-right:1px solid var(--border);font-weight:600}
+.prod-input-wrap input{border:none;padding:9px 10px;font-size:14px;font-weight:600;color:var(--navy);font-family:'Inter',sans-serif;width:100%;outline:none;background:transparent}
+.prod-input-suffix{padding:9px 10px;font-size:11px;color:var(--text3);background:var(--bg);border-left:1px solid var(--border);white-space:nowrap}
+.prod-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.recubr-list{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:4px}
+.recubr-row{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--white);border-bottom:1px solid var(--border)}
+.recubr-row:last-child{border-bottom:none}
+.recubr-row.off{background:var(--bg)}
+.recubr-toggle{width:36px;height:20px;border-radius:10px;background:var(--border2);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.recubr-toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.recubr-toggle.on{background:var(--teal)}
+.recubr-toggle.on::after{transform:translateX(16px)}
+.recubr-label{flex:1}
+.recubr-name{font-size:13px;font-weight:600;color:var(--navy)}
+.recubr-row.off .recubr-name{color:var(--text3)}
+.recubr-sub{font-size:11px;color:var(--text3)}
+.recubr-price{display:flex;align-items:center;gap:5px}
+.recubr-price span{font-size:11px;color:var(--text3)}
+.recubr-price input{width:64px;border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:13px;font-weight:600;color:var(--navy);text-align:right;font-family:'Inter',sans-serif;transition:border-color .15s;background:var(--white)}
+.recubr-price input:focus{outline:none;border-color:var(--teal)}
+.recubr-row.off .recubr-price input{color:var(--text3);background:var(--bg)}
+
+/* ── STEP 6 — LISTO ───────────────────────────────────────────── */
+#s6.ob-card{max-width:480px;text-align:center}
 .ob-done-icon{width:76px;height:76px;border-radius:50%;background:var(--teal-bg);border:2px solid var(--teal-border);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 20px;animation:popIn .4s cubic-bezier(.25,1.5,.5,1) .1s both}
 @keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 .ob-done-title{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;color:var(--navy);margin-bottom:6px}
 .ob-done-sub{font-size:13px;color:var(--text3);margin-bottom:24px;line-height:1.65}
 .ob-checklist{background:var(--bg);border-radius:8px;padding:14px 18px;margin-bottom:24px;text-align:left}
-.ob-chk{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2);padding:7px 0;border-bottom:1px solid var(--border)}
+.ob-chk{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);padding:7px 0;border-bottom:1px solid var(--border);line-height:1.5}
 .ob-chk:last-child{border-bottom:none}
-.ob-chk-tick{width:20px;height:20px;border-radius:50%;background:var(--teal);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ob-chk-skip{width:20px;height:20px;border-radius:50%;background:var(--border2);color:var(--text3);font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ob-chk-tick{width:20px;height:20px;border-radius:50%;background:var(--teal);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
 </style>
 </head>
 <body>
@@ -141,13 +201,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
   <div style="color:rgba(255,255,255,.38);font-size:12px;font-family:'Inter',sans-serif;letter-spacing:.3px">Preparando tu cuenta…</div>
 </div>
 
-<!-- Main wrapper — shown after auth check -->
-<div id="ob-wrap" style="display:none;min-height:100vh;display:none;flex-direction:column">
+<!-- Main wrapper -->
+<div id="ob-wrap" style="display:none;min-height:100vh;flex-direction:column">
 
 <!-- TOPBAR -->
 <header class="ob-topbar">
   <div class="ob-logo">
-    <svg width="28" height="28" viewBox="0 0 30 30" fill="none">
+    <svg width="26" height="26" viewBox="0 0 30 30" fill="none">
       <path d="M3 22 L15 28 L27 22 L15 16 Z" fill="#00A878" opacity="0.3"/>
       <path d="M3 18 L15 24 L27 18 L15 12 Z" fill="#00A878" opacity="0.55"/>
       <path d="M3 14 L15 20 L27 14 L15 8 Z" fill="#00A878" opacity="0.8"/>
@@ -159,26 +219,29 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
     </div>
   </div>
 
-  <!-- Progress — 3 steps -->
+  <!-- 5-dot progress bar -->
   <div class="ob-progress" id="ob-progress">
     <div class="ob-dot active" id="d1"><span>1</span></div>
     <div class="ob-line" id="l1"></div>
     <div class="ob-dot" id="d2"><span>2</span></div>
     <div class="ob-line" id="l2"></div>
     <div class="ob-dot" id="d3"><span>3</span></div>
+    <div class="ob-line" id="l3"></div>
+    <div class="ob-dot" id="d4"><span>4</span></div>
+    <div class="ob-line" id="l4"></div>
+    <div class="ob-dot" id="d5"><span>5</span></div>
   </div>
 
   <span class="ob-step-label" id="ob-step-label">Tu imprenta</span>
 </header>
 
-<!-- MAIN CONTENT -->
 <main class="ob-main" id="ob-main">
 
-  <!-- ── STEP 1: DATOS DE LA IMPRENTA ───────────────────────────── -->
+  <!-- ── STEP 1: DATOS DE LA IMPRENTA ─────────────────────────── -->
   <div class="ob-card" id="s1">
-    <div class="ob-step-badge">Paso 1 de 3</div>
+    <div class="ob-step-badge">Paso 1 de 5</div>
     <div class="ob-title">Tu imprenta</div>
-    <div class="ob-sub">Esta información aparecerá en tus cotizaciones y PDFs. Tarda menos de dos minutos.</div>
+    <div class="ob-sub">Esta información aparece en tus cotizaciones y PDFs. Tarda menos de dos minutos.</div>
 
     <div class="row2">
       <div class="fg">
@@ -202,7 +265,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
     </div>
     <div class="row2">
       <div class="fg">
-        <label>Correo de contacto *</label>
+        <label>Correo de contacto</label>
         <input id="f-email" type="email" readonly/>
       </div>
       <div class="fg">
@@ -211,14 +274,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
       </div>
     </div>
 
-    <!-- Logo upload -->
     <div class="fg">
       <label>Logo de la imprenta <span class="opt-tag">Opcional</span></label>
       <div class="logo-upload-area" id="logo-area" onclick="document.getElementById('logo-file-input').click()">
         <div class="logo-upload-icon">🖼️</div>
         <div class="logo-upload-hint">
           <strong>Clic para subir tu logo</strong>
-          PNG, JPG o SVG · Se mostrará en los PDFs de cotización
+          PNG, JPG o SVG · Aparece en los PDFs de cotización
         </div>
         <img class="logo-preview" id="logo-preview" alt="Logo"/>
         <span class="logo-remove" id="logo-remove" onclick="removeLogo(event)">✕ Quitar</span>
@@ -228,92 +290,246 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
     </div>
 
     <div class="ob-btn-row">
-      <div></div>
       <button class="btn-p" onclick="saveStep1()">Continuar →</button>
     </div>
   </div>
 
-  <!-- ── STEP 2: TUS PRENSAS ────────────────────────────────────── -->
+  <!-- ── STEP 2: TIPO DE TRABAJOS ──────────────────────────────── -->
   <div class="ob-card" id="s2" style="display:none">
-    <div class="ob-step-badge">Paso 2 de 3</div>
-    <div class="ob-title">Tus prensas</div>
-    <div class="ob-sub">Cargamos tres prensas estándar como punto de partida. Puedes editarlas ahora o ajustarlas después en Máquinas.</div>
+    <div class="ob-step-badge">Paso 2 de 5</div>
+    <div class="ob-title">¿Qué tipo de trabajos haces?</div>
+    <div class="ob-sub">Selecciona todos los que apliquen. Esto configura los acabados y materiales disponibles en tu cotizador.</div>
 
-    <div class="ob-maq-grid" id="ob-maq-grid"></div>
+    <div class="tipo-grid">
 
-    <div class="ob-maq-hint">
-      💡 El motor usará el área útil de cada prensa para calcular la imposición óptima y el costo de cada cotización.
+      <!-- General — siempre activo -->
+      <div class="tipo-card on locked" id="tipo-general">
+        <div class="tipo-check">✓</div>
+        <svg class="tipo-card-icon" viewBox="0 0 44 44" fill="none">
+          <rect x="8" y="6" width="28" height="32" rx="3" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M14 15h16M14 21h16M14 27h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <div class="tipo-card-name">General</div>
+        <div class="tipo-card-desc">Tarjetas, volantes, posters, etiquetas</div>
+        <div class="tipo-locked-tag">Siempre activo</div>
+      </div>
+
+      <!-- Editorial -->
+      <div class="tipo-card" id="tipo-editorial" onclick="toggleTipo('editorial')">
+        <div class="tipo-check">✓</div>
+        <svg class="tipo-card-icon" viewBox="0 0 44 44" fill="none">
+          <path d="M10 8h16l8 8v22a2 2 0 01-2 2H10a2 2 0 01-2-2V10a2 2 0 012-2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M26 8v10h10" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M15 22h14M15 28h14M15 34h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <div class="tipo-card-name">Editorial</div>
+        <div class="tipo-card-desc">Revistas, libros, folletos, catálogos</div>
+      </div>
+
+      <!-- Empaque -->
+      <div class="tipo-card" id="tipo-empaque" onclick="toggleTipo('empaque')">
+        <div class="tipo-check">✓</div>
+        <svg class="tipo-card-icon" viewBox="0 0 44 44" fill="none">
+          <path d="M22 6L38 14v16L22 38 6 30V14L22 6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M22 6v32M6 14l16 8 16-8" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        </svg>
+        <div class="tipo-card-name">Empaque</div>
+        <div class="tipo-card-desc">Cajas, plegadizo, corrugado</div>
+      </div>
     </div>
 
     <div class="ob-btn-row">
-      <span class="ob-skip" onclick="skipTo(3)">Omitir este paso</span>
-      <button class="btn-p" onclick="saveMachinesStep()">Confirmar prensas →</button>
+      <button class="btn-p" onclick="saveStep2()">Continuar →</button>
     </div>
   </div>
 
-  <!-- ── STEP 3: PRECIOS DE PAPEL ───────────────────────────────── -->
+  <!-- ── STEP 3: TUS PRENSAS ────────────────────────────────────── -->
   <div class="ob-card" id="s3" style="display:none">
-    <div class="ob-step-badge">Paso 3 de 3</div>
-    <div class="ob-title">Precios de papel</div>
-    <div class="ob-sub">Ajusta el costo por pliego según tu proveedor. Son los más usados — puedes agregar más en Sustratos.</div>
+    <div class="ob-step-badge">Paso 3 de 5</div>
+    <div class="ob-title">Tus prensas</div>
+    <div class="ob-sub">Activa las prensas que tienes en tu taller y ajusta los costos. Al menos una debe quedar activa.</div>
 
-    <div class="ob-papel-section">
-      <div class="ob-papel-label">Papel Bond</div>
-      <div class="ob-papel-row">
-        <span class="ob-gramaje-tag">75g</span>
-        <div class="ob-price-input">$ <input type="number" id="pb75" value="0.38" step="0.01"/></div>
+    <div class="prensa-list">
+
+      <!-- PM52 -->
+      <div class="prensa-card on" id="prensa-PM52">
+        <div class="prensa-card-header" onclick="togglePrensa('PM52')">
+          <div class="prensa-info">
+            <div class="prensa-name">PM52</div>
+            <div class="prensa-info-pills">
+              <span class="prensa-pill">Chica</span>
+              <span class="prensa-pill">35×49 cm útil</span>
+              <span class="prensa-pill">÷4</span>
+            </div>
+          </div>
+          <button class="prensa-toggle-btn" type="button" onclick="event.stopPropagation();togglePrensa('PM52')"></button>
+        </div>
+        <div class="prensa-pricing">
+          <div class="prod-fg">
+            <label>Costo por hora</label>
+            <div class="prod-input-wrap">
+              <span class="prod-input-prefix">$</span>
+              <input type="number" id="cph-PM52" value="850" min="0" step="50"/>
+              <span class="prod-input-suffix">/hr</span>
+            </div>
+          </div>
+          <div class="prod-fg">
+            <label>Costo por pliego</label>
+            <div class="prod-input-wrap">
+              <span class="prod-input-prefix">$</span>
+              <input type="number" id="ppl-PM52" value="0.45" min="0" step="0.05"/>
+              <span class="prod-input-suffix">/pliego</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="ob-papel-row">
-        <span class="ob-gramaje-tag">90g</span>
-        <div class="ob-price-input">$ <input type="number" id="pb90" value="0.45" step="0.01"/></div>
+
+      <!-- PM74 -->
+      <div class="prensa-card on" id="prensa-PM74">
+        <div class="prensa-card-header" onclick="togglePrensa('PM74')">
+          <div class="prensa-info">
+            <div class="prensa-name">PM74</div>
+            <div class="prensa-info-pills">
+              <span class="prensa-pill">Mediana</span>
+              <span class="prensa-pill">50×70 cm útil</span>
+              <span class="prensa-pill">÷2</span>
+            </div>
+          </div>
+          <button class="prensa-toggle-btn" type="button" onclick="event.stopPropagation();togglePrensa('PM74')"></button>
+        </div>
+        <div class="prensa-pricing">
+          <div class="prod-fg">
+            <label>Costo por hora</label>
+            <div class="prod-input-wrap">
+              <span class="prod-input-prefix">$</span>
+              <input type="number" id="cph-PM74" value="1200" min="0" step="50"/>
+              <span class="prod-input-suffix">/hr</span>
+            </div>
+          </div>
+          <div class="prod-fg">
+            <label>Costo por pliego</label>
+            <div class="prod-input-wrap">
+              <span class="prod-input-prefix">$</span>
+              <input type="number" id="ppl-PM74" value="0.65" min="0" step="0.05"/>
+              <span class="prod-input-suffix">/pliego</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="ob-papel-row">
-        <span class="ob-gramaje-tag">105g</span>
-        <div class="ob-price-input">$ <input type="number" id="pb105" value="0.54" step="0.01"/></div>
+
+      <!-- CD102 -->
+      <div class="prensa-card" id="prensa-CD102">
+        <div class="prensa-card-header" onclick="togglePrensa('CD102')">
+          <div class="prensa-info">
+            <div class="prensa-name">CD102</div>
+            <div class="prensa-info-pills">
+              <span class="prensa-pill">Grande</span>
+              <span class="prensa-pill">79×100 cm útil</span>
+              <span class="prensa-pill">÷1</span>
+            </div>
+          </div>
+          <button class="prensa-toggle-btn" type="button" onclick="event.stopPropagation();togglePrensa('CD102')"></button>
+        </div>
+        <div class="prensa-pricing">
+          <div class="prod-fg">
+            <label>Costo por hora</label>
+            <div class="prod-input-wrap">
+              <span class="prod-input-prefix">$</span>
+              <input type="number" id="cph-CD102" value="2100" min="0" step="50"/>
+              <span class="prod-input-suffix">/hr</span>
+            </div>
+          </div>
+          <div class="prod-fg">
+            <label>Costo por pliego</label>
+            <div class="prod-input-wrap">
+              <span class="prod-input-prefix">$</span>
+              <input type="number" id="ppl-CD102" value="1.20" min="0" step="0.05"/>
+              <span class="prod-input-suffix">/pliego</span>
+            </div>
+          </div>
+        </div>
       </div>
+
+    </div><!-- /prensa-list -->
+
+    <div class="prensa-min-error" id="prensa-min-error">
+      Necesitas al menos una prensa activa para continuar.
     </div>
 
-    <div class="ob-papel-section">
-      <div class="ob-papel-label">Papel Couché</div>
-      <div class="ob-papel-row">
-        <span class="ob-gramaje-tag">100g</span>
-        <div class="ob-price-input">$ <input type="number" id="pc100" value="0.55" step="0.01"/></div>
-      </div>
-      <div class="ob-papel-row">
-        <span class="ob-gramaje-tag">150g</span>
-        <div class="ob-price-input">$ <input type="number" id="pc150" value="0.65" step="0.01"/></div>
-      </div>
-      <div class="ob-papel-row">
-        <span class="ob-gramaje-tag">200g</span>
-        <div class="ob-price-input">$ <input type="number" id="pc200" value="0.80" step="0.01"/></div>
-      </div>
+    <div style="font-size:11px;color:var(--text3);line-height:1.5;margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+      💡 El motor calcula la imposición óptima según el área útil de cada prensa. Puedes editar todos los detalles después en <strong>Máquinas</strong>.
     </div>
 
-    <div class="ob-papel-section">
-      <div class="ob-papel-label">Sulfatado</div>
-      <div class="ob-papel-row">
-        <span class="ob-gramaje-tag">12 pts</span>
-        <div class="ob-price-input">$ <input type="number" id="ps12" value="1.10" step="0.01"/></div>
+    <div class="ob-btn-row">
+      <button class="btn-p" onclick="saveStep3()">Confirmar prensas →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: TUS PAPELES ────────────────────────────────────── -->
+  <div class="ob-card" id="s4" style="display:none">
+    <div class="ob-step-badge">Paso 4 de 5</div>
+    <div class="ob-title">Tus papeles</div>
+    <div class="ob-sub">Ingresa el precio por millar que pagas a tu proveedor. El cotizador convierte el resto automáticamente.</div>
+
+    <div class="papel-millar-hint">
+      💡 <strong>¿Precio por millar?</strong> Es lo que pagas por 1,000 pliegos al proveedor. Ej: si el Couché 150g te cuesta $2,120 el millar, pon 2120.
+    </div>
+
+    <div id="papeles-container"></div>
+
+    <div class="ob-btn-row">
+      <button class="btn-p" onclick="saveStep4()">Confirmar precios →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 5: PRECIOS DE PRODUCCIÓN ─────────────────────────── -->
+  <div class="ob-card" id="s5" style="display:none">
+    <div class="ob-step-badge">Paso 5 de 5</div>
+    <div class="ob-title">Tus precios de producción</div>
+    <div class="ob-sub">¿Cuánto cobras por láminas e impresión? Estos números van directo a cada cotización.</div>
+
+    <div id="prod-machines-container"></div>
+
+    <div class="prod-section-title" style="margin-top:20px">Recubrimientos</div>
+    <div class="recubr-list">
+      <div class="recubr-row" id="recubr-barniz_uv">
+        <button class="recubr-toggle on" id="rtog-barniz_uv" onclick="toggleRecubr('barniz_uv')" type="button"></button>
+        <div class="recubr-label">
+          <div class="recubr-name">Barniz UV Brillante</div>
+          <div class="recubr-sub">Se calcula por m² de impresión</div>
+        </div>
+        <div class="recubr-price">
+          <span>$</span>
+          <input type="number" id="rprice-barniz_uv" value="2.50" step="0.10" min="0"/>
+          <span>/m²</span>
+        </div>
       </div>
-      <div class="ob-papel-row">
-        <span class="ob-gramaje-tag">14 pts</span>
-        <div class="ob-price-input">$ <input type="number" id="ps14" value="1.28" step="0.01"/></div>
+      <div class="recubr-row" id="recubr-laminado">
+        <button class="recubr-toggle on" id="rtog-laminado" onclick="toggleRecubr('laminado')" type="button"></button>
+        <div class="recubr-label">
+          <div class="recubr-name">Laminado Mate</div>
+          <div class="recubr-sub">Plástico mate · Se calcula por m²</div>
+        </div>
+        <div class="recubr-price">
+          <span>$</span>
+          <input type="number" id="rprice-laminado" value="7.00" step="0.10" min="0"/>
+          <span>/m²</span>
+        </div>
       </div>
     </div>
 
     <div class="ob-btn-row">
-      <span class="ob-skip" onclick="skipTo(4)">Omitir este paso</span>
-      <button class="btn-p" onclick="savePapelStep()">Confirmar precios →</button>
+      <button class="btn-p" onclick="saveStep5()">Ver resumen →</button>
     </div>
   </div>
 
-  <!-- ── STEP 4: LISTO ──────────────────────────────────────────── -->
-  <div class="ob-card" id="s4" style="display:none;text-align:center">
+  <!-- ── STEP 6: ¡LISTO! ────────────────────────────────────────── -->
+  <div class="ob-card" id="s6" style="display:none;text-align:center">
     <div class="ob-done-icon">🎉</div>
     <div class="ob-done-title" id="done-title">¡Tu imprenta está lista!</div>
-    <div class="ob-done-sub" id="done-sub">Todo configurado. Tu cotizador ya sabe cómo trabaja tu taller.</div>
+    <div class="ob-done-sub">Tu cotizador está configurado con tus datos reales. La primera cotización debería sentirse como la tuya.</div>
     <div class="ob-checklist" id="done-checklist"></div>
-    <button class="btn-p lg" onclick="goDashboard()" style="width:100%">Ir a mi dashboard →</button>
+    <button class="btn-p lg" onclick="goDashboard()" style="width:100%">Hacer mi primera cotización →</button>
   </div>
 
 </main>
@@ -327,154 +543,294 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
 <script src="js/auth.js?v=2"></script>
 
 <script>
-// ── State ──────────────────────────────────────────────────────────
-let _step = 1;
-let _profile = {};
-let _logoBase64 = null;
-let _step2done = false;
-let _step3done = false;
+// ─── Defaults (inline — no loading app.js needed) ────────────────
+const OB_DEFAULT_MERMAS = [
+  { desde:100,   hasta:500,   merma:200 },
+  { desde:501,   hasta:1000,  merma:300 },
+  { desde:1001,  hasta:5000,  merma:400 },
+  { desde:5001,  hasta:10000, merma:700 },
+  { desde:10001, hasta:null,  merma:750 },
+];
 
-const STEP_LABELS = { 1: 'Tu imprenta', 2: 'Tus prensas', 3: 'Precios de papel' };
-
-const DEFAULTS = [
+const OB_MACHINES = [
   { id:'PM52',  name:'PM52',  tag:'Chica',   tamW:37,  tamH:51,  utilW:35, utilH:49,  gramaje:'16 pts', cph:850,  pliegoPrice:0.45, division:4 },
   { id:'PM74',  name:'PM74',  tag:'Mediana', tamW:52,  tamH:72,  utilW:50, utilH:70,  gramaje:'20 pts', cph:1200, pliegoPrice:0.65, division:2 },
   { id:'CD102', name:'CD102', tag:'Grande',  tamW:72,  tamH:102, utilW:79, utilH:100, gramaje:'24 pts', cph:2100, pliegoPrice:1.20, division:1 },
 ];
 
-// ── Auth guard ─────────────────────────────────────────────────────
-// Runs once on load. Redirects to login if not authenticated,
-// or to app if already onboarded (e.g. user navigated back here).
+// Which process IDs each tipo activates
+const TIPO_PROCESOS = {
+  general:   ['barniz_uv','laminado','suaje','doblez','plecado','folio'],
+  editorial: ['encuad','compag','wire'],
+  empaque:   ['pegado'],
+};
+
+// Production pricing: id → machine binding
+const OB_PROD_MAP = [
+  { proId:'PM52',  lamId:'pr2', impId:'pr5', defaultLam:80,  defaultImp:80  },
+  { proId:'PM74',  lamId:'pr3', impId:'pr6', defaultLam:160, defaultImp:160 },
+  { proId:'CD102', lamId:'pr4', impId:'pr7', defaultLam:320, defaultImp:320 },
+];
+
+// Paper sections for step 4
+const PAPEL_SECTIONS = [
+  { label:'Papel Bond', always:true, items:[
+    { id:'pap-1',  label:'75g',  defaultMillar:1057 },
+    { id:'pap-2',  label:'90g',  defaultMillar:1198 },
+    { id:'pap-3',  label:'105g', defaultMillar:1356 },
+  ]},
+  { label:'Papel Couché', always:true, items:[
+    { id:'pap-5',  label:'90g',  defaultMillar:1668 },
+    { id:'pap-6',  label:'100g', defaultMillar:1834 },
+    { id:'pap-7',  label:'115g', defaultMillar:1987 },
+    { id:'pap-9',  label:'150g', defaultMillar:2120 },
+    { id:'pap-10', label:'200g', defaultMillar:2987 },
+  ]},
+  { label:'Sulfatado', always:true, items:[
+    { id:'pap-21', label:'12 pts', defaultMillar:1456 },
+    { id:'pap-22', label:'14 pts', defaultMillar:1765 },
+  ]},
+  { label:'Opalina', tipo:'editorial', items:[
+    { id:'pap-15', label:'130g', defaultMillar:2100 },
+    { id:'pap-16', label:'180g', defaultMillar:2876 },
+  ]},
+  { label:'Cartulina Sulfatada', tipo:'empaque', items:[
+    { id:'pap-27', label:'162g', defaultMillar:2456 },
+    { id:'pap-28', label:'215g', defaultMillar:3123 },
+  ]},
+  { label:'Micro Flauta E', tipo:'empaque', items:[
+    { id:'pap-33', label:'36×50 cm', defaultMillar:2185 },
+    { id:'pap-34', label:'50×70 cm', defaultMillar:2987 },
+  ]},
+  { label:'Corrugado Flauta B', tipo:'empaque', items:[
+    { id:'pap-35', label:'36×50 cm', defaultMillar:1415 },
+    { id:'pap-36', label:'50×70 cm', defaultMillar:1987 },
+  ]},
+];
+
+// Full DEFAULT_PAPELES (for building the complete catalog on save)
+const OB_DEFAULT_PAPELES = [
+  { id:'pap-1',  categoria:'BOND',               material:'Bond',              medida:'57X87',  puntos:null, gramos:75,  precioMillar:1057, observaciones:'', maquina:'' },
+  { id:'pap-2',  categoria:'BOND',               material:'Bond',              medida:'57X87',  puntos:null, gramos:90,  precioMillar:1198, observaciones:'', maquina:'' },
+  { id:'pap-3',  categoria:'BOND',               material:'Bond',              medida:'58X88',  puntos:null, gramos:105, precioMillar:1356, observaciones:'', maquina:'' },
+  { id:'pap-4',  categoria:'BOND',               material:'Bond',              medida:'58X88',  puntos:null, gramos:120, precioMillar:1526, observaciones:'', maquina:'' },
+  { id:'pap-5',  categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:90,  precioMillar:1668, observaciones:'', maquina:'' },
+  { id:'pap-6',  categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:100, precioMillar:1834, observaciones:'', maquina:'' },
+  { id:'pap-7',  categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:115, precioMillar:1987, observaciones:'', maquina:'' },
+  { id:'pap-8',  categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:135, precioMillar:2325, observaciones:'', maquina:'' },
+  { id:'pap-9',  categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:150, precioMillar:2120, observaciones:'', maquina:'' },
+  { id:'pap-10', categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:200, precioMillar:2987, observaciones:'', maquina:'' },
+  { id:'pap-11', categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:250, precioMillar:3654, observaciones:'', maquina:'' },
+  { id:'pap-12', categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:300, precioMillar:4120, observaciones:'', maquina:'' },
+  { id:'pap-13', categoria:'COUCHE',             material:'Couché',            medida:'58X88',  puntos:null, gramos:350, precioMillar:4876, observaciones:'', maquina:'' },
+  { id:'pap-14', categoria:'COUCHE',             material:'Couché',            medida:'70X100', puntos:null, gramos:150, precioMillar:3012, observaciones:'', maquina:'' },
+  { id:'pap-15', categoria:'OPALINA',            material:'Opalina',           medida:'58X88',  puntos:null, gramos:130, precioMillar:2100, observaciones:'', maquina:'' },
+  { id:'pap-16', categoria:'OPALINA',            material:'Opalina',           medida:'58X88',  puntos:null, gramos:180, precioMillar:2876, observaciones:'', maquina:'' },
+  { id:'pap-17', categoria:'OPALINA',            material:'Opalina',           medida:'70X100', puntos:null, gramos:130, precioMillar:2658, observaciones:'', maquina:'' },
+  { id:'pap-18', categoria:'TEXCOTE',            material:'Texcote C1S',       medida:'58X88',  puntos:12,   gramos:null,precioMillar:3245, observaciones:'Cara/vuelta', maquina:'PM52' },
+  { id:'pap-19', categoria:'TEXCOTE',            material:'Texcote C2S',       medida:'58X88',  puntos:12,   gramos:null,precioMillar:3456, observaciones:'Dos caras',   maquina:'PM52' },
+  { id:'pap-20', categoria:'TEXCOTE',            material:'Texcote C1S',       medida:'70X100', puntos:12,   gramos:null,precioMillar:4123, observaciones:'',             maquina:'PM74' },
+  { id:'pap-21', categoria:'SULFATADO',          material:'Sulfatado',         medida:'58X88',  puntos:12,   gramos:null,precioMillar:1456, observaciones:'', maquina:'' },
+  { id:'pap-22', categoria:'SULFATADO',          material:'Sulfatado',         medida:'58X88',  puntos:14,   gramos:null,precioMillar:1765, observaciones:'', maquina:'' },
+  { id:'pap-23', categoria:'SULFATADO',          material:'Sulfatado',         medida:'70X100', puntos:16,   gramos:null,precioMillar:2234, observaciones:'', maquina:'' },
+  { id:'pap-24', categoria:'SULFATADO',          material:'Sulfatado',         medida:'70X100', puntos:18,   gramos:null,precioMillar:2456, observaciones:'', maquina:'' },
+  { id:'pap-25', categoria:'SULFATADO',          material:'Sulfatado',         medida:'70X100', puntos:20,   gramos:null,precioMillar:2765, observaciones:'', maquina:'' },
+  { id:'pap-26', categoria:'SULFATADO',          material:'Sulfatado',         medida:'70X100', puntos:24,   gramos:null,precioMillar:3123, observaciones:'', maquina:'' },
+  { id:'pap-27', categoria:'CARTULINA SULFATADA',material:'Cartulina Sulfatada',medida:'58X88', puntos:null, gramos:162, precioMillar:2456, observaciones:'', maquina:'' },
+  { id:'pap-28', categoria:'CARTULINA SULFATADA',material:'Cartulina Sulfatada',medida:'58X88', puntos:null, gramos:215, precioMillar:3123, observaciones:'', maquina:'' },
+  { id:'pap-29', categoria:'CARTULINA SULFATADA',material:'Cartulina Sulfatada',medida:'70X100',puntos:null, gramos:215, precioMillar:3876, observaciones:'', maquina:'' },
+  { id:'pap-30', categoria:'SBS MULTICAPA',      material:'SBS Multicapa',     medida:'70X96',  puntos:10,   gramos:215, precioMillar:4874, observaciones:'', maquina:'' },
+  { id:'pap-31', categoria:'SBS MULTICAPA',      material:'SBS Multicapa',     medida:'70X96',  puntos:12,   gramos:215, precioMillar:5234, observaciones:'', maquina:'' },
+  { id:'pap-32', categoria:'SBS MULTICAPA',      material:'SBS Multicapa',     medida:'79X109', puntos:10,   gramos:215, precioMillar:5876, observaciones:'', maquina:'' },
+  { id:'pap-33', categoria:'MICRO FLAUTA E',     material:'Micro Flauta E',    medida:'36X50',  puntos:null, gramos:null,precioMillar:2185, observaciones:'Sin gramaje fijo', maquina:'' },
+  { id:'pap-34', categoria:'MICRO FLAUTA E',     material:'Micro Flauta E',    medida:'50X70',  puntos:null, gramos:null,precioMillar:2987, observaciones:'', maquina:'' },
+  { id:'pap-35', categoria:'CORRUGADO FLAUTA B', material:'Corrugado Flauta B',medida:'36X50',  puntos:null, gramos:null,precioMillar:1415, observaciones:'', maquina:'' },
+  { id:'pap-36', categoria:'CORRUGADO FLAUTA B', material:'Corrugado Flauta B',medida:'50X70',  puntos:null, gramos:null,precioMillar:1987, observaciones:'', maquina:'' },
+  { id:'pap-37', categoria:'HUEVERO',            material:'Huevero',           medida:'30X40',  puntos:null, gramos:null,precioMillar:987,  observaciones:'', maquina:'' },
+  { id:'pap-38', categoria:'HUEVERO',            material:'Huevero',           medida:'50X70',  puntos:null, gramos:null,precioMillar:1654, observaciones:'', maquina:'' },
+  { id:'pap-39', categoria:'PLIEGOS VARIOS',     material:'Kraft',             medida:'70X100', puntos:null, gramos:null,precioMillar:654,  observaciones:'', maquina:'' },
+  { id:'pap-40', categoria:'PLIEGOS VARIOS',     material:'Manila',            medida:'57X87',  puntos:null, gramos:null,precioMillar:543,  observaciones:'', maquina:'' },
+];
+
+// Full DEFAULT_PROCESOS
+const OB_DEFAULT_PROCESOS = [
+  { id:'diseno',      name:'Diseño',                  sub:'Nivel básico (A) · Intermedio (B) · Complejo (C)', cat:'Pre-prensa',    tarifaSrc:null, tarifaNombres:[], active:true  },
+  { id:'foto',        name:'Fotografía',               sub:'Por toma',                                         cat:'Pre-prensa',    tarifaSrc:null, tarifaNombres:[], active:true  },
+  { id:'prueba',      name:'Prueba de color',          sub:'Matchprint / impresión de referencia',             cat:'Pre-prensa',    tarifaSrc:null, tarifaNombres:[], active:true  },
+  { id:'negpos',      name:'Negativo / Positivo',      sub:'Chico · Mediano · Grande',                         cat:'Pre-prensa',    tarifaSrc:null, tarifaNombres:[], active:true  },
+  { id:'papeles',     name:'Papeles',                  sub:'Tabla anexa de sustratos',                         cat:'Materiales',    tarifaSrc:null, tarifaNombres:[], active:true  },
+  { id:'laminas',     name:'Láminas para impresión',   sub:'Según máquina seleccionada',                       cat:'Materiales',    tarifaSrc:null, tarifaNombres:[], active:true  },
+  { id:'impresion',   name:'Impresión',                sub:'4 tintas CMYK',                                    cat:'Producción',    tarifaSrc:null, tarifaNombres:[], active:true  },
+  { id:'recubr',      name:'Recubrimiento',            sub:'Barniz en máquina',                                cat:'Producción',    tarifaSrc:'rc', tarifaNombres:['Barniz máquina'],                                                active:true  },
+  { id:'recubr_r',    name:'Recubrimiento a registro', sub:'Solo áreas específicas',                           cat:'Producción',    tarifaSrc:'rc', tarifaNombres:['Arreglo de barniz a registro','Aplicación barniz registro UV Br.'], active:false },
+  { id:'grabados',    name:'Grabados',                 sub:'Hotstamping · Grabado en seco',                    cat:'Producción',    tarifaSrc:'ac', tarifaNombres:['Hot stamping'],                                                  active:true  },
+  { id:'suaje',       name:'Suaje',                    sub:'Matriz · Arreglo · Suajado · Desbarbado',          cat:'Acabados',      tarifaSrc:'ac', tarifaNombres:['Suaje (matriz)','Arreglo de suajado','Suajado'],                 active:true  },
+  { id:'redondeo',    name:'Redondeo de esquinas',     sub:'',                                                 cat:'Acabados',      tarifaSrc:'ac', tarifaNombres:['Redondeo esquinas'],                                             active:false },
+  { id:'ponchado',    name:'Ponchado',                 sub:'Orificio chico o mediano',                         cat:'Acabados',      tarifaSrc:null, tarifaNombres:[], active:false },
+  { id:'compag',      name:'Compaginado',              sub:'Manual o automático',                               cat:'Acabados',      tarifaSrc:null, tarifaNombres:[], active:false },
+  { id:'encuad',      name:'Encuadernado',             sub:'Rústico · Hotmelt · Grapa · Encolado',             cat:'Acabados',      tarifaSrc:null, tarifaNombres:[], active:false },
+  { id:'doblez',      name:'Doblez',                   sub:'Cruz · Mapa · Tríptico · Díptico',                 cat:'Acabados',      tarifaSrc:'ac', tarifaNombres:['Doblado'],                                                       active:true  },
+  { id:'plecado',     name:'Plecado',                  sub:'Rallado para doblez',                              cat:'Acabados',      tarifaSrc:'ac', tarifaNombres:['Plecado'],                                                       active:true  },
+  { id:'wire',        name:'Wire-O / Arillo',          sub:'Metálico · Espiral · Gancho',                      cat:'Acabados',      tarifaSrc:null, tarifaNombres:[], active:false },
+  { id:'corte',       name:'Corte',                    sub:'Guillotina · Trilateral',                          cat:'Acabados',      tarifaSrc:null, tarifaNombres:[], active:false },
+  { id:'folio',       name:'Folio / Perforado',        sub:'Numeración consecutiva',                           cat:'Acabados',      tarifaSrc:'ac', tarifaNombres:['Foliado'],                                                       active:true  },
+  { id:'pegado',      name:'Pegado',                   sub:'Folders · Caja lineal · Fondo automático',         cat:'Acabados',      tarifaSrc:'ac', tarifaNombres:['Pegado lineal'],                                                 active:false },
+  { id:'barniz_uv',   name:'Barniz UV',                sub:'Brillo o mate',                                    cat:'Recubrimientos', tarifaSrc:'rc', tarifaNombres:['Barniz UV Brillante'],                                          active:true  },
+  { id:'laminado',    name:'Laminado',                 sub:'Brillante o mate',                                 cat:'Recubrimientos', tarifaSrc:'rc', tarifaNombres:['Plástico Mate'],                                                active:true  },
+  { id:'empacado',    name:'Empacado',                 sub:'Por caja o empaque individual',                    cat:'Logística',     tarifaSrc:null, tarifaNombres:[], active:true  },
+  { id:'envarillado', name:'Envarillado',              sub:'Superior o inferior',                              cat:'Logística',     tarifaSrc:null, tarifaNombres:[], active:false },
+  { id:'empalmado',   name:'Empalmado',                sub:'SBS+Micro · SBS+Corrugado',                        cat:'Logística',     tarifaSrc:null, tarifaNombres:[], active:false },
+  { id:'envio',       name:'Envío',                    sub:'Por pieza · Por kilo · Por distancia',             cat:'Logística',     tarifaSrc:null, tarifaNombres:[], active:true  },
+];
+
+const OB_DEFAULT_PRODUCCION = [
+  { id:'pr1', nombre:'Corte a prensa',         nota:'Se suma sobre el costo de papel',     tamano:'—',    precio:'5%',  unidad:'sobre papel' },
+  { id:'pr2', nombre:'Láminas para impresión', nota:'4 láminas = color completo CMYK',     tamano:'PM52', precio:'80',  unidad:'por lámina' },
+  { id:'pr3', nombre:'Láminas para impresión', nota:'',                                    tamano:'PM74', precio:'160', unidad:'por lámina' },
+  { id:'pr4', nombre:'Láminas para impresión', nota:'',                                    tamano:'CD102',precio:'320', unidad:'por lámina' },
+  { id:'pr5', nombre:'Impresión',              nota:'Unitario por color · 1 a 1,000 pzas', tamano:'PM52', precio:'80',  unidad:'por color' },
+  { id:'pr6', nombre:'Impresión',              nota:'',                                    tamano:'PM74', precio:'160', unidad:'por color' },
+  { id:'pr7', nombre:'Impresión',              nota:'',                                    tamano:'CD102',precio:'320', unidad:'por color' },
+];
+
+const OB_DEFAULT_RECUBRIMIENTOS = [
+  { id:'rc1',  nombre:'Barniz máquina',                      nota:'De 1 a 1,000 pzas por lado', tamano:'PM52',  precio:'100',  unidad:'por lado' },
+  { id:'rc2',  nombre:'Barniz máquina',                      nota:'',                            tamano:'PM74',  precio:'200',  unidad:'por lado' },
+  { id:'rc3',  nombre:'Barniz máquina',                      nota:'',                            tamano:'CD102', precio:'400',  unidad:'por lado' },
+  { id:'rc4',  nombre:'Barniz UV Brillante',                 nota:'Mín. $500',                   tamano:'—',     precio:'2.50', unidad:'por m²' },
+  { id:'rc5',  nombre:'Barniz UV Mate',                      nota:'Mín. $1,000',                 tamano:'—',     precio:'5.00', unidad:'por m²' },
+  { id:'rc6',  nombre:'Plástico Brillante',                  nota:'Mín. $500',                   tamano:'—',     precio:'6.00', unidad:'por m²' },
+  { id:'rc7',  nombre:'Plástico Mate',                       nota:'Mín. $500',                   tamano:'—',     precio:'7.00', unidad:'por m²' },
+  { id:'rc8',  nombre:'Arreglo de barniz a registro',        nota:'Una sola vez por proyecto',   tamano:'PM52',  precio:'1000', unidad:'por proyecto' },
+  { id:'rc9',  nombre:'Arreglo de barniz a registro',        nota:'',                            tamano:'PM74',  precio:'2000', unidad:'por proyecto' },
+  { id:'rc10', nombre:'Arreglo de barniz a registro',        nota:'',                            tamano:'CD102', precio:'3000', unidad:'por proyecto' },
+  { id:'rc11', nombre:'Aplicación barniz registro UV Br.',   nota:'Mín. $1,800',                 tamano:'—',     precio:'7.00', unidad:'por m²' },
+];
+
+// ─── App state ────────────────────────────────────────────────────
+let _step = 1;
+let _profile = {};
+let _logoBase64 = null;
+let _tiposSeleccionados = ['general']; // general always included
+// _papelPrecios: { 'pap-N': millarPrice }
+let _papelPrecios = {};
+// _recubrActivo: { barniz_uv: bool, laminado: bool }
+let _recubrActivo = { barniz_uv: true, laminado: true };
+
+const STEP_LABELS = {
+  1:'Tu imprenta', 2:'Tipo de trabajos', 3:'Tus prensas',
+  4:'Tus papeles', 5:'Tus precios'
+};
+
+// ─── Auth guard ───────────────────────────────────────────────────
 auth.onAuthStateChanged(async (user) => {
-  if (!user) {
-    window.location.href = 'login.html';
-    return;
-  }
-  // Returning user who already completed onboarding → go to app
+  if (!user) { window.location.href = 'login.html'; return; }
   const profileSnap = await db.collection('users').doc(user.uid)
     .collection('config').doc('profile').get();
-  if (profileSnap.exists) {
-    window.location.href = 'index.html';
-    return;
-  }
+  if (profileSnap.exists) { window.location.href = 'index.html'; return; }
   // New user — show onboarding
   document.getElementById('auth-loading').style.display = 'none';
   const wrap = document.getElementById('ob-wrap');
   wrap.style.display = 'flex';
-  // Pre-fill email from auth
   document.getElementById('f-email').value = user.email || '';
   updateProgress(1);
 });
 
-// ── Navigation ─────────────────────────────────────────────────────
+// ─── Navigation ───────────────────────────────────────────────────
 function goTo(n) {
   document.getElementById('s' + _step).style.display = 'none';
   _step = n;
   const card = document.getElementById('s' + n);
   card.style.display = '';
+  void card.offsetWidth; // force reflow for animation restart
+  card.style.animation = 'none';
   card.style.animation = 'slideIn .28s cubic-bezier(.25,1,.5,1)';
 
-  if (n <= 3) {
+  if (n <= 5) {
     document.getElementById('ob-progress').style.display = 'flex';
     document.getElementById('ob-step-label').textContent = STEP_LABELS[n] || '';
     updateProgress(n);
   } else {
-    // Step 4 (done) — hide progress
+    // Step 6 — done screen, hide progress
     document.getElementById('ob-progress').style.display = 'none';
     document.getElementById('ob-step-label').textContent = '';
+    renderDone();
   }
 
-  if (n === 2) renderMachineCards();
-  if (n === 4) renderDone();
+  if (n === 4) renderPapeles();
+  if (n === 5) renderProdMachines();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function skipTo(n) { goTo(n); }
-
 function updateProgress(active) {
-  for (let i = 1; i <= 3; i++) {
+  for (let i = 1; i <= 5; i++) {
     const dot = document.getElementById('d' + i);
+    if (!dot) continue;
     dot.className = 'ob-dot ' + (i < active ? 'done' : i === active ? 'active' : '');
     dot.innerHTML = i < active ? '' : '<span>' + i + '</span>';
   }
-  for (let i = 1; i <= 2; i++) {
+  for (let i = 1; i <= 4; i++) {
     const line = document.getElementById('l' + i);
-    line.className = 'ob-line ' + (i < active ? 'done' : '');
+    if (line) line.className = 'ob-line ' + (i < active ? 'done' : '');
   }
 }
 
-// ── Flash invalid field ─────────────────────────────────────────────
+// ─── Flash invalid field ──────────────────────────────────────────
 function flash(id) {
   const el = document.getElementById(id);
+  if (!el) return;
   el.classList.add('err');
   el.focus();
   setTimeout(() => el.classList.remove('err'), 1800);
 }
 
-// ── Step 1 — Save datos de imprenta ────────────────────────────────
+// ─── STEP 1 — Datos de la imprenta ───────────────────────────────
 function saveStep1() {
   const nombre   = document.getElementById('f-nombre').value.trim();
   const imprenta = document.getElementById('f-imprenta').value.trim();
   const ciudad   = document.getElementById('f-ciudad').value.trim();
   const tel      = document.getElementById('f-tel').value.trim();
-  const email    = document.getElementById('f-email').value.trim();
-
   if (!nombre)   { flash('f-nombre');   return; }
   if (!imprenta) { flash('f-imprenta'); return; }
   if (!ciudad)   { flash('f-ciudad');   return; }
   if (!tel)      { flash('f-tel');      return; }
-
   _profile = {
-    nombre,
-    imprenta,
-    ciudad,
-    tel,
-    email,
+    nombre, imprenta, ciudad, tel,
+    email:     document.getElementById('f-email').value.trim(),
     rfc:       document.getElementById('f-rfc').value.trim().toUpperCase(),
     logoBase64: _logoBase64 || null,
   };
   goTo(2);
 }
 
-// ── Logo upload ─────────────────────────────────────────────────────
-// Resizes image to max 400×400 via canvas → stores as base64 JPEG
+// ─── Logo upload ──────────────────────────────────────────────────
 function handleLogoFile(input) {
   const file = input.files[0];
   if (!file) return;
-
   const MAX_PX = 400;
-  const QUALITY = 0.88;
-  const reader  = new FileReader();
+  const reader = new FileReader();
   reader.onload = (e) => {
     const img = new Image();
     img.onload = () => {
-      // Scale down if needed
       let w = img.width, h = img.height;
       if (w > MAX_PX || h > MAX_PX) {
         const ratio = Math.min(MAX_PX / w, MAX_PX / h);
-        w = Math.round(w * ratio);
-        h = Math.round(h * ratio);
+        w = Math.round(w * ratio); h = Math.round(h * ratio);
       }
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      const b64 = canvas.toDataURL('image/jpeg', QUALITY);
+      const b64 = canvas.toDataURL('image/jpeg', 0.88);
       _logoBase64 = b64;
-
-      // Show preview
-      const area    = document.getElementById('logo-area');
-      const preview = document.getElementById('logo-preview');
-      preview.src   = b64;
+      const area = document.getElementById('logo-area');
+      document.getElementById('logo-preview').src = b64;
       area.classList.add('has-logo');
-
-      // Size hint
       const kb = Math.round(b64.length * 0.75 / 1024);
       document.getElementById('logo-size-hint').textContent = `Logo guardado · ${w}×${h}px · ~${kb} KB`;
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
-  // Reset input so same file can be re-selected if removed
   input.value = '';
 }
 
@@ -486,111 +842,301 @@ function removeLogo(e) {
   document.getElementById('logo-size-hint').textContent = '';
 }
 
-// ── Step 2 — Machines ──────────────────────────────────────────────
-function renderMachineCards() {
-  const grid = document.getElementById('ob-maq-grid');
-  grid.innerHTML = DEFAULTS.map((m) => {
-    const divLabel = m.division === 4 ? 'Cuarto (÷4)' : m.division === 2 ? 'Medio (÷2)' : 'Pliego (÷1)';
-    return `
-    <div class="ob-maq-card">
-      <div class="ob-maq-name">${m.name}</div>
-      <div class="ob-maq-tag">${m.tag}</div>
-      <div class="ob-maq-row">Área útil: <strong>${m.utilW}×${m.utilH} cm</strong></div>
-      <div class="ob-maq-row">División: <strong style="color:var(--teal)">${divLabel}</strong></div>
-      <div class="ob-maq-row">Costo/hora: <strong>$${m.cph.toLocaleString('es-MX')}</strong></div>
-    </div>`;
-  }).join('');
+// ─── STEP 2 — Tipo de trabajos ────────────────────────────────────
+function toggleTipo(tipo) {
+  const card = document.getElementById('tipo-' + tipo);
+  const idx = _tiposSeleccionados.indexOf(tipo);
+  if (idx === -1) {
+    _tiposSeleccionados.push(tipo);
+    card.classList.add('on');
+  } else {
+    _tiposSeleccionados.splice(idx, 1);
+    card.classList.remove('on');
+  }
 }
 
-function saveMachinesStep() {
-  const DEFAULT_MERMAS = [
-    { desde:100,   hasta:500,   merma:200 },
-    { desde:501,   hasta:1000,  merma:300 },
-    { desde:1001,  hasta:5000,  merma:400 },
-    { desde:5001,  hasta:10000, merma:700 },
-    { desde:10001, hasta:null,  merma:750 },
-  ];
-  const machines = DEFAULTS.map(m => ({ ...m, mermas: DEFAULT_MERMAS.map(r => ({...r})) }));
-  localStorage.setItem('sustrato_machines', JSON.stringify(machines));
-  _step2done = true;
+function saveStep2() {
+  // general is always in _tiposSeleccionados
   goTo(3);
 }
 
-// ── Step 3 — Paper prices ──────────────────────────────────────────
-function savePapelStep() {
-  const papel = {
-    bond:      { '75g': +document.getElementById('pb75').value  || 0.38, '90g': +document.getElementById('pb90').value  || 0.45, '105g': +document.getElementById('pb105').value || 0.54 },
-    couche:    { '100g':+document.getElementById('pc100').value || 0.55, '150g':+document.getElementById('pc150').value || 0.65, '200g': +document.getElementById('pc200').value || 0.80 },
-    sulfatado: { '12 pts':+document.getElementById('ps12').value||1.10,  '14 pts':+document.getElementById('ps14').value||1.28 },
-  };
-  localStorage.setItem('sustrato_papel', JSON.stringify(papel));
-  _step3done = true;
+// ─── STEP 3 — Prensas ─────────────────────────────────────────────
+function togglePrensa(id) {
+  const card = document.getElementById('prensa-' + id);
+  const isOn = card.classList.contains('on');
+  if (isOn) {
+    // Check at least 1 remains on
+    const onCount = document.querySelectorAll('.prensa-card.on').length;
+    if (onCount <= 1) {
+      const err = document.getElementById('prensa-min-error');
+      err.style.display = 'block';
+      setTimeout(() => err.style.display = 'none', 2500);
+      return;
+    }
+  }
+  card.classList.toggle('on');
+}
+
+function saveStep3() {
+  const onCards = document.querySelectorAll('.prensa-card.on');
+  if (onCards.length === 0) {
+    document.getElementById('prensa-min-error').style.display = 'block';
+    return;
+  }
   goTo(4);
 }
 
-// ── Step 4 — Render done screen ────────────────────────────────────
+// ─── STEP 4 — Papeles (render on demand) ─────────────────────────
+function renderPapeles() {
+  const container = document.getElementById('papeles-container');
+  let html = '';
+  for (const section of PAPEL_SECTIONS) {
+    const isVisible = section.always ||
+      (section.tipo && _tiposSeleccionados.includes(section.tipo));
+    if (!isVisible) continue;
+    html += `<div class="papel-section"><div class="papel-section-label">${section.label}</div>`;
+    for (const item of section.items) {
+      const current = _papelPrecios[item.id] !== undefined
+        ? _papelPrecios[item.id] : item.defaultMillar;
+      html += `
+        <div class="papel-row">
+          <div class="papel-row-left">
+            <span class="papel-tag">${item.label}</span>
+          </div>
+          <div class="papel-price-input">
+            <span>$</span>
+            <input type="number" id="pp-${item.id}"
+              value="${current}" min="0" step="10"/>
+            <span>/millar</span>
+          </div>
+        </div>`;
+    }
+    html += `</div>`;
+  }
+  container.innerHTML = html;
+}
+
+function saveStep4() {
+  // Read all visible inputs
+  for (const section of PAPEL_SECTIONS) {
+    const isVisible = section.always ||
+      (section.tipo && _tiposSeleccionados.includes(section.tipo));
+    if (!isVisible) continue;
+    for (const item of section.items) {
+      const el = document.getElementById('pp-' + item.id);
+      if (el) _papelPrecios[item.id] = parseFloat(el.value) || item.defaultMillar;
+    }
+  }
+  goTo(5);
+}
+
+// ─── STEP 5 — Precios de producción (render on demand) ───────────
+function renderProdMachines() {
+  const container = document.getElementById('prod-machines-container');
+  let html = '';
+  for (const pm of OB_PROD_MAP) {
+    const card = document.getElementById('prensa-' + pm.proId);
+    if (!card || !card.classList.contains('on')) continue;
+    html += `
+      <div class="prod-machine-block">
+        <div class="prod-machine-header">
+          <div class="prod-machine-hname">${pm.proId}</div>
+          <div class="prod-machine-htag">${OB_MACHINES.find(m=>m.id===pm.proId)?.tag || ''}</div>
+        </div>
+        <div class="prod-machine-body">
+          <div class="prod-fg">
+            <label>Láminas (CMYK)</label>
+            <div class="prod-input-wrap">
+              <span class="prod-input-prefix">$</span>
+              <input type="number" id="lam-${pm.proId}" value="${pm.defaultLam}" min="0" step="10"/>
+              <span class="prod-input-suffix">/lámina</span>
+            </div>
+          </div>
+          <div class="prod-fg">
+            <label>Impresión</label>
+            <div class="prod-input-wrap">
+              <span class="prod-input-prefix">$</span>
+              <input type="number" id="imp-${pm.proId}" value="${pm.defaultImp}" min="0" step="10"/>
+              <span class="prod-input-suffix">/color × millar</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+  container.innerHTML = html;
+}
+
+function toggleRecubr(id) {
+  _recubrActivo[id] = !_recubrActivo[id];
+  const row = document.getElementById('recubr-' + id);
+  const tog = document.getElementById('rtog-' + id);
+  if (_recubrActivo[id]) {
+    row.classList.remove('off');
+    tog.classList.add('on');
+  } else {
+    row.classList.add('off');
+    tog.classList.remove('on');
+  }
+}
+
+function saveStep5() {
+  goTo(6);
+}
+
+// ─── STEP 6 — Done screen ────────────────────────────────────────
 function renderDone() {
-  const name = _profile.imprenta || 'Tu imprenta';
-  document.getElementById('done-title').textContent = '¡' + name + ' está lista!';
-  document.getElementById('done-sub').textContent =
-    'Configurada en minutos. Tu cotizador ya sabe cómo trabaja tu taller.';
+  const imprenta = _profile.imprenta || 'Tu imprenta';
+  document.getElementById('done-title').textContent = '¡' + imprenta + ' está lista!';
+
+  // Count active machines
+  const activeMaq = OB_MACHINES.filter(m => {
+    const card = document.getElementById('prensa-' + m.id);
+    return card && card.classList.contains('on');
+  });
+
+  // Count paper sections shown
+  const secShown = PAPEL_SECTIONS.filter(s =>
+    s.always || (s.tipo && _tiposSeleccionados.includes(s.tipo))
+  );
+  const paperCount = secShown.reduce((sum, s) => sum + s.items.length, 0);
+
+  // Tipo labels
+  const tipoLabels = {
+    general: 'General', editorial: 'Editorial', empaque: 'Empaque'
+  };
+  const tipoStr = _tiposSeleccionados.map(t => tipoLabels[t] || t).join(' · ');
 
   document.getElementById('done-checklist').innerHTML = `
     <div class="ob-chk">
       <div class="ob-chk-tick">✓</div>
-      <span>Imprenta registrada · <strong>${_profile.imprenta || '—'}</strong></span>
+      <span>Imprenta registrada · <strong>${imprenta}</strong></span>
     </div>
     <div class="ob-chk">
-      <div class="${_logoBase64 ? 'ob-chk-tick' : 'ob-chk-skip'}">${_logoBase64 ? '✓' : '—'}</div>
-      <span>Logo${_logoBase64 ? ' · cargado' : ' · (omitido — puedes agregarlo después en Mi imprenta)'}</span>
+      <div class="ob-chk-tick">✓</div>
+      <span>Tipo de trabajos · <strong>${tipoStr}</strong></span>
     </div>
     <div class="ob-chk">
-      <div class="${_step2done ? 'ob-chk-tick' : 'ob-chk-skip'}">${_step2done ? '✓' : '—'}</div>
-      <span>Prensas configuradas${_step2done ? ' · 3 máquinas' : ' · (omitido, usando valores predeterminados)'}</span>
+      <div class="ob-chk-tick">✓</div>
+      <span>Prensas configuradas · <strong>${activeMaq.map(m=>m.name).join(', ')}</strong></span>
     </div>
     <div class="ob-chk">
-      <div class="${_step3done ? 'ob-chk-tick' : 'ob-chk-skip'}">${_step3done ? '✓' : '—'}</div>
-      <span>Precios de papel${_step3done ? ' · ajustados' : ' · (omitido, usando valores predeterminados)'}</span>
+      <div class="ob-chk-tick">✓</div>
+      <span>Precios de papel · <strong>${paperCount} sustratos</strong></span>
     </div>
+    <div class="ob-chk">
+      <div class="ob-chk-tick">✓</div>
+      <span>Precios de producción configurados</span>
+    </div>
+    ${_profile.logoBase64 ? `
+    <div class="ob-chk">
+      <div class="ob-chk-tick">✓</div>
+      <span>Logo de imprenta cargado</span>
+    </div>` : ''}
   `;
-
-  // Save profile and default machines to localStorage
-  localStorage.setItem('sustrato_profile', JSON.stringify(_profile));
-  localStorage.setItem('sustrato_onboarded', '1');
-  if (!_step2done) {
-    const DEFAULT_MERMAS = [
-      { desde:100,   hasta:500,   merma:200 },
-      { desde:501,   hasta:1000,  merma:300 },
-      { desde:1001,  hasta:5000,  merma:400 },
-      { desde:5001,  hasta:10000, merma:700 },
-      { desde:10001, hasta:null,  merma:750 },
-    ];
-    const machines = DEFAULTS.map(m => ({ ...m, mermas: DEFAULT_MERMAS.map(r => ({...r})) }));
-    localStorage.setItem('sustrato_machines', JSON.stringify(machines));
-  }
 }
 
-// ── Dashboard — persist everything to Firestore ────────────────────
+// ─── goDashboard — persist everything ────────────────────────────
 async function goDashboard() {
+  // ── 1. Build procesos ──
+  // Collect all IDs that should be active based on tipo selection
+  const activeIds = new Set();
+  for (const tipo of _tiposSeleccionados) {
+    for (const id of (TIPO_PROCESOS[tipo] || [])) activeIds.add(id);
+  }
+  // Set of IDs managed by tipo selection
+  const allTipoIds = new Set([
+    ...TIPO_PROCESOS.general,
+    ...TIPO_PROCESOS.editorial,
+    ...TIPO_PROCESOS.empaque,
+  ]);
+  const procesosData = OB_DEFAULT_PROCESOS.map(p => {
+    // IDs managed by tipo → set active based on selection
+    if (allTipoIds.has(p.id)) {
+      let active = activeIds.has(p.id);
+      // Override: if recubrimiento toggled off in step 5
+      if (p.id === 'barniz_uv' && !_recubrActivo.barniz_uv) active = false;
+      if (p.id === 'laminado'  && !_recubrActivo.laminado)  active = false;
+      return { ...p, active };
+    }
+    return { ...p }; // keep defaults for non-tipo processes
+  });
+
+  // ── 2. Build machines (only active from step 3) ──
+  const machinesData = OB_MACHINES
+    .filter(m => {
+      const card = document.getElementById('prensa-' + m.id);
+      return card && card.classList.contains('on');
+    })
+    .map(m => {
+      const cphEl  = document.getElementById('cph-' + m.id);
+      const pplEl  = document.getElementById('ppl-' + m.id);
+      return {
+        ...m,
+        cph:         cphEl  ? (parseFloat(cphEl.value)  || m.cph)  : m.cph,
+        pliegoPrice: pplEl  ? (parseFloat(pplEl.value)  || m.pliegoPrice) : m.pliegoPrice,
+        mermas: OB_DEFAULT_MERMAS.map(r => ({...r})),
+      };
+    });
+
+  // ── 3. Build papeles (full catalog with user prices) ──
+  const papelesData = OB_DEFAULT_PAPELES.map(p => {
+    const newMillar = _papelPrecios[p.id];
+    return newMillar !== undefined ? { ...p, precioMillar: newMillar } : { ...p };
+  });
+
+  // ── 4. Build produccion (update prices for active machines) ──
+  const prodOverrides = {}; // prodEntryId → newPrecio
+  for (const pm of OB_PROD_MAP) {
+    const lamEl = document.getElementById('lam-' + pm.proId);
+    const impEl = document.getElementById('imp-' + pm.proId);
+    if (lamEl) prodOverrides[pm.lamId] = lamEl.value;
+    if (impEl) prodOverrides[pm.impId] = impEl.value;
+  }
+  const produccionData = OB_DEFAULT_PRODUCCION.map(pr => {
+    return prodOverrides[pr.id] !== undefined
+      ? { ...pr, precio: String(prodOverrides[pr.id]) }
+      : { ...pr };
+  });
+
+  // ── 5. Build recubrimientos (update rc4 and rc7) ──
+  const recubrOverrides = {
+    rc4: document.getElementById('rprice-barniz_uv')?.value || '2.50',
+    rc7: document.getElementById('rprice-laminado')?.value  || '7.00',
+  };
+  const recubrData = OB_DEFAULT_RECUBRIMIENTOS.map(r => {
+    return recubrOverrides[r.id] !== undefined
+      ? { ...r, precio: String(recubrOverrides[r.id]) }
+      : { ...r };
+  });
+
+  // ── 6. Save to localStorage ──
+  localStorage.setItem('sustrato_profile',       JSON.stringify(_profile));
+  localStorage.setItem('sustrato_machines',      JSON.stringify(machinesData));
+  localStorage.setItem('sustrato_papeles',       JSON.stringify(papelesData));
+  localStorage.setItem('sustrato_procesos',      JSON.stringify(procesosData));
+  localStorage.setItem('sustrato_produccion',    JSON.stringify(produccionData));
+  localStorage.setItem('sustrato_recubrimientos',JSON.stringify(recubrData));
+  localStorage.setItem('sustrato_onboarded',     '1');
+
+  // ── 7. Persist to Firestore (fire-and-forget) ──
   try {
     const user = auth.currentUser;
     if (user) {
-      const base   = db.collection('users').doc(user.uid).collection('config');
-      const writes = [];
-      // Profile (flat object — no .data wrapper)
-      writes.push(base.doc('profile').set(_profile));
-      // Machines
-      const machinesRaw = localStorage.getItem('sustrato_machines');
-      if (machinesRaw) writes.push(base.doc('machines').set({ data: JSON.parse(machinesRaw) }));
-      // Legacy papel key
-      const papelRaw = localStorage.getItem('sustrato_papel');
-      if (papelRaw) writes.push(base.doc('papel').set({ data: JSON.parse(papelRaw) }));
-      await Promise.all(writes);
+      const base = db.collection('users').doc(user.uid).collection('config');
+      await Promise.all([
+        base.doc('profile').set(_profile),
+        base.doc('machines').set({ data: machinesData }),
+        base.doc('papeles').set({ data: papelesData }),
+        base.doc('procesos').set({ data: procesosData }),
+        base.doc('produccion').set({ data: produccionData }),
+        base.doc('recubrimientos').set({ data: recubrData }),
+      ]);
     }
   } catch (e) {
     console.warn('[Firestore onboarding]', e);
     // Non-fatal — data is already in localStorage
   }
+
   window.location.href = 'index.html';
 }
 </script>
