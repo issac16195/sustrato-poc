@@ -108,25 +108,26 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
 .tipo-locked-tag{display:inline-block;margin-top:8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--teal-dark);background:rgba(0,168,120,.12);border-radius:3px;padding:2px 7px}
 
 /* ── STEP 3 — PRENSAS ─────────────────────────────────────────── */
-#s3.ob-card{max-width:620px}
-.prensa-list{display:flex;flex-direction:column;gap:12px;margin-bottom:4px}
-.prensa-card{border:2px solid var(--border);border-radius:10px;background:var(--bg);transition:border-color .2s,background .2s;overflow:hidden}
-.prensa-card.on{border-color:var(--teal);background:var(--white)}
-.prensa-card-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;cursor:pointer}
-.prensa-card.on .prensa-card-header{padding-bottom:12px}
-.prensa-info{}
-.prensa-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--navy);line-height:1}
-.prensa-tag{font-size:11px;color:var(--text3);font-weight:500;margin-top:2px}
-.prensa-toggle-btn{width:44px;height:24px;border-radius:12px;background:var(--border2);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
-.prensa-toggle-btn::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.prensa-card.on .prensa-toggle-btn{background:var(--teal)}
-.prensa-card.on .prensa-toggle-btn::after{transform:translateX(20px)}
-.prensa-pricing{display:none;padding:0 18px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.prensa-card:not(.on) .prensa-pricing{display:none}
-.prensa-card.on .prensa-pricing{display:grid}
-.prensa-info-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
-.prensa-pill{font-size:10px;font-weight:600;color:var(--text3);background:rgba(28,32,21,.06);border-radius:4px;padding:2px 7px}
-.prensa-min-error{font-size:12px;color:#C0392B;background:#fef0ed;border:1px solid #f8c5bc;border-radius:6px;padding:8px 12px;margin-top:4px;display:none}
+#s3.ob-card{max-width:600px}
+.prensa-items{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;min-height:52px}
+.prensa-empty{font-size:13px;color:var(--text3);text-align:center;padding:18px;background:var(--bg);border:1.5px dashed var(--border2);border-radius:8px}
+.prensa-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--teal-bg);border:1.5px solid var(--teal-border);border-radius:8px}
+.prensa-item-info{flex:1;min-width:0}
+.prensa-item-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:var(--navy);line-height:1.1}
+.prensa-item-meta{font-size:11px;color:var(--text2);margin-top:2px}
+.prensa-remove-btn{width:26px;height:26px;border-radius:50%;border:none;background:rgba(0,0,0,.06);color:var(--text3);cursor:pointer;font-size:11px;flex-shrink:0;transition:background .15s,color .15s;display:flex;align-items:center;justify-content:center}
+.prensa-remove-btn:hover{background:#fde8e8;color:#c0392b}
+.btn-add-prensa{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:none;border:1.5px dashed var(--border2);border-radius:8px;padding:12px;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;transition:border-color .15s,color .15s;font-family:'Inter',sans-serif}
+.btn-add-prensa:hover{border-color:var(--teal);color:var(--teal-dark)}
+.prensa-add-form{background:var(--bg);border:1.5px solid var(--teal-border);border-radius:10px;padding:18px;margin-top:10px}
+.prensa-add-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:var(--navy);margin-bottom:14px}
+.prensa-add-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.prensa-add-grid{grid-template-columns:1fr}}
+.prensa-add-full{grid-column:1/-1}
+.area-row{display:flex;align-items:center;gap:8px}
+.area-row input{width:70px}
+.area-row span{color:var(--text3);font-size:13px;flex-shrink:0}
+.prensa-req-error{font-size:12px;color:#C0392B;background:#fef0ed;border:1px solid #f8c5bc;border-radius:6px;padding:8px 12px;margin-top:8px;display:none}
 
 /* ── STEP 4 — PAPELES ─────────────────────────────────────────── */
 #s4.ob-card{max-width:580px}
@@ -347,118 +348,68 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
   <div class="ob-card" id="s3" style="display:none">
     <div class="ob-step-badge">Paso 3 de 5</div>
     <div class="ob-title">Tus prensas</div>
-    <div class="ob-sub">Activa las prensas que tienes en tu taller y ajusta los costos. Al menos una debe quedar activa.</div>
+    <div class="ob-sub">Agrega las prensas que tienes en tu taller — sin límite. Puedes poner el nombre como quieras.</div>
 
-    <div class="prensa-list">
-
-      <!-- PM52 -->
-      <div class="prensa-card on" id="prensa-PM52">
-        <div class="prensa-card-header" onclick="togglePrensa('PM52')">
-          <div class="prensa-info">
-            <div class="prensa-name">PM52</div>
-            <div class="prensa-info-pills">
-              <span class="prensa-pill">Chica</span>
-              <span class="prensa-pill">35×49 cm útil</span>
-              <span class="prensa-pill">÷4</span>
-            </div>
-          </div>
-          <button class="prensa-toggle-btn" type="button" onclick="event.stopPropagation();togglePrensa('PM52')"></button>
-        </div>
-        <div class="prensa-pricing">
-          <div class="prod-fg">
-            <label>Costo por hora</label>
-            <div class="prod-input-wrap">
-              <span class="prod-input-prefix">$</span>
-              <input type="number" id="cph-PM52" value="850" min="0" step="50"/>
-              <span class="prod-input-suffix">/hr</span>
-            </div>
-          </div>
-          <div class="prod-fg">
-            <label>Costo por pliego</label>
-            <div class="prod-input-wrap">
-              <span class="prod-input-prefix">$</span>
-              <input type="number" id="ppl-PM52" value="0.45" min="0" step="0.05"/>
-              <span class="prod-input-suffix">/pliego</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PM74 -->
-      <div class="prensa-card on" id="prensa-PM74">
-        <div class="prensa-card-header" onclick="togglePrensa('PM74')">
-          <div class="prensa-info">
-            <div class="prensa-name">PM74</div>
-            <div class="prensa-info-pills">
-              <span class="prensa-pill">Mediana</span>
-              <span class="prensa-pill">50×70 cm útil</span>
-              <span class="prensa-pill">÷2</span>
-            </div>
-          </div>
-          <button class="prensa-toggle-btn" type="button" onclick="event.stopPropagation();togglePrensa('PM74')"></button>
-        </div>
-        <div class="prensa-pricing">
-          <div class="prod-fg">
-            <label>Costo por hora</label>
-            <div class="prod-input-wrap">
-              <span class="prod-input-prefix">$</span>
-              <input type="number" id="cph-PM74" value="1200" min="0" step="50"/>
-              <span class="prod-input-suffix">/hr</span>
-            </div>
-          </div>
-          <div class="prod-fg">
-            <label>Costo por pliego</label>
-            <div class="prod-input-wrap">
-              <span class="prod-input-prefix">$</span>
-              <input type="number" id="ppl-PM74" value="0.65" min="0" step="0.05"/>
-              <span class="prod-input-suffix">/pliego</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CD102 -->
-      <div class="prensa-card" id="prensa-CD102">
-        <div class="prensa-card-header" onclick="togglePrensa('CD102')">
-          <div class="prensa-info">
-            <div class="prensa-name">CD102</div>
-            <div class="prensa-info-pills">
-              <span class="prensa-pill">Grande</span>
-              <span class="prensa-pill">79×100 cm útil</span>
-              <span class="prensa-pill">÷1</span>
-            </div>
-          </div>
-          <button class="prensa-toggle-btn" type="button" onclick="event.stopPropagation();togglePrensa('CD102')"></button>
-        </div>
-        <div class="prensa-pricing">
-          <div class="prod-fg">
-            <label>Costo por hora</label>
-            <div class="prod-input-wrap">
-              <span class="prod-input-prefix">$</span>
-              <input type="number" id="cph-CD102" value="2100" min="0" step="50"/>
-              <span class="prod-input-suffix">/hr</span>
-            </div>
-          </div>
-          <div class="prod-fg">
-            <label>Costo por pliego</label>
-            <div class="prod-input-wrap">
-              <span class="prod-input-prefix">$</span>
-              <input type="number" id="ppl-CD102" value="1.20" min="0" step="0.05"/>
-              <span class="prod-input-suffix">/pliego</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /prensa-list -->
-
-    <div class="prensa-min-error" id="prensa-min-error">
-      Necesitas al menos una prensa activa para continuar.
+    <!-- List of added machines -->
+    <div class="prensa-items" id="prensa-items">
+      <div class="prensa-empty">Aún sin prensas · Agrega al menos una para continuar</div>
     </div>
 
-    <div style="font-size:11px;color:var(--text3);line-height:1.5;margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
-      💡 El motor calcula la imposición óptima según el área útil de cada prensa. Puedes editar todos los detalles después en <strong>Máquinas</strong>.
+    <!-- Add button -->
+    <button class="btn-add-prensa" id="btn-add-prensa" onclick="showAddForm()">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Agregar prensa
+    </button>
+
+    <!-- Inline add form -->
+    <div class="prensa-add-form" id="prensa-add-form" style="display:none">
+      <div class="prensa-add-title">Nueva prensa</div>
+      <div class="prensa-add-grid">
+        <div class="fg prensa-add-full">
+          <label>Nombre / modelo *</label>
+          <input type="text" id="pf-nombre" placeholder="Ej. Heidelberg GTO 52, Ryobi 3200, offset 52…"/>
+        </div>
+        <div class="fg prensa-add-full">
+          <label>Área útil *</label>
+          <div class="area-row">
+            <input type="number" id="pf-utilW" placeholder="Ancho" min="1" step="0.5"/>
+            <span>×</span>
+            <input type="number" id="pf-utilH" placeholder="Alto" min="1" step="0.5"/>
+            <span>cm</span>
+          </div>
+        </div>
+        <div class="fg">
+          <label>División de pliego</label>
+          <select id="pf-division" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;font-family:'Inter',sans-serif;color:var(--navy);background:var(--white);width:100%">
+            <option value="4">Cuarto · ÷4</option>
+            <option value="2">Medio · ÷2</option>
+            <option value="1">Pliego completo · ÷1</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Costo por hora *</label>
+          <div class="prod-input-wrap">
+            <span class="prod-input-prefix">$</span>
+            <input type="number" id="pf-cph" placeholder="850" min="0" step="50"/>
+            <span class="prod-input-suffix">/hr</span>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Costo por pliego <span class="opt-tag">Opcional</span></label>
+          <div class="prod-input-wrap">
+            <span class="prod-input-prefix">$</span>
+            <input type="number" id="pf-ppl" placeholder="0.45" min="0" step="0.05"/>
+            <span class="prod-input-suffix">/pliego</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+        <button type="button" onclick="hideAddForm()" style="background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);padding:9px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;font-family:'Inter',sans-serif">Cancelar</button>
+        <button type="button" class="btn-p" onclick="confirmAddMachine()">Agregar</button>
+      </div>
     </div>
+
+    <div class="prensa-req-error" id="prensa-req-error">Agrega al menos una prensa para continuar.</div>
 
     <div class="ob-btn-row">
       <button class="btn-p" onclick="saveStep3()">Confirmar prensas →</button>
@@ -552,25 +503,12 @@ const OB_DEFAULT_MERMAS = [
   { desde:10001, hasta:null,  merma:750 },
 ];
 
-const OB_MACHINES = [
-  { id:'PM52',  name:'PM52',  tag:'Chica',   tamW:37,  tamH:51,  utilW:35, utilH:49,  gramaje:'16 pts', cph:850,  pliegoPrice:0.45, division:4 },
-  { id:'PM74',  name:'PM74',  tag:'Mediana', tamW:52,  tamH:72,  utilW:50, utilH:70,  gramaje:'20 pts', cph:1200, pliegoPrice:0.65, division:2 },
-  { id:'CD102', name:'CD102', tag:'Grande',  tamW:72,  tamH:102, utilW:79, utilH:100, gramaje:'24 pts', cph:2100, pliegoPrice:1.20, division:1 },
-];
-
 // Which process IDs each tipo activates
 const TIPO_PROCESOS = {
   general:   ['barniz_uv','laminado','suaje','doblez','plecado','folio'],
   editorial: ['encuad','compag','wire'],
   empaque:   ['pegado'],
 };
-
-// Production pricing: id → machine binding
-const OB_PROD_MAP = [
-  { proId:'PM52',  lamId:'pr2', impId:'pr5', defaultLam:80,  defaultImp:80  },
-  { proId:'PM74',  lamId:'pr3', impId:'pr6', defaultLam:160, defaultImp:160 },
-  { proId:'CD102', lamId:'pr4', impId:'pr7', defaultLam:320, defaultImp:320 },
-];
 
 // Paper sections for step 4
 const PAPEL_SECTIONS = [
@@ -712,6 +650,7 @@ let _step = 1;
 let _profile = {};
 let _logoBase64 = null;
 let _tiposSeleccionados = ['general']; // general always included
+let _prensasAdded = [];               // machines added by user in step 3
 // _papelPrecios: { 'pap-N': millarPrice }
 let _papelPrecios = {};
 // _recubrActivo: { barniz_uv: bool, laminado: bool }
@@ -860,27 +799,79 @@ function saveStep2() {
   goTo(3);
 }
 
-// ─── STEP 3 — Prensas ─────────────────────────────────────────────
-function togglePrensa(id) {
-  const card = document.getElementById('prensa-' + id);
-  const isOn = card.classList.contains('on');
-  if (isOn) {
-    // Check at least 1 remains on
-    const onCount = document.querySelectorAll('.prensa-card.on').length;
-    if (onCount <= 1) {
-      const err = document.getElementById('prensa-min-error');
-      err.style.display = 'block';
-      setTimeout(() => err.style.display = 'none', 2500);
-      return;
-    }
+// ─── STEP 3 — Prensas (manual add) ───────────────────────────────
+const DIV_LABELS = { 1:'Pliego completo (÷1)', 2:'Medio pliego (÷2)', 4:'Cuarto (÷4)' };
+
+function renderPrensaList() {
+  const container = document.getElementById('prensa-items');
+  if (_prensasAdded.length === 0) {
+    container.innerHTML = '<div class="prensa-empty">Aún sin prensas · Agrega al menos una para continuar</div>';
+    return;
   }
-  card.classList.toggle('on');
+  container.innerHTML = _prensasAdded.map(m => `
+    <div class="prensa-item">
+      <div class="prensa-item-info">
+        <div class="prensa-item-name">${m.name}</div>
+        <div class="prensa-item-meta">${m.utilW}×${m.utilH} cm · ${DIV_LABELS[m.division]||('÷'+m.division)} · $${m.cph.toLocaleString('es-MX')}/hr${m.pliegoPrice?(' · $'+m.pliegoPrice+'/pliego'):''}</div>
+      </div>
+      <button class="prensa-remove-btn" onclick="removeMachine('${m.id}')" title="Eliminar">✕</button>
+    </div>`).join('');
+}
+
+function showAddForm() {
+  document.getElementById('prensa-add-form').style.display = 'block';
+  document.getElementById('btn-add-prensa').style.display = 'none';
+  ['pf-nombre','pf-utilW','pf-utilH','pf-cph','pf-ppl'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('pf-division').value = '4';
+  document.getElementById('pf-nombre').focus();
+}
+
+function hideAddForm() {
+  document.getElementById('prensa-add-form').style.display = 'none';
+  document.getElementById('btn-add-prensa').style.display = 'flex';
+}
+
+function confirmAddMachine() {
+  const nombre = document.getElementById('pf-nombre').value.trim();
+  const utilW  = parseFloat(document.getElementById('pf-utilW').value) || 0;
+  const utilH  = parseFloat(document.getElementById('pf-utilH').value) || 0;
+  const div    = parseInt(document.getElementById('pf-division').value) || 4;
+  const cph    = parseFloat(document.getElementById('pf-cph').value) || 0;
+  const ppl    = parseFloat(document.getElementById('pf-ppl').value) || 0;
+
+  if (!nombre) { flash('pf-nombre'); return; }
+  if (!utilW)  { flash('pf-utilW');  return; }
+  if (!utilH)  { flash('pf-utilH');  return; }
+  if (!cph)    { flash('pf-cph');    return; }
+
+  _prensasAdded.push({
+    id:          'maq' + Date.now().toString(36),
+    name:        nombre,
+    tag:         '',
+    tamW:        utilW, tamH: utilH,
+    utilW,       utilH,
+    gramaje:     '',
+    cph,
+    pliegoPrice: ppl,
+    division:    div,
+    mermas:      OB_DEFAULT_MERMAS.map(r => ({...r})),
+  });
+  renderPrensaList();
+  hideAddForm();
+}
+
+function removeMachine(id) {
+  _prensasAdded = _prensasAdded.filter(m => m.id !== id);
+  renderPrensaList();
 }
 
 function saveStep3() {
-  const onCards = document.querySelectorAll('.prensa-card.on');
-  if (onCards.length === 0) {
-    document.getElementById('prensa-min-error').style.display = 'block';
+  if (_prensasAdded.length === 0) {
+    const err = document.getElementById('prensa-req-error');
+    err.style.display = 'block';
+    setTimeout(() => err.style.display = 'none', 2500);
     return;
   }
   goTo(4);
@@ -933,37 +924,31 @@ function saveStep4() {
 // ─── STEP 5 — Precios de producción (render on demand) ───────────
 function renderProdMachines() {
   const container = document.getElementById('prod-machines-container');
-  let html = '';
-  for (const pm of OB_PROD_MAP) {
-    const card = document.getElementById('prensa-' + pm.proId);
-    if (!card || !card.classList.contains('on')) continue;
-    html += `
-      <div class="prod-machine-block">
-        <div class="prod-machine-header">
-          <div class="prod-machine-hname">${pm.proId}</div>
-          <div class="prod-machine-htag">${OB_MACHINES.find(m=>m.id===pm.proId)?.tag || ''}</div>
-        </div>
-        <div class="prod-machine-body">
-          <div class="prod-fg">
-            <label>Láminas (CMYK)</label>
-            <div class="prod-input-wrap">
-              <span class="prod-input-prefix">$</span>
-              <input type="number" id="lam-${pm.proId}" value="${pm.defaultLam}" min="0" step="10"/>
-              <span class="prod-input-suffix">/lámina</span>
-            </div>
-          </div>
-          <div class="prod-fg">
-            <label>Impresión</label>
-            <div class="prod-input-wrap">
-              <span class="prod-input-prefix">$</span>
-              <input type="number" id="imp-${pm.proId}" value="${pm.defaultImp}" min="0" step="10"/>
-              <span class="prod-input-suffix">/color × millar</span>
-            </div>
+  container.innerHTML = _prensasAdded.map(m => `
+    <div class="prod-machine-block">
+      <div class="prod-machine-header">
+        <div class="prod-machine-hname">${m.name}</div>
+        <div class="prod-machine-htag">${m.utilW}×${m.utilH} cm · ${DIV_LABELS[m.division]||('÷'+m.division)}</div>
+      </div>
+      <div class="prod-machine-body">
+        <div class="prod-fg">
+          <label>Láminas (CMYK)</label>
+          <div class="prod-input-wrap">
+            <span class="prod-input-prefix">$</span>
+            <input type="number" id="lam-${m.id}" value="80" min="0" step="10"/>
+            <span class="prod-input-suffix">/lámina</span>
           </div>
         </div>
-      </div>`;
-  }
-  container.innerHTML = html;
+        <div class="prod-fg">
+          <label>Impresión</label>
+          <div class="prod-input-wrap">
+            <span class="prod-input-prefix">$</span>
+            <input type="number" id="imp-${m.id}" value="80" min="0" step="10"/>
+            <span class="prod-input-suffix">/color × millar</span>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
 }
 
 function toggleRecubr(id) {
@@ -988,23 +973,13 @@ function renderDone() {
   const imprenta = _profile.imprenta || 'Tu imprenta';
   document.getElementById('done-title').textContent = '¡' + imprenta + ' está lista!';
 
-  // Count active machines
-  const activeMaq = OB_MACHINES.filter(m => {
-    const card = document.getElementById('prensa-' + m.id);
-    return card && card.classList.contains('on');
-  });
+  const tipoLabels = { general:'General', editorial:'Editorial', empaque:'Empaque' };
+  const tipoStr = _tiposSeleccionados.map(t => tipoLabels[t] || t).join(' · ');
 
-  // Count paper sections shown
   const secShown = PAPEL_SECTIONS.filter(s =>
     s.always || (s.tipo && _tiposSeleccionados.includes(s.tipo))
   );
   const paperCount = secShown.reduce((sum, s) => sum + s.items.length, 0);
-
-  // Tipo labels
-  const tipoLabels = {
-    general: 'General', editorial: 'Editorial', empaque: 'Empaque'
-  };
-  const tipoStr = _tiposSeleccionados.map(t => tipoLabels[t] || t).join(' · ');
 
   document.getElementById('done-checklist').innerHTML = `
     <div class="ob-chk">
@@ -1017,7 +992,7 @@ function renderDone() {
     </div>
     <div class="ob-chk">
       <div class="ob-chk-tick">✓</div>
-      <span>Prensas configuradas · <strong>${activeMaq.map(m=>m.name).join(', ')}</strong></span>
+      <span>${_prensasAdded.length} prensa${_prensasAdded.length!==1?'s':''} configurada${_prensasAdded.length!==1?'s':''} · <strong>${_prensasAdded.map(m=>m.name).join(', ')}</strong></span>
     </div>
     <div class="ob-chk">
       <div class="ob-chk-tick">✓</div>
@@ -1027,11 +1002,7 @@ function renderDone() {
       <div class="ob-chk-tick">✓</div>
       <span>Precios de producción configurados</span>
     </div>
-    ${_profile.logoBase64 ? `
-    <div class="ob-chk">
-      <div class="ob-chk-tick">✓</div>
-      <span>Logo de imprenta cargado</span>
-    </div>` : ''}
+    ${_profile.logoBase64 ? '<div class="ob-chk"><div class="ob-chk-tick">✓</div><span>Logo de imprenta cargado</span></div>' : ''}
   `;
 }
 
@@ -1061,22 +1032,8 @@ async function goDashboard() {
     return { ...p }; // keep defaults for non-tipo processes
   });
 
-  // ── 2. Build machines (only active from step 3) ──
-  const machinesData = OB_MACHINES
-    .filter(m => {
-      const card = document.getElementById('prensa-' + m.id);
-      return card && card.classList.contains('on');
-    })
-    .map(m => {
-      const cphEl  = document.getElementById('cph-' + m.id);
-      const pplEl  = document.getElementById('ppl-' + m.id);
-      return {
-        ...m,
-        cph:         cphEl  ? (parseFloat(cphEl.value)  || m.cph)  : m.cph,
-        pliegoPrice: pplEl  ? (parseFloat(pplEl.value)  || m.pliegoPrice) : m.pliegoPrice,
-        mermas: OB_DEFAULT_MERMAS.map(r => ({...r})),
-      };
-    });
+  // ── 2. Build machines (exactly what user added in step 3) ──
+  const machinesData = _prensasAdded;
 
   // ── 3. Build papeles (full catalog with user prices) ──
   const papelesData = OB_DEFAULT_PAPELES.map(p => {
@@ -1084,30 +1041,36 @@ async function goDashboard() {
     return newMillar !== undefined ? { ...p, precioMillar: newMillar } : { ...p };
   });
 
-  // ── 4. Build produccion (update prices for active machines) ──
-  const prodOverrides = {}; // prodEntryId → newPrecio
-  for (const pm of OB_PROD_MAP) {
-    const lamEl = document.getElementById('lam-' + pm.proId);
-    const impEl = document.getElementById('imp-' + pm.proId);
-    if (lamEl) prodOverrides[pm.lamId] = lamEl.value;
-    if (impEl) prodOverrides[pm.impId] = impEl.value;
+  // ── 4. Build produccion — one láminas + impresión entry per machine ──
+  const produccionData = [
+    { id:'pr1', nombre:'Corte a prensa', nota:'Se suma sobre el costo de papel', tamano:'—', precio:'5%', unidad:'sobre papel' },
+  ];
+  for (const m of _prensasAdded) {
+    const lamVal = document.getElementById('lam-' + m.id)?.value || '80';
+    const impVal = document.getElementById('imp-' + m.id)?.value || '80';
+    produccionData.push(
+      { id:'pr_lam_'+m.id, nombre:'Láminas para impresión', nota:'4 láminas = color completo CMYK', tamano:m.id, precio:lamVal, unidad:'por lámina' },
+      { id:'pr_imp_'+m.id, nombre:'Impresión', nota:'Unitario por color · 1 a 1,000 pzas', tamano:m.id, precio:impVal, unidad:'por color' },
+    );
   }
-  const produccionData = OB_DEFAULT_PRODUCCION.map(pr => {
-    return prodOverrides[pr.id] !== undefined
-      ? { ...pr, precio: String(prodOverrides[pr.id]) }
-      : { ...pr };
-  });
 
-  // ── 5. Build recubrimientos (update rc4 and rc7) ──
-  const recubrOverrides = {
-    rc4: document.getElementById('rprice-barniz_uv')?.value || '2.50',
-    rc7: document.getElementById('rprice-laminado')?.value  || '7.00',
-  };
-  const recubrData = OB_DEFAULT_RECUBRIMIENTOS.map(r => {
-    return recubrOverrides[r.id] !== undefined
-      ? { ...r, precio: String(recubrOverrides[r.id]) }
-      : { ...r };
-  });
+  // ── 5. Build recubrimientos — barniz máquina per machine + universales ──
+  const uvPrecio  = document.getElementById('rprice-barniz_uv')?.value || '2.50';
+  const lamPrecio = document.getElementById('rprice-laminado')?.value  || '7.00';
+  const recubrData = [];
+  for (const m of _prensasAdded) {
+    recubrData.push(
+      { id:'rc_bm_'+m.id,  nombre:'Barniz máquina',              nota:'', tamano:m.id, precio:'100',  unidad:'por lado' },
+      { id:'rc_arr_'+m.id, nombre:'Arreglo de barniz a registro', nota:'Una sola vez por proyecto', tamano:m.id, precio:'1000', unidad:'por proyecto' },
+    );
+  }
+  recubrData.push(
+    { id:'rc4',  nombre:'Barniz UV Brillante',           nota:'Mín. $500',    tamano:'—', precio:uvPrecio,  unidad:'por m²' },
+    { id:'rc5',  nombre:'Barniz UV Mate',                nota:'Mín. $1,000',  tamano:'—', precio:'5.00',   unidad:'por m²' },
+    { id:'rc6',  nombre:'Plástico Brillante',            nota:'Mín. $500',    tamano:'—', precio:'6.00',   unidad:'por m²' },
+    { id:'rc7',  nombre:'Plástico Mate',                 nota:'Mín. $500',    tamano:'—', precio:lamPrecio, unidad:'por m²' },
+    { id:'rc11', nombre:'Aplicación barniz registro UV Br.', nota:'Mín. $1,800', tamano:'—', precio:'7.00', unidad:'por m²' },
+  );
 
   // ── 6. Save to localStorage ──
   localStorage.setItem('sustrato_profile',       JSON.stringify(_profile));
