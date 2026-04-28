@@ -171,7 +171,7 @@ auth.onAuthStateChanged(async (user) => {
   if (user) {
     if (_loginInProgress) return; // el flujo de login activo maneja la redirección
     const onboarded = await isOnboarded(user.uid);
-    window.location.href = onboarded ? 'index.html' : 'onboarding.html';
+    window.location.href = onboarded ? '/app' : '/onboarding';
     return;
   }
   document.getElementById('auth-loading').style.display = 'none';
@@ -232,7 +232,7 @@ async function doSignIn() {
   setLoading('btn-signin', true);
   try {
     await signInUser(email, pass); // incluye syncUserData — espera a que termine
-    window.location.href = 'index.html';
+    window.location.href = '/app';
   } catch(e) {
     _loginInProgress = false;
     setLoading('btn-signin', false);
@@ -253,7 +253,7 @@ async function doSignUp() {
   setLoading('btn-signup', true);
   try {
     await signUpUser(email, pass);
-    window.location.href = 'onboarding.html';
+    window.location.href = '/onboarding';
   } catch(e) {
     setLoading('btn-signup', false);
     showError(mapFirebaseError(e.code));
@@ -266,7 +266,7 @@ async function doGoogle() {
   _loginInProgress = true;
   try {
     const { isNew } = await signInGoogle(); // incluye syncUserData para usuarios existentes
-    window.location.href = isNew ? 'onboarding.html' : 'index.html';
+    window.location.href = isNew ? '/onboarding' : '/app';
   } catch(e) {
     _loginInProgress = false;
     showError(mapFirebaseError(e.code));
