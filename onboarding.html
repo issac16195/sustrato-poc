@@ -129,20 +129,50 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
 .area-row span{color:var(--text3);font-size:13px;flex-shrink:0}
 .prensa-req-error{font-size:12px;color:#C0392B;background:#fef0ed;border:1px solid #f8c5bc;border-radius:6px;padding:8px 12px;margin-top:8px;display:none}
 
-/* ── STEP 4 — PAPELES ─────────────────────────────────────────── */
-#s4.ob-card{max-width:580px}
-.papel-section{margin-bottom:20px}
-.papel-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
-.papel-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
-.papel-row:last-child{border-bottom:none}
-.papel-row-left{display:flex;align-items:center;gap:8px}
-.papel-tag{display:inline-block;font-size:12px;font-weight:700;color:var(--navy);background:rgba(26,32,21,.06);border:1px solid rgba(26,32,21,.12);border-radius:6px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.3px}
-.papel-medida{font-size:11px;color:var(--text3)}
-.papel-price-input{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3);white-space:nowrap}
-.papel-price-input span{color:var(--text3)}
-.papel-price-input input{width:82px;border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:13px;font-weight:600;color:var(--navy);text-align:right;font-family:'Inter',sans-serif;transition:border-color .15s}
-.papel-price-input input:focus{outline:none;border-color:var(--teal)}
-.papel-millar-hint{font-size:11px;color:var(--text3);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-bottom:20px;line-height:1.5}
+/* ── STEP 4a — TIPO DE SUSTRATOS ─────────────────────────────── */
+#s4.ob-card{max-width:700px}
+.paper-type-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:8px}
+@media(max-width:680px){.paper-type-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:440px){.paper-type-grid{grid-template-columns:repeat(2,1fr)}}
+.paper-type-card{border:2px solid var(--border);border-radius:10px;padding:14px 8px 12px;cursor:pointer;transition:border-color .2s,background .2s;text-align:center;position:relative;user-select:none}
+.paper-type-card:hover{border-color:var(--teal-border);background:rgba(0,168,120,.04)}
+.paper-type-card.on{border-color:var(--teal);background:var(--teal-bg)}
+.pt-check{position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:var(--border2);display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;transition:background .2s}
+.paper-type-card.on .pt-check{background:var(--teal)}
+.pt-icon{font-size:22px;margin-bottom:5px}
+.pt-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--navy);margin-bottom:2px;line-height:1.1}
+.pt-desc{font-size:9px;color:var(--text3);line-height:1.4}
+.pt-err{font-size:12px;color:#C0392B;background:#fef0ed;border:1px solid #f8c5bc;border-radius:6px;padding:8px 12px;margin-top:8px;display:none}
+/* ── STEP 4b — GRAMAJES Y PRECIOS ───────────────────────────── */
+.s4b-back{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;border:none;background:none;padding:0;margin-bottom:16px;font-family:'Inter',sans-serif;transition:color .15s}
+.s4b-back:hover{color:var(--teal-dark)}
+.gramaje-section{margin-bottom:18px}
+.gramaje-section-hdr{display:flex;align-items:center;gap:8px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;color:var(--navy);margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--teal-bg)}
+.gramaje-item{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.gramaje-item:last-child{border-bottom:none}
+.gramaje-chk{width:18px;height:18px;border:2px solid var(--border2);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;background:var(--white)}
+.gramaje-item.on .gramaje-chk{background:var(--teal);border-color:var(--teal)}
+.gramaje-item.on .gramaje-chk::after{content:'✓';color:#fff;font-size:10px;font-weight:800}
+.gramaje-lbl{flex:1;font-size:13px;color:var(--text3);transition:color .15s}
+.gramaje-item.on .gramaje-lbl{color:var(--navy);font-weight:500}
+.gramaje-price{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);white-space:nowrap}
+.gramaje-price input{width:80px;border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:13px;font-weight:600;text-align:right;font-family:'Inter',sans-serif;color:var(--text3);background:var(--bg);transition:all .15s;pointer-events:none}
+.gramaje-item.on .gramaje-price input{color:var(--navy);background:var(--white);pointer-events:auto}
+.gramaje-item.on .gramaje-price input:focus{outline:none;border-color:var(--teal)}
+.millar-hint{font-size:11px;color:var(--text3);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-bottom:18px;line-height:1.5}
+/* ── STEP 5 — ENVÍOS ────────────────────────────────────────── */
+.envio-list{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px}
+.envio-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--white);border-bottom:1px solid var(--border)}
+.envio-row:last-child{border-bottom:none}
+.envio-nombre{flex:1;min-width:60px;border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;color:var(--navy);transition:border-color .15s}
+.envio-nombre:focus{outline:none;border-color:var(--teal)}
+.envio-price-wrap{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);white-space:nowrap}
+.envio-price-wrap input{width:70px;border:1px solid var(--border);border-radius:5px;padding:7px 8px;font-size:13px;font-weight:600;text-align:right;font-family:'Inter',sans-serif;color:var(--navy);transition:border-color .15s}
+.envio-price-wrap input:focus{outline:none;border-color:var(--teal)}
+.envio-remove{width:26px;height:26px;border-radius:50%;border:none;background:rgba(0,0,0,.05);color:var(--text3);cursor:pointer;font-size:11px;flex-shrink:0;transition:background .15s,color .15s}
+.envio-remove:hover{background:#fde8e8;color:#c0392b}
+.btn-add-envio{display:flex;align-items:center;justify-content:center;gap:6px;background:none;border:1.5px dashed var(--border2);border-radius:7px;padding:9px;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;width:100%;transition:border-color .15s,color .15s;font-family:'Inter',sans-serif}
+.btn-add-envio:hover{border-color:var(--teal);color:var(--teal-dark)}
 
 /* ── STEP 5 — PRECIOS DE PRODUCCIÓN ──────────────────────────── */
 #s5.ob-card{max-width:640px}
@@ -416,21 +446,36 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
     </div>
   </div>
 
-  <!-- ── STEP 4: TUS PAPELES ────────────────────────────────────── -->
+  <!-- ── STEP 4: TUS SUSTRATOS ────────────────────────────────── -->
   <div class="ob-card" id="s4" style="display:none">
-    <div class="ob-step-badge">Paso 4 de 5</div>
-    <div class="ob-title">Tus papeles</div>
-    <div class="ob-sub">Ingresa el precio por millar que pagas a tu proveedor. El cotizador convierte el resto automáticamente.</div>
 
-    <div class="papel-millar-hint">
-      💡 <strong>¿Precio por millar?</strong> Es lo que pagas por 1,000 pliegos al proveedor. Ej: si el Couché 150g te cuesta $2,120 el millar, pon 2120.
+    <!-- 4a: selección de tipos de papel -->
+    <div id="s4a">
+      <div class="ob-step-badge">Paso 4 de 5</div>
+      <div class="ob-title">¿Qué sustratos usas?</div>
+      <div class="ob-sub">Elige los tipos de papel que manejas en tu imprenta. En el siguiente paso configuras gramajes y precios.</div>
+      <div class="paper-type-grid" id="paper-type-grid"></div>
+      <div class="pt-err" id="pt-err">Selecciona al menos un tipo de sustrato.</div>
+      <div class="ob-btn-row">
+        <button class="btn-p" onclick="saveStep4a()">Ver gramajes y precios →</button>
+      </div>
     </div>
 
-    <div id="papeles-container"></div>
-
-    <div class="ob-btn-row">
-      <button class="btn-p" onclick="saveStep4()">Confirmar precios →</button>
+    <!-- 4b: gramajes y precios por tipo seleccionado -->
+    <div id="s4b" style="display:none">
+      <button class="s4b-back" onclick="showS4a()">
+        ← Cambiar sustratos
+      </button>
+      <div class="ob-step-badge">Paso 4 de 5 · Precios</div>
+      <div class="ob-title">Gramajes y precios</div>
+      <div class="ob-sub">Marca los gramajes que tienes y anota el precio por millar que pagas a tu proveedor.</div>
+      <div class="millar-hint">💡 Precio por <strong>millar</strong> = lo que pagas por 1,000 pliegos. El app convierte a $/pliego solo.</div>
+      <div id="gramajes-container"></div>
+      <div class="ob-btn-row">
+        <button class="btn-p" onclick="saveStep4()">Confirmar precios →</button>
+      </div>
     </div>
+
   </div>
 
   <!-- ── STEP 5: PRECIOS DE PRODUCCIÓN ─────────────────────────── -->
@@ -468,6 +513,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
         </div>
       </div>
     </div>
+
+    <div class="prod-section-title" style="margin-top:20px">Zonas de envío</div>
+    <div class="envio-list" id="envio-list"></div>
+    <button class="btn-add-envio" id="btn-add-envio" onclick="addEnvio()">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Agregar zona de envío
+    </button>
 
     <div class="ob-btn-row">
       <button class="btn-p" onclick="saveStep5()">Ver resumen →</button>
@@ -510,40 +562,73 @@ const TIPO_PROCESOS = {
   empaque:   ['pegado'],
 };
 
-// Paper sections for step 4
-const PAPEL_SECTIONS = [
-  { label:'Papel Bond', always:true, items:[
-    { id:'pap-1',  label:'75g',  defaultMillar:1057 },
-    { id:'pap-2',  label:'90g',  defaultMillar:1198 },
-    { id:'pap-3',  label:'105g', defaultMillar:1356 },
-  ]},
-  { label:'Papel Couché', always:true, items:[
-    { id:'pap-5',  label:'90g',  defaultMillar:1668 },
-    { id:'pap-6',  label:'100g', defaultMillar:1834 },
-    { id:'pap-7',  label:'115g', defaultMillar:1987 },
-    { id:'pap-9',  label:'150g', defaultMillar:2120 },
-    { id:'pap-10', label:'200g', defaultMillar:2987 },
-  ]},
-  { label:'Sulfatado', always:true, items:[
-    { id:'pap-21', label:'12 pts', defaultMillar:1456 },
-    { id:'pap-22', label:'14 pts', defaultMillar:1765 },
-  ]},
-  { label:'Opalina', tipo:'editorial', items:[
-    { id:'pap-15', label:'130g', defaultMillar:2100 },
-    { id:'pap-16', label:'180g', defaultMillar:2876 },
-  ]},
-  { label:'Cartulina Sulfatada', tipo:'empaque', items:[
-    { id:'pap-27', label:'162g', defaultMillar:2456 },
-    { id:'pap-28', label:'215g', defaultMillar:3123 },
-  ]},
-  { label:'Micro Flauta E', tipo:'empaque', items:[
-    { id:'pap-33', label:'36×50 cm', defaultMillar:2185 },
-    { id:'pap-34', label:'50×70 cm', defaultMillar:2987 },
-  ]},
-  { label:'Corrugado Flauta B', tipo:'empaque', items:[
-    { id:'pap-35', label:'36×50 cm', defaultMillar:1415 },
-    { id:'pap-36', label:'50×70 cm', defaultMillar:1987 },
-  ]},
+// Paper type catalog for step 4
+const PAPER_TYPES = [
+  { id:'bond',      icon:'📄', label:'Bond',               desc:'Carta · libros · formularios',
+    items:[
+      { id:'pap-1',  label:'75g  · 57×87 cm',  defaultMillar:1057 },
+      { id:'pap-2',  label:'90g  · 57×87 cm',  defaultMillar:1198 },
+      { id:'pap-3',  label:'105g · 58×88 cm',  defaultMillar:1356 },
+      { id:'pap-4',  label:'120g · 58×88 cm',  defaultMillar:1526 },
+    ]},
+  { id:'couche',    icon:'✨', label:'Couché',             desc:'Folletos · revistas · catálogos',
+    items:[
+      { id:'pap-5',  label:'90g  · 58×88 cm',  defaultMillar:1668 },
+      { id:'pap-6',  label:'100g · 58×88 cm',  defaultMillar:1834 },
+      { id:'pap-7',  label:'115g · 58×88 cm',  defaultMillar:1987 },
+      { id:'pap-9',  label:'150g · 58×88 cm',  defaultMillar:2120 },
+      { id:'pap-10', label:'200g · 58×88 cm',  defaultMillar:2987 },
+      { id:'pap-11', label:'250g · 58×88 cm',  defaultMillar:3654 },
+      { id:'pap-14', label:'150g · 70×100 cm', defaultMillar:3012 },
+    ]},
+  { id:'opalina',   icon:'🃏', label:'Opalina',            desc:'Tarjetas · invitaciones',
+    items:[
+      { id:'pap-15', label:'130g · 58×88 cm',  defaultMillar:2100 },
+      { id:'pap-16', label:'180g · 58×88 cm',  defaultMillar:2876 },
+      { id:'pap-17', label:'130g · 70×100 cm', defaultMillar:2658 },
+    ]},
+  { id:'texcote',   icon:'🖊️', label:'Texcote',            desc:'Tarjetas premium · portadas',
+    items:[
+      { id:'pap-18', label:'12 pts C1S · 58×88',  defaultMillar:3245 },
+      { id:'pap-19', label:'12 pts C2S · 58×88',  defaultMillar:3456 },
+      { id:'pap-20', label:'12 pts C1S · 70×100', defaultMillar:4123 },
+    ]},
+  { id:'sulfatado', icon:'🗂️', label:'Sulfatado',          desc:'Empaques · cajas ligeras',
+    items:[
+      { id:'pap-21', label:'12 pts · 58×88 cm',  defaultMillar:1456 },
+      { id:'pap-22', label:'14 pts · 58×88 cm',  defaultMillar:1765 },
+      { id:'pap-23', label:'16 pts · 70×100 cm', defaultMillar:2234 },
+      { id:'pap-24', label:'18 pts · 70×100 cm', defaultMillar:2456 },
+      { id:'pap-25', label:'20 pts · 70×100 cm', defaultMillar:2765 },
+      { id:'pap-26', label:'24 pts · 70×100 cm', defaultMillar:3123 },
+    ]},
+  { id:'cart_sulf', icon:'📦', label:'Cartulina Sulfatada', desc:'Cajas · empaques rígidos',
+    items:[
+      { id:'pap-27', label:'162g · 58×88 cm',  defaultMillar:2456 },
+      { id:'pap-28', label:'215g · 58×88 cm',  defaultMillar:3123 },
+      { id:'pap-29', label:'215g · 70×100 cm', defaultMillar:3876 },
+    ]},
+  { id:'sbs',       icon:'🔲', label:'SBS Multicapa',      desc:'Farmacéutico · premium',
+    items:[
+      { id:'pap-30', label:'10 pts · 70×96 cm',  defaultMillar:4874 },
+      { id:'pap-31', label:'12 pts · 70×96 cm',  defaultMillar:5234 },
+      { id:'pap-32', label:'10 pts · 79×109 cm', defaultMillar:5876 },
+    ]},
+  { id:'micro',     icon:'〰️', label:'Micro Flauta E',     desc:'Display · empaque ligero',
+    items:[
+      { id:'pap-33', label:'36×50 cm', defaultMillar:2185 },
+      { id:'pap-34', label:'50×70 cm', defaultMillar:2987 },
+    ]},
+  { id:'corrug',    icon:'📫', label:'Corrugado Flauta B', desc:'Cajas · industrial',
+    items:[
+      { id:'pap-35', label:'36×50 cm', defaultMillar:1415 },
+      { id:'pap-36', label:'50×70 cm', defaultMillar:1987 },
+    ]},
+  { id:'kraft',     icon:'🟫', label:'Kraft / Manila',     desc:'Bolsas · eco · básico',
+    items:[
+      { id:'pap-39', label:'Kraft  · 70×100 cm', defaultMillar:654 },
+      { id:'pap-40', label:'Manila · 57×87 cm',  defaultMillar:543 },
+    ]},
 ];
 
 // Full DEFAULT_PAPELES (for building the complete catalog on save)
@@ -651,10 +736,14 @@ let _profile = {};
 let _logoBase64 = null;
 let _tiposSeleccionados = ['general']; // general always included
 let _prensasAdded = [];               // machines added by user in step 3
-// _papelPrecios: { 'pap-N': millarPrice }
-let _papelPrecios = {};
-// _recubrActivo: { barniz_uv: bool, laminado: bool }
+let _selectedPaperTypes = new Set(); // paper type ids selected in step 4a
+let _selectedPapelItems = new Set(); // specific pap-N ids checked in step 4b
+let _papelPrecios = {};               // { 'pap-N': millarPrice } edited in step 4b
 let _recubrActivo = { barniz_uv: true, laminado: true };
+let _enviosData = [                   // shipping zones for step 5
+  { id:'env1', nombre:'Zona local',   nota:'Ciudad o área local',          precio:150 },
+  { id:'env2', nombre:'Zona foráneo', nota:'Foráneo o zona metropolitana', precio:200 },
+];
 
 const STEP_LABELS = {
   1:'Tu imprenta', 2:'Tipo de trabajos', 3:'Tus prensas',
@@ -696,8 +785,8 @@ function goTo(n) {
     renderDone();
   }
 
-  if (n === 4) renderPapeles();
-  if (n === 5) renderProdMachines();
+  if (n === 4) { renderPaperTypeGrid(); showS4a(); }
+  if (n === 5) { renderProdMachines(); renderEnvios(); }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -877,27 +966,74 @@ function saveStep3() {
   goTo(4);
 }
 
-// ─── STEP 4 — Papeles (render on demand) ─────────────────────────
-function renderPapeles() {
-  const container = document.getElementById('papeles-container');
+// ─── STEP 4a — Paper type selection ──────────────────────────────
+function renderPaperTypeGrid() {
+  document.getElementById('paper-type-grid').innerHTML = PAPER_TYPES.map(pt => `
+    <div class="paper-type-card${_selectedPaperTypes.has(pt.id) ? ' on' : ''}"
+         id="ptcard-${pt.id}" onclick="togglePaperType('${pt.id}')">
+      <div class="pt-check">✓</div>
+      <div class="pt-icon">${pt.icon}</div>
+      <div class="pt-name">${pt.label}</div>
+      <div class="pt-desc">${pt.desc}</div>
+    </div>`).join('');
+}
+
+function togglePaperType(id) {
+  if (_selectedPaperTypes.has(id)) {
+    _selectedPaperTypes.delete(id);
+    document.getElementById('ptcard-' + id)?.classList.remove('on');
+  } else {
+    _selectedPaperTypes.add(id);
+    document.getElementById('ptcard-' + id)?.classList.add('on');
+  }
+}
+
+function saveStep4a() {
+  if (_selectedPaperTypes.size === 0) {
+    const err = document.getElementById('pt-err');
+    err.style.display = 'block';
+    setTimeout(() => err.style.display = 'none', 2500);
+    return;
+  }
+  // Default: all items of selected types are checked
+  if (_selectedPapelItems.size === 0) {
+    for (const pt of PAPER_TYPES) {
+      if (_selectedPaperTypes.has(pt.id)) {
+        pt.items.forEach(item => _selectedPapelItems.add(item.id));
+      }
+    }
+  }
+  renderS4b();
+  document.getElementById('s4a').style.display = 'none';
+  document.getElementById('s4b').style.display = '';
+}
+
+function showS4a() {
+  document.getElementById('s4b').style.display = 'none';
+  document.getElementById('s4a').style.display = '';
+}
+
+// ─── STEP 4b — Gramajes y precios ────────────────────────────────
+function renderS4b() {
+  const container = document.getElementById('gramajes-container');
   let html = '';
-  for (const section of PAPEL_SECTIONS) {
-    const isVisible = section.always ||
-      (section.tipo && _tiposSeleccionados.includes(section.tipo));
-    if (!isVisible) continue;
-    html += `<div class="papel-section"><div class="papel-section-label">${section.label}</div>`;
-    for (const item of section.items) {
-      const current = _papelPrecios[item.id] !== undefined
-        ? _papelPrecios[item.id] : item.defaultMillar;
+  for (const pt of PAPER_TYPES) {
+    if (!_selectedPaperTypes.has(pt.id)) continue;
+    html += `<div class="gramaje-section">
+      <div class="gramaje-section-hdr">${pt.icon} ${pt.label}</div>`;
+    for (const item of pt.items) {
+      const isOn = _selectedPapelItems.has(item.id);
+      const precio = _papelPrecios[item.id] ?? item.defaultMillar;
       html += `
-        <div class="papel-row">
-          <div class="papel-row-left">
-            <span class="papel-tag">${item.label}</span>
-          </div>
-          <div class="papel-price-input">
+        <div class="gramaje-item${isOn ? ' on' : ''}" id="gi-${item.id}"
+             onclick="toggleGramaje('${item.id}',${item.defaultMillar})">
+          <div class="gramaje-chk"></div>
+          <div class="gramaje-lbl">${item.label}</div>
+          <div class="gramaje-price" onclick="event.stopPropagation()">
             <span>$</span>
-            <input type="number" id="pp-${item.id}"
-              value="${current}" min="0" step="10"/>
+            <input type="number" id="gp-${item.id}" value="${precio}"
+                   min="0" step="10" onclick="event.stopPropagation()"
+                   oninput="_papelPrecios['${item.id}']=parseFloat(this.value)||0"/>
             <span>/millar</span>
           </div>
         </div>`;
@@ -907,15 +1043,29 @@ function renderPapeles() {
   container.innerHTML = html;
 }
 
+function toggleGramaje(id, defaultMillar) {
+  const row = document.getElementById('gi-' + id);
+  if (_selectedPapelItems.has(id)) {
+    _selectedPapelItems.delete(id);
+    row?.classList.remove('on');
+  } else {
+    _selectedPapelItems.add(id);
+    row?.classList.add('on');
+    // Set default price if not yet set
+    if (_papelPrecios[id] === undefined) _papelPrecios[id] = defaultMillar;
+    const inp = document.getElementById('gp-' + id);
+    if (inp && !inp.value) inp.value = defaultMillar;
+  }
+}
+
 function saveStep4() {
-  // Read all visible inputs
-  for (const section of PAPEL_SECTIONS) {
-    const isVisible = section.always ||
-      (section.tipo && _tiposSeleccionados.includes(section.tipo));
-    if (!isVisible) continue;
-    for (const item of section.items) {
-      const el = document.getElementById('pp-' + item.id);
-      if (el) _papelPrecios[item.id] = parseFloat(el.value) || item.defaultMillar;
+  // Read current input values for checked items
+  for (const pt of PAPER_TYPES) {
+    for (const item of pt.items) {
+      if (_selectedPapelItems.has(item.id)) {
+        const el = document.getElementById('gp-' + item.id);
+        if (el) _papelPrecios[item.id] = parseFloat(el.value) || item.defaultMillar;
+      }
     }
   }
   goTo(5);
@@ -965,7 +1115,47 @@ function toggleRecubr(id) {
 }
 
 function saveStep5() {
+  // Read envíos from DOM before navigating
+  _enviosData = readEnviosDom();
   goTo(6);
+}
+
+// ─── Envíos (zonas de envío) ──────────────────────────────────────
+function renderEnvios() {
+  const list = document.getElementById('envio-list');
+  list.innerHTML = _enviosData.map((z, i) => `
+    <div class="envio-row" id="envio-row-${z.id}">
+      <input class="envio-nombre" type="text" value="${z.nombre}"
+             placeholder="Zona A" id="en-${z.id}"/>
+      <div class="envio-price-wrap">
+        <span>$</span>
+        <input type="number" value="${z.precio}" min="0" step="10" id="ep-${z.id}"/>
+        <span>/proyecto</span>
+      </div>
+      ${_enviosData.length > 1
+        ? `<button class="envio-remove" onclick="removeEnvio('${z.id}')" title="Quitar">✕</button>`
+        : '<div style="width:26px"></div>'}
+    </div>`).join('');
+}
+
+function readEnviosDom() {
+  return _enviosData.map(z => ({
+    ...z,
+    nombre: document.getElementById('en-' + z.id)?.value.trim() || z.nombre,
+    precio: parseFloat(document.getElementById('ep-' + z.id)?.value) || z.precio,
+  }));
+}
+
+function addEnvio() {
+  _enviosData = readEnviosDom();
+  const id = 'env' + Date.now().toString(36);
+  _enviosData.push({ id, nombre:'Zona ' + String.fromCharCode(65 + _enviosData.length), nota:'', precio:150 });
+  renderEnvios();
+}
+
+function removeEnvio(id) {
+  _enviosData = readEnviosDom().filter(z => z.id !== id);
+  renderEnvios();
 }
 
 // ─── STEP 6 — Done screen ────────────────────────────────────────
@@ -976,10 +1166,7 @@ function renderDone() {
   const tipoLabels = { general:'General', editorial:'Editorial', empaque:'Empaque' };
   const tipoStr = _tiposSeleccionados.map(t => tipoLabels[t] || t).join(' · ');
 
-  const secShown = PAPEL_SECTIONS.filter(s =>
-    s.always || (s.tipo && _tiposSeleccionados.includes(s.tipo))
-  );
-  const paperCount = secShown.reduce((sum, s) => sum + s.items.length, 0);
+  const paperCount = _selectedPapelItems.size;
 
   document.getElementById('done-checklist').innerHTML = `
     <div class="ob-chk">
@@ -996,11 +1183,11 @@ function renderDone() {
     </div>
     <div class="ob-chk">
       <div class="ob-chk-tick">✓</div>
-      <span>Precios de papel · <strong>${paperCount} sustratos</strong></span>
+      <span>Sustratos · <strong>${[..._selectedPaperTypes].map(id=>PAPER_TYPES.find(p=>p.id===id)?.label||id).join(', ')}</strong> · ${paperCount} gramajes</span>
     </div>
     <div class="ob-chk">
       <div class="ob-chk-tick">✓</div>
-      <span>Precios de producción configurados</span>
+      <span>Precios de producción y ${_enviosData.length} zona${_enviosData.length!==1?'s':''} de envío</span>
     </div>
     ${_profile.logoBase64 ? '<div class="ob-chk"><div class="ob-chk-tick">✓</div><span>Logo de imprenta cargado</span></div>' : ''}
   `;
@@ -1035,7 +1222,10 @@ async function goDashboard() {
   // ── 2. Build machines (exactly what user added in step 3) ──
   const machinesData = _prensasAdded;
 
-  // ── 3. Build papeles (full catalog with user prices) ──
+  // ── 3. Build papeles — only items user checked, with their prices ──
+  // We save the full catalog, updating checked items with user prices.
+  // Unchecked items keep their defaults (they just won't appear in the cotizador's
+  // sustrato dropdown since that's filtered separately).
   const papelesData = OB_DEFAULT_PAPELES.map(p => {
     const newMillar = _papelPrecios[p.id];
     return newMillar !== undefined ? { ...p, precioMillar: newMillar } : { ...p };
@@ -1072,16 +1262,23 @@ async function goDashboard() {
     { id:'rc11', nombre:'Aplicación barniz registro UV Br.', nota:'Mín. $1,800', tamano:'—', precio:'7.00', unidad:'por m²' },
   );
 
-  // ── 6. Save to localStorage ──
+  // ── 6. Finalise envíos ──
+  const enviosData = _enviosData.map(z => ({
+    id: z.id, nombre: z.nombre, nota: z.nota || '', precio: z.precio,
+    tamano: '—', unidad: 'por proyecto',
+  }));
+
+  // ── 7. Save to localStorage ──
   localStorage.setItem('sustrato_profile',       JSON.stringify(_profile));
   localStorage.setItem('sustrato_machines',      JSON.stringify(machinesData));
   localStorage.setItem('sustrato_papeles',       JSON.stringify(papelesData));
   localStorage.setItem('sustrato_procesos',      JSON.stringify(procesosData));
   localStorage.setItem('sustrato_produccion',    JSON.stringify(produccionData));
   localStorage.setItem('sustrato_recubrimientos',JSON.stringify(recubrData));
+  localStorage.setItem('sustrato_envios',        JSON.stringify(enviosData));
   localStorage.setItem('sustrato_onboarded',     '1');
 
-  // ── 7. Persist to Firestore (fire-and-forget) ──
+  // ── 8. Persist to Firestore (fire-and-forget) ──
   try {
     const user = auth.currentUser;
     if (user) {
@@ -1093,6 +1290,7 @@ async function goDashboard() {
         base.doc('procesos').set({ data: procesosData }),
         base.doc('produccion').set({ data: produccionData }),
         base.doc('recubrimientos').set({ data: recubrData }),
+        base.doc('envios').set({ data: enviosData }),
       ]);
     }
   } catch (e) {
