@@ -164,11 +164,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
 .gramaje-custom-tag{font-size:9px;font-weight:700;color:var(--teal-dark);background:rgba(0,168,120,.12);border-radius:3px;padding:1px 5px;text-transform:uppercase;letter-spacing:.3px;margin-left:4px}
 .gramaje-add-btn{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--text3);cursor:pointer;border:none;background:none;padding:8px 2px 6px;font-family:'Inter',sans-serif;transition:color .15s}
 .gramaje-add-btn:hover{color:var(--teal-dark)}
-.gramaje-add-form{display:flex;align-items:center;gap:8px;padding:10px 2px;border-top:1.5px dashed var(--border2);margin-top:2px;flex-wrap:wrap}
-.gramaje-add-desc{flex:1;min-width:140px;border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;color:var(--navy);transition:border-color .15s}
-.gramaje-add-desc:focus{outline:none;border-color:var(--teal)}
-.gramaje-add-price-wrap{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);white-space:nowrap}
-.gramaje-add-price{width:80px;border:1px solid var(--border);border-radius:5px;padding:7px 7px;font-size:13px;font-weight:600;text-align:right;font-family:'Inter',sans-serif;color:var(--navy)}
+.gramaje-add-form{display:flex;align-items:center;gap:8px;padding:12px 2px 8px;border-top:1.5px dashed var(--border2);margin-top:2px;flex-wrap:wrap}
+.gadd-group{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.gadd-num{width:58px;border:1px solid var(--border);border-radius:5px;padding:7px 6px;font-size:13px;font-family:'Inter',sans-serif;color:var(--navy);text-align:center;transition:border-color .15s}
+.gadd-num:focus{outline:none;border-color:var(--teal)}
+.gadd-unit{border:1px solid var(--border);border-radius:5px;padding:7px 5px;font-size:12px;font-family:'Inter',sans-serif;color:var(--navy);background:var(--white);cursor:pointer;transition:border-color .15s}
+.gadd-unit:focus{outline:none;border-color:var(--teal)}
+.gadd-dim{width:52px;border:1px solid var(--border);border-radius:5px;padding:7px 6px;font-size:13px;font-family:'Inter',sans-serif;color:var(--navy);text-align:center;transition:border-color .15s}
+.gadd-dim:focus{outline:none;border-color:var(--teal)}
+.gadd-x,.gadd-cm,.gadd-sep{font-size:12px;color:var(--text3);flex-shrink:0}
+.gadd-sep{margin:0 2px}
+.gramaje-add-price-wrap{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);flex-shrink:0}
+.gramaje-add-price{width:76px;border:1px solid var(--border);border-radius:5px;padding:7px 7px;font-size:13px;font-weight:600;text-align:right;font-family:'Inter',sans-serif;color:var(--navy);transition:border-color .15s}
 .gramaje-add-price:focus{outline:none;border-color:var(--teal)}
 .gramaje-add-actions{display:flex;gap:6px;flex-shrink:0}
 .gramaje-confirm-btn{background:var(--teal);color:#fff;border:none;border-radius:5px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
@@ -1085,13 +1092,28 @@ function renderS4b() {
         Agregar gramaje
       </button>
       <div class="gramaje-add-form" id="gadd-form-${pt.id}" style="display:none">
-        <input class="gramaje-add-desc" id="gadd-desc-${pt.id}"
-               type="text" placeholder="Ej: 135g · 70×100 cm"
-               onkeydown="if(event.key==='Enter')confirmGramajeAdd('${pt.id}')"/>
+        <div class="gadd-group">
+          <input class="gadd-num" type="number" id="gadd-gval-${pt.id}"
+                 placeholder="120" min="1" step="1"
+                 onkeydown="if(event.key==='Enter')confirmGramajeAdd('${pt.id}')"/>
+          <select class="gadd-unit" id="gadd-gunit-${pt.id}">
+            <option value="g">g</option>
+            <option value="pts">pts</option>
+          </select>
+        </div>
+        <span class="gadd-sep">·</span>
+        <div class="gadd-group">
+          <input class="gadd-dim" type="number" id="gadd-w-${pt.id}"
+                 placeholder="58" min="1" step="0.5"/>
+          <span class="gadd-x">×</span>
+          <input class="gadd-dim" type="number" id="gadd-h-${pt.id}"
+                 placeholder="88" min="1" step="0.5"/>
+          <span class="gadd-cm">cm</span>
+        </div>
         <div class="gramaje-add-price-wrap">
           <span>$</span>
           <input class="gramaje-add-price" id="gadd-price-${pt.id}"
-                 type="number" placeholder="0" min="0" step="10"/>
+                 type="number" placeholder="1000" min="0" step="10"/>
           <span>/millar</span>
         </div>
         <div class="gramaje-add-actions">
@@ -1115,19 +1137,36 @@ function showGramajeForm(typeId) {
 function cancelGramajeForm(typeId) {
   document.getElementById('gadd-form-' + typeId).style.display = 'none';
   document.getElementById('gadd-btn-' + typeId).style.display = 'inline-flex';
-  document.getElementById('gadd-desc-' + typeId).value = '';
-  document.getElementById('gadd-price-' + typeId).value = '';
+  ['gadd-gval-','gadd-w-','gadd-h-','gadd-price-'].forEach(pfx => {
+    const el = document.getElementById(pfx + typeId); if (el) el.value = '';
+  });
 }
 
 function confirmGramajeAdd(typeId) {
-  const desc  = document.getElementById('gadd-desc-' + typeId).value.trim();
+  const gval  = document.getElementById('gadd-gval-'  + typeId).value.trim();
+  const gunit = document.getElementById('gadd-gunit-' + typeId).value;
+  const w     = document.getElementById('gadd-w-'     + typeId).value.trim();
+  const h     = document.getElementById('gadd-h-'     + typeId).value.trim();
   const price = parseFloat(document.getElementById('gadd-price-' + typeId).value) || 1000;
-  if (!desc) { document.getElementById('gadd-desc-' + typeId).classList.add('err'); return; }
+
+  if (!gval) {
+    const el = document.getElementById('gadd-gval-' + typeId);
+    el.classList.add('err'); el.focus();
+    setTimeout(() => el.classList.remove('err'), 1800);
+    return;
+  }
+
+  // Build human-readable label: "120g · 58×88 cm" or "14 pts · 70×100 cm"
+  let label = `${gval}${gunit}`;
+  if (w && h)   label += ` · ${w}×${h} cm`;
+  else if (w)   label += ` · ${w} cm`;
+  else if (h)   label += ` · ${h} cm`;
+
   const id = 'pap-c-' + Date.now().toString(36);
-  _customPapelItems.push({ id, typeId, label: desc, millar: price });
+  _customPapelItems.push({ id, typeId, label, millar: price });
   _selectedPapelItems.add(id);
   _papelPrecios[id] = price;
-  renderS4b(); // re-render to show the new item
+  renderS4b();
 }
 
 function removeCustomGramaje(id) {
