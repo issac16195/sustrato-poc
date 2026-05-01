@@ -159,6 +159,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-h
 .gramaje-price input{width:80px;border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:13px;font-weight:600;text-align:right;font-family:'Inter',sans-serif;color:var(--text3);background:var(--bg);transition:all .15s;pointer-events:none}
 .gramaje-item.on .gramaje-price input{color:var(--navy);background:var(--white);pointer-events:auto}
 .gramaje-item.on .gramaje-price input:focus{outline:none;border-color:var(--teal)}
+.gramaje-remove{width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.06);color:var(--text3);cursor:pointer;font-size:10px;flex-shrink:0;transition:background .15s,color .15s;display:flex;align-items:center;justify-content:center}
+.gramaje-remove:hover{background:#fde8e8;color:#c0392b}
+.gramaje-custom-tag{font-size:9px;font-weight:700;color:var(--teal-dark);background:rgba(0,168,120,.12);border-radius:3px;padding:1px 5px;text-transform:uppercase;letter-spacing:.3px;margin-left:4px}
+.gramaje-add-btn{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--text3);cursor:pointer;border:none;background:none;padding:8px 2px 6px;font-family:'Inter',sans-serif;transition:color .15s}
+.gramaje-add-btn:hover{color:var(--teal-dark)}
+.gramaje-add-form{display:flex;align-items:center;gap:8px;padding:10px 2px;border-top:1.5px dashed var(--border2);margin-top:2px;flex-wrap:wrap}
+.gramaje-add-desc{flex:1;min-width:140px;border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;color:var(--navy);transition:border-color .15s}
+.gramaje-add-desc:focus{outline:none;border-color:var(--teal)}
+.gramaje-add-price-wrap{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);white-space:nowrap}
+.gramaje-add-price{width:80px;border:1px solid var(--border);border-radius:5px;padding:7px 7px;font-size:13px;font-weight:600;text-align:right;font-family:'Inter',sans-serif;color:var(--navy)}
+.gramaje-add-price:focus{outline:none;border-color:var(--teal)}
+.gramaje-add-actions{display:flex;gap:6px;flex-shrink:0}
+.gramaje-confirm-btn{background:var(--teal);color:#fff;border:none;border-radius:5px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.gramaje-cancel-btn{background:none;border:1px solid var(--border2);border-radius:5px;padding:7px 10px;font-size:12px;color:var(--text3);cursor:pointer;font-family:'Inter',sans-serif}
 .millar-hint{font-size:11px;color:var(--text3);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-bottom:18px;line-height:1.5}
 /* ── STEP 5 — ENVÍOS ────────────────────────────────────────── */
 .envio-list{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px}
@@ -739,6 +753,7 @@ let _prensasAdded = [];               // machines added by user in step 3
 let _selectedPaperTypes = new Set(); // paper type ids selected in step 4a
 let _selectedPapelItems = new Set(); // specific pap-N ids checked in step 4b
 let _papelPrecios = {};               // { 'pap-N': millarPrice } edited in step 4b
+let _customPapelItems = [];           // { id, typeId, label, millar } — manually added
 let _recubrActivo = { barniz_uv: true, laminado: true };
 let _enviosData = [                   // shipping zones for step 5
   { id:'env1', nombre:'Zona local',   nota:'Ciudad o área local',          precio:150 },
@@ -1021,6 +1036,8 @@ function renderS4b() {
     if (!_selectedPaperTypes.has(pt.id)) continue;
     html += `<div class="gramaje-section">
       <div class="gramaje-section-hdr">${pt.icon} ${pt.label}</div>`;
+
+    // Pre-defined items
     for (const item of pt.items) {
       const isOn = _selectedPapelItems.has(item.id);
       const precio = _papelPrecios[item.id] ?? item.defaultMillar;
@@ -1038,9 +1055,86 @@ function renderS4b() {
           </div>
         </div>`;
     }
-    html += `</div>`;
+
+    // Custom items for this type
+    const customs = _customPapelItems.filter(c => c.typeId === pt.id);
+    for (const c of customs) {
+      const precio = _papelPrecios[c.id] ?? c.millar;
+      html += `
+        <div class="gramaje-item on" id="gi-${c.id}">
+          <div class="gramaje-chk"></div>
+          <div class="gramaje-lbl">${c.label}<span class="gramaje-custom-tag">personalizado</span></div>
+          <div class="gramaje-price" onclick="event.stopPropagation()">
+            <span>$</span>
+            <input type="number" id="gp-${c.id}" value="${precio}"
+                   min="0" step="10" onclick="event.stopPropagation()"
+                   oninput="_papelPrecios['${c.id}']=parseFloat(this.value)||0"/>
+            <span>/millar</span>
+          </div>
+          <button class="gramaje-remove" onclick="removeCustomGramaje('${c.id}')" title="Eliminar">✕</button>
+        </div>`;
+    }
+
+    // Add-gramaje button + inline form
+    html += `
+      <button class="gramaje-add-btn" id="gadd-btn-${pt.id}"
+              onclick="showGramajeForm('${pt.id}')">
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="none">
+          <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Agregar gramaje
+      </button>
+      <div class="gramaje-add-form" id="gadd-form-${pt.id}" style="display:none">
+        <input class="gramaje-add-desc" id="gadd-desc-${pt.id}"
+               type="text" placeholder="Ej: 135g · 70×100 cm"
+               onkeydown="if(event.key==='Enter')confirmGramajeAdd('${pt.id}')"/>
+        <div class="gramaje-add-price-wrap">
+          <span>$</span>
+          <input class="gramaje-add-price" id="gadd-price-${pt.id}"
+                 type="number" placeholder="0" min="0" step="10"/>
+          <span>/millar</span>
+        </div>
+        <div class="gramaje-add-actions">
+          <button class="gramaje-confirm-btn" onclick="confirmGramajeAdd('${pt.id}')">Agregar</button>
+          <button class="gramaje-cancel-btn" onclick="cancelGramajeForm('${pt.id}')">Cancelar</button>
+        </div>
+      </div>`;
+
+    html += `</div>`; // close gramaje-section
   }
   container.innerHTML = html;
+}
+
+// ─── Custom gramaje management ────────────────────────────────────
+function showGramajeForm(typeId) {
+  document.getElementById('gadd-btn-' + typeId).style.display = 'none';
+  document.getElementById('gadd-form-' + typeId).style.display = 'flex';
+  document.getElementById('gadd-desc-' + typeId).focus();
+}
+
+function cancelGramajeForm(typeId) {
+  document.getElementById('gadd-form-' + typeId).style.display = 'none';
+  document.getElementById('gadd-btn-' + typeId).style.display = 'inline-flex';
+  document.getElementById('gadd-desc-' + typeId).value = '';
+  document.getElementById('gadd-price-' + typeId).value = '';
+}
+
+function confirmGramajeAdd(typeId) {
+  const desc  = document.getElementById('gadd-desc-' + typeId).value.trim();
+  const price = parseFloat(document.getElementById('gadd-price-' + typeId).value) || 1000;
+  if (!desc) { document.getElementById('gadd-desc-' + typeId).classList.add('err'); return; }
+  const id = 'pap-c-' + Date.now().toString(36);
+  _customPapelItems.push({ id, typeId, label: desc, millar: price });
+  _selectedPapelItems.add(id);
+  _papelPrecios[id] = price;
+  renderS4b(); // re-render to show the new item
+}
+
+function removeCustomGramaje(id) {
+  _customPapelItems = _customPapelItems.filter(c => c.id !== id);
+  _selectedPapelItems.delete(id);
+  delete _papelPrecios[id];
+  renderS4b();
 }
 
 function toggleGramaje(id, defaultMillar) {
@@ -1222,14 +1316,23 @@ async function goDashboard() {
   // ── 2. Build machines (exactly what user added in step 3) ──
   const machinesData = _prensasAdded;
 
-  // ── 3. Build papeles — only items user checked, with their prices ──
-  // We save the full catalog, updating checked items with user prices.
-  // Unchecked items keep their defaults (they just won't appear in the cotizador's
-  // sustrato dropdown since that's filtered separately).
+  // ── 3. Build papeles — full catalog with user prices + custom items ──
   const papelesData = OB_DEFAULT_PAPELES.map(p => {
     const newMillar = _papelPrecios[p.id];
     return newMillar !== undefined ? { ...p, precioMillar: newMillar } : { ...p };
   });
+  // Append manually added gramajes
+  for (const c of _customPapelItems) {
+    const pt = PAPER_TYPES.find(p => p.id === c.typeId);
+    papelesData.push({
+      id: c.id,
+      categoria: pt?.label.toUpperCase() || 'PERSONALIZADO',
+      material: c.label,
+      medida: '', puntos: null, gramos: null,
+      precioMillar: _papelPrecios[c.id] ?? c.millar,
+      observaciones: '', maquina: '',
+    });
+  }
 
   // ── 4. Build produccion — one láminas + impresión entry per machine ──
   const produccionData = [
